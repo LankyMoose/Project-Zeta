@@ -11,7 +11,7 @@ export function configureUserRoutes(app: FastifyInstance) {
     if (!req.params.id) throw new Error("No id provided")
     const parsed = parseInt(req.params.id)
     if (isNaN(parsed)) throw new Error("Invalid id")
-
-    return { user: userService.getById(parsed) }
+    const user = await userService.getById(parsed)
+    return { user }
   })
 }
