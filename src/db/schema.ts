@@ -1,4 +1,12 @@
-import { boolean, date, index, integer, pgTable, serial, varchar } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  date,
+  index,
+  integer,
+  pgTable,
+  serial,
+  varchar,
+} from "drizzle-orm/pg-core"
 import { InferModel } from "drizzle-orm"
 
 export const users = pgTable("user", {
@@ -78,10 +86,3 @@ export const pollVotes = pgTable(
 
 export type PollVote = InferModel<typeof pollVotes>
 export type NewPollVote = InferModel<typeof pollVotes, "insert">
-
-export const dbSchema = {
-  users,
-  polls,
-  pollOptions,
-  pollVotes,
-}
