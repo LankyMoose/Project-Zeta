@@ -29,7 +29,7 @@ export const createPoll = async (poll: PollData): Promise<PollData> => {
 }
 
 export const updatePoll = async (poll: PollData): Promise<PollData> => {
-  const res = await fetch(`/api/polls/${poll.poll.id}`, {
+  const res = await fetch(`/api/polls/${poll.poll.webId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(poll),

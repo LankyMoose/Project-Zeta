@@ -47,6 +47,7 @@ export const pollService = {
       WITH P as (
         SELECT 
           ${polls.id},
+          ${polls.webId},
           ${polls.disabled},
           ${polls.ownerId},
           ${polls.desc},
@@ -76,7 +77,12 @@ export const pollService = {
       )
       
       SELECT
-        P.*,
+        P.web_id,
+        P.disabled,
+        P.owner_id,
+        P.desc,
+        P.started_at,
+        P.ended_at,
         ${pollOptions.id} as poll_option_id,
         ${pollOptions.desc} as poll_option_desc,
         V.option_id as poll_option_vote_optionId,
@@ -101,12 +107,12 @@ export const pollService = {
     // we can do this by grouping the rows by poll id
     // and then reducing the rows into a single object
     // for each poll
-    const pollMap = res.reduce<Record<number, PollData>>((acc, row) => {
-      const pollId = row.id as number
+    const pollMap = res.reduce<Record<string, PollData>>((acc, row) => {
+      const pollId = row.web_id as string
       if (!acc[pollId]) {
         acc[pollId] = {
           poll: {
-            id: pollId,
+            webId: pollId,
             disabled: row.disabled as boolean,
             ownerId: row.owner_id as number,
             desc: row.desc as string,
@@ -122,7 +128,6 @@ export const pollService = {
         poll.options.push({
           id: row.poll_option_id as number,
           desc: row.poll_option_desc as string,
-          pollId: pollId,
         })
       }
       if (row.poll_option_vote_optionid) {
@@ -156,7 +161,7 @@ export const pollService = {
       pollVoteCounts(userId).where(eq(pollVotes.pollId, id)),
     ])
 
-    const poll = rows[0].poll as Poll
+    const poll = rows[0].poll as Omit<Poll, "id">
     return {
       poll,
       options: rows.map((row) => row.poll_option as PollOption),

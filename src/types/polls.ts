@@ -1,6 +1,6 @@
 export type PollData = {
   poll: {
-    id: number
+    webId: string
     disabled: boolean | null
     ownerId: number
     desc: string
@@ -10,7 +10,6 @@ export type PollData = {
   options: {
     id: number
     desc: string
-    pollId: number
   }[]
   voteCounts: {
     [optionId: string]: {

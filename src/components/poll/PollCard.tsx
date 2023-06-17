@@ -15,7 +15,7 @@ export const PollCard = (props: PollData) => {
       ? "small"
       : "large")
   return (
-    <div key={props.poll.id} className="card">
+    <div key={props.poll.webId} className="card">
       <h3 className={titleClass}>{titleText}</h3>
       <div style="display:flex; flex-direction:column; gap:1rem">
         <Cinnabun.For

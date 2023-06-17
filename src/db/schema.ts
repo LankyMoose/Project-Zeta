@@ -58,6 +58,7 @@ export const polls = pgTable(
   "poll",
   {
     id: serial("id").primaryKey(),
+    webId: uuid("web_id").defaultRandom().notNull(),
     ownerId: integer("owner_id")
       .notNull()
       .references(() => users.id),
@@ -68,6 +69,7 @@ export const polls = pgTable(
   },
   (table) => {
     return {
+      webIdIdx: index("web_id_idx").on(table.webId),
       ownerIdIdx: index("owner_id_idx").on(table.ownerId),
       startedAtIdx: index("started_at_idx").on(table.startedAt),
     }
