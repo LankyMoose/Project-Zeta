@@ -1,0 +1,35 @@
+{
+  "name": "cinnabun-ssr-template",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "node .cb/build",
+    "dev": "pnpm build --debug",
+    "prod": "pnpm build --prod && node dist/server",
+    "test": "echo \"Error: no test specified\"",
+    "db:migrate": "tsc && node ./dist/src/db/migrate.js",
+    "db:create-migration": "pnpm drizzle-kit generate:pg --schema=./src/db/schema.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/compress": "^6.4.0",
+    "@fastify/cookie": "^8.3.0",
+    "@fastify/jwt": "^7.0.0",
+    "@fastify/static": "^6.10.2",
+    "cinnabun": "^0.1.36",
+    "dotenv": "^16.2.0",
+    "drizzle-orm": "^0.26.5",
+    "esbuild": "^0.17.19",
+    "fastify": "^4.18.0",
+    "postgres": "^3.3.5",
+    "tree-kill": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.18",
+    "drizzle-kit": "^0.18.1"
+  }
+}
