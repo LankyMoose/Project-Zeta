@@ -1,11 +1,14 @@
 import * as Cinnabun from "cinnabun"
 import { PollData } from "../../types/polls"
 import { PollOptionButton } from "./PollOptionButton"
+import { userStore } from "../../state"
 
 export const PollCard = (props: PollData) => {
   const totalVotes = props.options.reduce((acc, option) => {
     return acc + (props.voteCounts[option.id]?.count || 0)
   }, 0)
+  const isOwner = userStore.value?.webId === props.poll.ownerWebId
+  console.log("isOwner", isOwner)
   const titleText = props.poll.desc
   const titleClass =
     "card-title " +

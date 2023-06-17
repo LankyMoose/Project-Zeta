@@ -1,1 +1,0 @@
-ALTER TABLE "poll" ALTER COLUMN "web_id" SET NOT NULL;

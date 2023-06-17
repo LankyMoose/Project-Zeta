@@ -2,7 +2,7 @@ export type PollData = {
   poll: {
     webId: string
     disabled: boolean | null
-    ownerId: number
+    ownerWebId: string
     desc: string
     startedAt: string
     endedAt: string | null

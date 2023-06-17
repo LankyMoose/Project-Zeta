@@ -62,6 +62,9 @@ export const polls = pgTable(
     ownerId: integer("owner_id")
       .notNull()
       .references(() => users.id),
+    ownerWebId: uuid("owner_web_id")
+      .notNull()
+      .references(() => users.webId),
     desc: varchar("desc", { length: 255 }).notNull(),
     startedAt: date("started_at").defaultNow().notNull(),
     endedAt: date("ended_at"),

@@ -49,7 +49,7 @@ export const pollService = {
           ${polls.id},
           ${polls.webId},
           ${polls.disabled},
-          ${polls.ownerId},
+          ${polls.ownerWebId},
           ${polls.desc},
           ${polls.startedAt},
           ${polls.endedAt}
@@ -79,7 +79,7 @@ export const pollService = {
       SELECT
         P.web_id,
         P.disabled,
-        P.owner_id,
+        P.owner_web_id,
         P.desc,
         P.started_at,
         P.ended_at,
@@ -114,7 +114,7 @@ export const pollService = {
           poll: {
             webId: pollId,
             disabled: row.disabled as boolean,
-            ownerId: row.owner_id as number,
+            ownerWebId: row.owner_web_id as string,
             desc: row.desc as string,
             startedAt: row.started_at as string,
             endedAt: row.ended_at as string | null,
@@ -139,16 +139,6 @@ export const pollService = {
       return acc
     }, {})
     return Object.values(pollMap)
-
-    //return res
-
-    // return pollRows.map((poll) => {
-    //   return {
-    //     poll,
-    //     options: optionRows.filter((option) => option.pollId === poll.id),
-    //     voteCounts: aggrigateVotes(voteRows),
-    //   }
-    // })
   },
 
   async getById(id: number, userId: number | null = null): Promise<PollData> {
