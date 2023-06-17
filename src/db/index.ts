@@ -1,6 +1,7 @@
 import postgres from "postgres"
 import { env } from "../env.js"
 import { drizzle } from "drizzle-orm/postgres-js"
+import { dbSchema } from "./schema.js"
 // create the connection
 const poolConnection = postgres({
   host: env.db.host,
@@ -12,4 +13,4 @@ const poolConnection = postgres({
   },
 })
 
-export const db = drizzle(poolConnection)
+export const db = drizzle<typeof dbSchema>(poolConnection)

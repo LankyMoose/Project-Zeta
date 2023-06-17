@@ -52,3 +52,36 @@ export const pollOptions = pgTable(
 
 export type PollOption = InferModel<typeof pollOptions>
 export type NewPollOption = InferModel<typeof pollOptions, "insert">
+
+export const pollVotes = pgTable(
+  "poll_vote",
+  {
+    id: serial("id").primaryKey(),
+    pollId: integer("poll_id")
+      .notNull()
+      .references(() => polls.id),
+    optionId: integer("option_id")
+      .notNull()
+      .references(() => pollOptions.id),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id),
+  },
+  (table) => {
+    return {
+      pollIdIdx: index("poll_id_idx").on(table.pollId),
+      optionIdIdx: index("option_id_idx").on(table.optionId),
+      userIdIdx: index("user_id_idx").on(table.userId),
+    }
+  }
+)
+
+export type PollVote = InferModel<typeof pollVotes>
+export type NewPollVote = InferModel<typeof pollVotes, "insert">
+
+export const dbSchema = {
+  users,
+  polls,
+  pollOptions,
+  pollVotes,
+}
