@@ -6,9 +6,7 @@ export const PollCard = (props: PollData) => {
   const totalVotes = props.options.reduce((acc, option) => {
     return acc + (props.voteCounts[option.id]?.count || 0)
   }, 0)
-  const titleText =
-    props.poll.desc +
-    "asdasdasdadas dasdasdasda sdasdasdasd sadsdasdasd asdasdassdasdasd"
+  const titleText = props.poll.desc
   const titleClass =
     "card-title " +
     (titleText.length > 128
