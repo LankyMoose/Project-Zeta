@@ -3,7 +3,7 @@ import { PollData } from "../../types/polls"
 export const getPolls = async (page: number = 0): Promise<PollData[]> => {
   console.log("getPolls")
   try {
-    const res = await $fetch(`/api/polls?page=${page}`)
+    const res = await fetch(`/api/polls?page=${page}`)
     if (!res.ok) throw new Error("Failed to fetch polls")
     console.log("gotPolls")
     return await res.json()
@@ -13,7 +13,7 @@ export const getPolls = async (page: number = 0): Promise<PollData[]> => {
   }
 }
 export const getPoll = async (id: string): Promise<PollData> => {
-  const res = await $fetch(`/api/polls/${id}`)
+  const res = await fetch(`/api/polls/${id}`)
   if (!res.ok) throw new Error("Failed to fetch poll")
   return await res.json()
 }

@@ -25,6 +25,8 @@ export const userService = {
     if (user.id === 0 || !user.id) {
       return (await db.insert(users).values(user).returning()).at(0) as User
     }
-    return (await db.update(users).set(user).where(eq(users.id, user.id)).returning()).at(0) as User
+    return (
+      await db.update(users).set(user).where(eq(users.id, user.id)).returning()
+    ).at(0) as User
   },
 }

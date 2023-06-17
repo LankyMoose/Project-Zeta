@@ -3,6 +3,7 @@ import { Router, Route, Link } from "cinnabun/router"
 import { pathStore } from "./state"
 import { UserList } from "./components/UserList"
 import { PollList } from "./components/poll/PollList"
+import { AuthLinks } from "./components/AuthLinks"
 
 const Navigation = () => (
   <nav>
@@ -21,6 +22,9 @@ const Navigation = () => (
         <Link to="/polls" store={pathStore}>
           Polls
         </Link>
+      </li>
+      <li>
+        <AuthLinks />
       </li>
     </ul>
   </nav>
