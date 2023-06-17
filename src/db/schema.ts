@@ -6,18 +6,53 @@ import {
   pgTable,
   serial,
   varchar,
+  uuid,
 } from "drizzle-orm/pg-core"
 import { InferModel } from "drizzle-orm"
 
-export const users = pgTable("user", {
-  id: serial("id").primaryKey(),
-  name: varchar("username", { length: 80 }).notNull(),
-  createdAt: date("created_at").defaultNow(),
-  disabled: boolean("disabled").default(false),
-})
+export const users = pgTable(
+  "user",
+  {
+    id: serial("id").primaryKey(),
+    webId: uuid("web_id").defaultRandom(),
+    name: varchar("username", { length: 80 }).notNull(),
+    createdAt: date("created_at").defaultNow(),
+    disabled: boolean("disabled").default(false),
+    avatarUrl: varchar("avatar_url", { length: 255 }),
+  },
+  (table) => {
+    return {
+      nameIdx: index("name_idx").on(table.name),
+      webIdIdx: index("web_id_idx").on(table.webId),
+    }
+  }
+)
 
 export type User = InferModel<typeof users>
 export type NewUser = InferModel<typeof users, "insert">
+
+export const userAuths = pgTable(
+  "user_auth",
+  {
+    id: serial("id").primaryKey(),
+    email: varchar("email", { length: 80 }).notNull(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id),
+    provider: varchar("provider", { length: 80 }).notNull(),
+    providerId: varchar("provider_id", { length: 80 }).notNull(),
+  },
+  (table) => {
+    return {
+      emailIdx: index("email_idx").on(table.email),
+      userIdIdx: index("user_id_idx").on(table.userId),
+      providerIdIdx: index("provider_id_idx").on(table.providerId),
+    }
+  }
+)
+
+export type UserAuth = InferModel<typeof userAuths>
+export type NewUserAuth = InferModel<typeof userAuths, "insert">
 
 export const polls = pgTable(
   "poll",
