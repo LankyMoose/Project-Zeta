@@ -23,10 +23,8 @@ export const pollService = {
   },
   async save(poll: NewPoll): Promise<Poll> {
     if (poll.id === 0 || !poll.id) {
-      const inserted = (await db.insert(polls).values(poll).returning()) as Poll[]
-      return inserted[0]!
+      return (await db.insert(polls).values(poll).returning()).at(0) as Poll
     }
-    const updated = (await db.update(polls).set(poll).where(eq(polls.id, poll.id)).returning()) as Poll[]
-    return updated[0]!
+    return (await db.update(polls).set(poll).where(eq(polls.id, poll.id)).returning()).at(0) as Poll
   },
 }

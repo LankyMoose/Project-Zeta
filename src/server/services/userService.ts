@@ -23,10 +23,8 @@ export const userService = {
   },
   async save(user: NewUser): Promise<User> {
     if (user.id === 0 || !user.id) {
-      const insertedUsers = (await db.insert(users).values(user).returning()) as User[]
-      return insertedUsers[0]!
+      return (await db.insert(users).values(user).returning()).at(0) as User
     }
-    const updatedUsers = (await db.update(users).set(user).where(eq(users.id, user.id)).returning()) as User[]
-    return updatedUsers[0]!
+    return (await db.update(users).set(user).where(eq(users.id, user.id)).returning()).at(0) as User
   },
 }
