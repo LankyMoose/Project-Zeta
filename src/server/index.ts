@@ -202,7 +202,6 @@ configurePollRoutes(app)
 app.get("/*", async (req, res) => {
   const reqUser = req.cookies["user"]
   const reqUserId = req.cookies["user_id"]
-  console.log("reqUser", reqUser, reqUserId)
 
   const cinnabunInstance = new Cinnabun()
   cinnabunInstance.setServerRequestData({
