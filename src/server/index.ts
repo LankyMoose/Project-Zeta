@@ -12,18 +12,36 @@ import { SSR } from "cinnabun/ssr"
 import { Cinnabun } from "cinnabun"
 import { log } from "../../.cb/logger.js"
 
-import { configureUserRoutes } from "./api/users.js"
+const port: number = parseInt(process.env.PORT ?? "3000")
+
+declare global {
+  var $fetch: typeof fetch
+}
+
+globalThis.$fetch = async (
+  input: RequestInfo | URL,
+  init?: RequestInit | undefined
+) => {
+  if (typeof input === "string" && input.startsWith("/")) {
+    input = `http://localhost:${port}${input}`
+  }
+  return fetch(input, init)
+}
 
 import { Document } from "../Document.jsx"
 import { App } from "../App"
 import { configurePollRoutes } from "./api/polls.js"
+import { configureUserRoutes } from "./api/users.js"
 
 const isDev = process.env.NODE_ENV === "development"
 
 if (isDev) {
   try {
     log("Dim", "  evaluating application... 🔍")
-    await SSR.serverBake(Document(App), { cinnabunInstance: new Cinnabun(), stream: null })
+    await SSR.serverBake(Document(App), {
+      cinnabunInstance: new Cinnabun(),
+      stream: null,
+    })
     log("Dim", "  good to go! ✅")
   } catch (error) {
     if ("message" in (error as Error)) {
@@ -48,8 +66,6 @@ declare module "fastify" {
   }
 }
 
-const port: number = parseInt(process.env.PORT ?? "3000")
-
 const app = fastify()
 
 app.register(jwt, {
@@ -63,24 +79,31 @@ app.register(jwt, {
   },
 })
 app.register(cookie)
-app.decorate("authenticate", async (request: FastifyRequest, reply: FastifyReply) => {
-  try {
-    await request.jwtVerify({ onlyCookie: true })
-  } catch (error) {
-    reply.clearCookie("refreshToken")
+app.decorate(
+  "authenticate",
+  async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      await request.jwtVerify({ onlyCookie: true })
+    } catch (error) {
+      reply.clearCookie("refreshToken")
+    }
   }
-})
+)
 
 app.register(compress, { global: false })
 app.register(fStatic, {
   prefix: "/static/",
-  root: path.join(path.dirname(fileURLToPath(import.meta.url)), "../../dist/static"),
+  root: path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../../dist/static"
+  ),
 })
 app.get("/favicon.ico", (_, res) => {
   res.status(404).send()
 })
 
-if (isDev) await import("../../.cb/sse").then(({ configureSSE }) => configureSSE(app))
+if (isDev)
+  await import("../../.cb/sse").then(({ configureSSE }) => configureSSE(app))
 
 configureUserRoutes(app)
 configurePollRoutes(app)

@@ -18,11 +18,11 @@ dependencies:
     specifier: ^6.10.2
     version: 6.10.2
   cinnabun:
-    specifier: ^0.1.36
-    version: 0.1.36
+    specifier: ^0.1.37
+    version: 0.1.37
   dotenv:
-    specifier: ^16.2.0
-    version: 16.2.0
+    specifier: ^16.3.0
+    version: 16.3.0
   drizzle-orm:
     specifier: ^0.26.5
     version: 0.26.5(postgres@3.3.5)
@@ -449,8 +449,8 @@ packages:
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
     dev: true
 
-  /cinnabun@0.1.36:
-    resolution: {integrity: sha512-mgw0QA5SAV/cUAJfx032Jvcs5pTBvoV5wed4+p4s1EeJy6OILdoHMKX5Wh4JKY5yOqXuoEMjlOTaTqE+k8HXbg==}
+  /cinnabun@0.1.37:
+    resolution: {integrity: sha512-V3PERi+27u0TaBCd/OAexf2JE9azNseUSY50I55VFXrFhQZOtq62CXtDFbYzXqzU/76NqcyQHvjedBestOFh+A==}
     dev: false
 
   /cli-color@2.0.3:
@@ -514,8 +514,8 @@ packages:
       heap: 0.2.7
     dev: true
 
-  /dotenv@16.2.0:
-    resolution: {integrity: sha512-jcq2vR1DY1+QA+vH58RIrWLDZOifTGmyQJWzP9arDUbgZcySdzuBb1WvhWZzZtiXgfm+GW2pjBqStqlfpzq7wQ==}
+  /dotenv@16.3.0:
+    resolution: {integrity: sha512-tHB+hmf8MRCkT3VVivGiG8kq9HiGTmQ3FzOKgztfpJQH1IWuZTOvKSJmHNnQPowecAmkCJhLrxdPhOr06LLqIQ==}
     engines: {node: '>=12'}
     dev: false
 

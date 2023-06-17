@@ -3,9 +3,15 @@
   line-height: 1.5;
   font-weight: 400;
 
+  --primary: #0070f3;
+  --primary-rgb: 0, 112, 243;
+  --secondary: #8600f3;
+  --dark: #1e1e1e;
+  --light: #ffffff;
+
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #1e1e1e;
+  color: var(--light);
+  background-color: var(--dark);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -16,8 +22,8 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--dark);
+    background-color: var(--light);
   }
 }
 * {
@@ -85,4 +91,43 @@ footer {
   padding: 2rem;
   text-align: center;
   font-size: small;
+}
+
+ul.card-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  --highlight: rgba(255, 255, 255, .075);
+  --border: rgba(255, 255, 255, .025);
+  /* border-radius: .5rem; */
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .075);
+  padding: 1rem;
+  background-color: var(--highlight);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid var(--border);
+}
+
+@media (prefers-color-scheme: light) {
+  .card {
+    --highlight: rgba(0, 0, 0, .075);
+    --border: rgba(0, 0, 0, .025);
+  }
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 400;
+}
+
+.card-title.small {
+  font-size: 1.25rem;
+}
+.card-title.x-small {
+  font-size: 1rem;
 }

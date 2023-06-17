@@ -2,7 +2,7 @@ import * as Cinnabun from "cinnabun"
 import { Router, Route, Link } from "cinnabun/router"
 import { pathStore } from "./state"
 import { UserList } from "./components/UserList"
-import { PollList } from "./components/PollList"
+import { PollList } from "./components/poll/PollList"
 
 const Navigation = () => (
   <nav>
