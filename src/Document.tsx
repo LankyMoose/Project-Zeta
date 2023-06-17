@@ -15,6 +15,7 @@ export const Document = (App: { (): Component }) => {
         <div id="app">
           <App />
         </div>
+        <div id="portal-root"></div>
       </body>
     </>
   )
