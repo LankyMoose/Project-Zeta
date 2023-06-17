@@ -20,7 +20,9 @@
     background-color: #ffffff;
   }
 }
-
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -30,17 +32,28 @@ body {
 
 #app {
   min-height: 100vh;
-  display:flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
-}
-#app > div {
-  display:flex;
-  min-height: 100vh;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
+}
+
+nav ul {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+header {
+  width: 100%;
+  min-height: 100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
 }
 
 
