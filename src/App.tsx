@@ -2,8 +2,8 @@ import * as Cinnabun from "cinnabun"
 import { Router, Route, Link } from "cinnabun/router"
 import { pathStore } from "./state"
 import { UserList } from "./components/UserList"
-import { PollList } from "./components/poll/PollList"
 import { AuthLinks } from "./components/AuthLinks"
+import { PollsPage } from "./pages/Polls"
 
 const Navigation = () => (
   <nav>
@@ -47,7 +47,7 @@ export const App = () => {
         <Router store={pathStore}>
           <Route path="/" component={<h3>Home</h3>} />
           <Route path="/users" component={<UserList />} />
-          <Route path="/polls" component={<PollList />} />
+          <Route path="/polls" component={<PollsPage />} />
         </Router>
       </main>
     </>
