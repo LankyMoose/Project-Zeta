@@ -2,7 +2,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 
 import fastify, { FastifyReply, FastifyRequest } from "fastify"
-import cookie from "@fastify/cookie"
+import cookie, { CookieSerializeOptions } from "@fastify/cookie"
 import compress from "@fastify/compress"
 import fStatic from "@fastify/static"
 import oauthPlugin, { OAuth2Namespace } from "@fastify/oauth2"
@@ -154,28 +154,25 @@ app.get("/login/google/callback", async function (request, reply) {
   if (!webId || !userId) throw new Error("unable to create user")
   //clearCookies(reply)
 
-  reply.setCookie("user", JSON.stringify({ webId, name, picture }), {
+  const cookieSettings: Partial<CookieSerializeOptions> = {
     domain: "localhost",
     path: "/",
-    httpOnly: false,
     sameSite: "lax",
     secure: !isDev,
+  }
+  reply.setCookie("user", JSON.stringify({ webId, name, picture }), {
+    ...cookieSettings,
+    httpOnly: false,
   })
   reply.setCookie("user_id", userId.toString(), {
-    domain: "localhost",
-    path: "/",
+    ...cookieSettings,
     httpOnly: true,
-    sameSite: "lax",
-    secure: !isDev,
   })
   // if later you need to refresh the token you can use
   // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
   reply.setCookie("access_token", access_token, {
-    domain: "localhost",
-    path: "/",
+    ...cookieSettings,
     httpOnly: true,
-    sameSite: "lax",
-    secure: !isDev,
   })
 
   reply.redirect("/")
