@@ -6,7 +6,7 @@ const isClient = Cinnabun.isClient
 
 export const pathStore = createSignal(isClient ? window.location.pathname : "/")
 
-const parseCookie = (str: string) =>
+const decodeCookie = (str: string) =>
   str
     .split(";")
     .map((v) => v.split("="))
@@ -16,10 +16,10 @@ const parseCookie = (str: string) =>
     }, {} as Record<string, any>)
 
 const getUserDataFromCookie = (): PublicUser | null => {
-  console.log("getUserDataFromCookie", window.document.cookie)
   if (!window.document.cookie) return null
-  const { user } = parseCookie(window.document.cookie)
-  return user ?? null
+  const { user } = decodeCookie(window.document.cookie)
+  const parsed = JSON.parse(user)
+  return parsed ?? null
 }
 
 export const userStore = createSignal<PublicUser | null>(

@@ -42,7 +42,7 @@ export const App = () => {
   return (
     <>
       <Header />
-      <main>
+      <main className="container">
         <Router store={pathStore}>
           <Route path="/" component={<PollList />} />
           <Route path="/users" component={<UserList />} />

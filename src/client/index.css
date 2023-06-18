@@ -98,24 +98,11 @@ footer {
   width: 100%;
 }
 
-
-.page-body {
-  background-color: var(--content-area);
-  max-width: 980px;
+.container {
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
-}
-
-.page-title {
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.page-title h1 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 400;
 }
 
 .list-container {
@@ -126,12 +113,14 @@ ul.card-list {
   margin: 0;
   padding: 0;
   list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap:1rem;
 }
 
 .card {
   --highlight: rgba(255, 255, 255, .075);
   --border: rgba(255, 255, 255, .025);
-  /* border-radius: .5rem; */
   box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .075);
   padding: 1rem;
   background-color: var(--highlight);
@@ -139,11 +128,19 @@ ul.card-list {
   flex-direction: column;
   gap: 1rem;
   border: 1px solid var(--border);
-  margin-bottom: 1rem;
+  flex-basis: 100%;
 }
-.card:last-child {
-  margin-bottom: 0;
+@media screen and (min-width: 640px) {
+  .card {
+    flex-basis: calc(50% - .5rem);
+  }
 }
+@media screen and (min-width: 1080px) {
+  .card {
+    flex-basis: calc(25% - .75rem);
+  }
+}
+
 
 @media (prefers-color-scheme: light) {
   .card {
