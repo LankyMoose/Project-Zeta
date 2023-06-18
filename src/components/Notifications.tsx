@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal, Component } from "cinnabun"
-import "./notifications.css"
+import "./Notifications.css"
 import { generateUUID } from "../utils"
 import { DomInterop } from "cinnabun/src/domInterop"
 

@@ -18,7 +18,11 @@ export const getPoll = async (id: string): Promise<PollData> => {
   return await res.json()
 }
 
-export const createPoll = async (poll: PollData): Promise<PollData> => {
+export const createPoll = async (poll: {
+  id?: string
+  desc: string
+  options: string[]
+}): Promise<PollData> => {
   const res = await fetch(`/api/polls`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -28,7 +32,9 @@ export const createPoll = async (poll: PollData): Promise<PollData> => {
   return await res.json()
 }
 
-export const updatePoll = async (poll: PollData): Promise<PollData> => {
+export const updatePoll = async (
+  poll: PollData
+): Promise<{ id: string; desc: string; options: string[] }> => {
   const res = await fetch(`/api/polls/${poll.poll.webId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

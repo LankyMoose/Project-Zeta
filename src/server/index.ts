@@ -164,10 +164,17 @@ app.get("/login/google/callback", async function (request, reply) {
     ...cookieSettings,
     httpOnly: false,
   })
-  reply.setCookie("user_id", userId.toString(), {
-    ...cookieSettings,
-    httpOnly: true,
-  })
+  reply.setCookie(
+    "user_id",
+    JSON.stringify({
+      numeric: userId,
+      string: webId,
+    }),
+    {
+      ...cookieSettings,
+      httpOnly: true,
+    }
+  )
   // if later you need to refresh the token you can use
   // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
   reply.setCookie("access_token", access_token, {
@@ -208,7 +215,7 @@ app.get("/*", async (req, res) => {
     path: req.url,
     data: {
       user: reqUser ? JSON.parse(reqUser) : null,
-      userId: reqUserId ? parseInt(reqUserId) : null,
+      userId: reqUserId ? JSON.parse(reqUserId) : null,
     },
   })
 

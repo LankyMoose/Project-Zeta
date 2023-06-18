@@ -9,13 +9,13 @@ export const PollList = () => {
     <div className="list-container">
       <Suspense promise={getPolls} cache prefetch:defer>
         {(loading: boolean, items: PollData[]) => {
-          if (loading) return <i>Loading...</i>
+          if (loading) return <i className="text-muted text-lg">Loading...</i>
           return (
             (items?.length && (
               <ul className="card-list">
                 <For each={items} template={(item) => <PollCard {...item} />} />
               </ul>
-            )) || <i>No polls found.</i>
+            )) || <i className="text-muted text-lg">No polls found 😢</i>
           )
         }}
       </Suspense>

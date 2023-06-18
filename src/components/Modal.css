@@ -1,0 +1,43 @@
+.modal-outer {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, .5);
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.modal {
+  background-color: var(--content-area);
+  overflow: hidden;
+  margin: auto;
+  flex-basis: 350px;
+}
+.modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+}
+
+.modal-body {
+  padding: 1rem;
+  background-color: rgba(0,0,0,.15);
+}
+
+.modal-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}

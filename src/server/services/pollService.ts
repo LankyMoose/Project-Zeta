@@ -10,6 +10,7 @@ import {
 } from "../../db/schema"
 import { PollData } from "../../types/polls"
 import postgres from "postgres"
+import { RequestUserID } from "../../types/server"
 
 const pollVoteCounts = (userId: number | null) =>
   db
@@ -159,12 +160,48 @@ export const pollService = {
     }
   },
 
-  async save(poll: NewPoll): Promise<Poll> {
-    if (poll.id === 0 || !poll.id) {
-      return (await db.insert(polls).values(poll).returning()).at(0) as Poll
-    }
-    return (
-      await db.update(polls).set(poll).where(eq(polls.id, poll.id)).returning()
+  async save(
+    poll: NewPoll & { options: string[] },
+    userId: RequestUserID
+  ): Promise<PollData> {
+    poll.ownerId = userId.numeric
+    poll.ownerWebId = userId.string
+    const { options, ...pollWithoutOptions } = poll
+
+    const newPoll = (
+      await db.insert(polls).values(pollWithoutOptions).returning()
     ).at(0) as Poll
+
+    const newOptions = await Promise.all(
+      options.map(async (option) => {
+        return (
+          await db
+            .insert(pollOptions)
+            .values({
+              pollId: newPoll.id,
+              desc: option,
+            })
+            .returning({
+              id: pollOptions.id,
+              desc: pollOptions.desc,
+            })
+        ).at(0)!
+      })
+    )
+
+    const res = {
+      poll: newPoll,
+      options: newOptions,
+      voteCounts: {},
+    } as PollData & {
+      poll: {
+        id?: number
+        ownerId?: number
+      }
+    }
+    delete res.poll.id
+    delete res.poll.ownerId
+
+    return res
   },
 }

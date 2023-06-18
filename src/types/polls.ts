@@ -18,3 +18,8 @@ export type PollData = {
     }
   }
 }
+
+export type NewPoll = {
+  desc: string
+  options: string[]
+}
