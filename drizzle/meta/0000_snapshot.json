@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "64cc32b8-dd14-4271-9241-ff7ec7e8f5e8",
+  "id": "cabed15a-443e-4184-b936-d487532e7bfa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "poll_option": {
@@ -10,13 +10,14 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "poll_id": {
           "name": "poll_id",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -28,8 +29,8 @@
         }
       },
       "indexes": {
-        "poll_id_idx": {
-          "name": "poll_id_idx",
+        "poll_option_poll_id_idx": {
+          "name": "poll_option_poll_id_idx",
           "columns": [
             "poll_id"
           ],
@@ -59,46 +60,47 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "poll_id": {
           "name": "poll_id",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
         "option_id": {
           "name": "option_id",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
         "user_id": {
           "name": "user_id",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {
-        "poll_id_idx": {
-          "name": "poll_id_idx",
+        "poll_vote_poll_id_idx": {
+          "name": "poll_vote_poll_id_idx",
           "columns": [
             "poll_id"
           ],
           "isUnique": false
         },
-        "option_id_idx": {
-          "name": "option_id_idx",
+        "poll_vote_option_id_idx": {
+          "name": "poll_vote_option_id_idx",
           "columns": [
             "option_id"
           ],
           "isUnique": false
         },
-        "user_id_idx": {
-          "name": "user_id_idx",
+        "poll_vote_user_id_idx": {
+          "name": "poll_vote_user_id_idx",
           "columns": [
             "user_id"
           ],
@@ -154,25 +156,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "web_id": {
-          "name": "web_id",
           "type": "uuid",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
         "owner_id": {
           "name": "owner_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "owner_web_id": {
-          "name": "owner_web_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -185,14 +175,14 @@
         },
         "started_at": {
           "name": "started_at",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "ended_at": {
           "name": "ended_at",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
@@ -205,22 +195,15 @@
         }
       },
       "indexes": {
-        "web_id_idx": {
-          "name": "web_id_idx",
-          "columns": [
-            "web_id"
-          ],
-          "isUnique": false
-        },
-        "owner_id_idx": {
-          "name": "owner_id_idx",
+        "poll_owner_id_idx": {
+          "name": "poll_owner_id_idx",
           "columns": [
             "owner_id"
           ],
           "isUnique": false
         },
-        "started_at_idx": {
-          "name": "started_at_idx",
+        "poll_started_at_idx": {
+          "name": "poll_started_at_idx",
           "columns": [
             "started_at"
           ],
@@ -237,19 +220,6 @@
           ],
           "columnsTo": [
             "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "poll_owner_web_id_user_web_id_fk": {
-          "name": "poll_owner_web_id_user_web_id_fk",
-          "tableFrom": "poll",
-          "tableTo": "user",
-          "columnsFrom": [
-            "owner_web_id"
-          ],
-          "columnsTo": [
-            "web_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -275,7 +245,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -293,22 +263,22 @@
         }
       },
       "indexes": {
-        "email_idx": {
-          "name": "email_idx",
+        "user_auth_email_idx": {
+          "name": "user_auth_email_idx",
           "columns": [
             "email"
           ],
           "isUnique": false
         },
-        "user_id_idx": {
-          "name": "user_id_idx",
+        "user_auth_user_id_idx": {
+          "name": "user_auth_user_id_idx",
           "columns": [
             "user_id"
           ],
           "isUnique": false
         },
-        "provider_id_idx": {
-          "name": "provider_id_idx",
+        "user_auth_provider_id_idx": {
+          "name": "user_auth_provider_id_idx",
           "columns": [
             "provider_id"
           ],
@@ -338,15 +308,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "web_id": {
-          "name": "web_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": false,
+          "primaryKey": true,
+          "notNull": true,
           "default": "gen_random_uuid()"
         },
         "username": {
@@ -377,17 +341,10 @@
         }
       },
       "indexes": {
-        "name_idx": {
-          "name": "name_idx",
+        "user_name_idx": {
+          "name": "user_name_idx",
           "columns": [
             "username"
-          ],
-          "isUnique": false
-        },
-        "web_id_idx": {
-          "name": "web_id_idx",
-          "columns": [
-            "web_id"
           ],
           "isUnique": false
         }

@@ -12,7 +12,7 @@ export const userService = {
       .limit(this.pageSize)
       .offset(page * this.pageSize)
   },
-  async getById(id: number) {
+  async getById(id: string) {
     return (
       await db
         .select()
@@ -22,7 +22,7 @@ export const userService = {
     ).at(0)
   },
   async save(user: NewUser): Promise<User> {
-    if (user.id === 0 || !user.id) {
+    if (!user.id) {
       return (await db.insert(users).values(user).returning()).at(0) as User
     }
     return (

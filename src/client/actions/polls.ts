@@ -1,11 +1,9 @@
 import { PollData } from "../../types/polls"
 
 export const getPolls = async (page: number = 0): Promise<PollData[]> => {
-  console.log("getPolls")
   try {
     const res = await fetch(`/api/polls?page=${page}`)
     if (!res.ok) throw new Error("Failed to fetch polls")
-    console.log("gotPolls")
     return await res.json()
   } catch (error) {
     console.error(error)
@@ -33,12 +31,12 @@ export const createPoll = async (poll: {
 }
 
 export const updatePoll = async (
-  poll: PollData
+  pollData: PollData
 ): Promise<{ id: string; desc: string; options: string[] }> => {
-  const res = await fetch(`/api/polls/${poll.poll.webId}`, {
+  const res = await fetch(`/api/polls/${pollData.poll.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(poll),
+    body: JSON.stringify(pollData),
   })
   if (!res.ok) throw new Error("Failed to update poll")
   return await res.json()

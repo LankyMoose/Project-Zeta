@@ -24,7 +24,7 @@ export const authService = {
   },
 
   async save(userAuth: UserAuth): Promise<UserAuth> {
-    if (userAuth.id === 0 || !userAuth.id) {
+    if (!userAuth.id) {
       return (await db.insert(userAuths).values(userAuth).returning()).at(
         0
       ) as UserAuth

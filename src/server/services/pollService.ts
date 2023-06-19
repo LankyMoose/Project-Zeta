@@ -10,9 +10,8 @@ import {
 } from "../../db/schema"
 import { PollData } from "../../types/polls"
 import postgres from "postgres"
-import { RequestUserID } from "../../types/server"
 
-const pollVoteCounts = (userId: number | null) =>
+const pollVoteCounts = (userId: string | null) =>
   db
     .select({
       optionId: pollVotes.optionId,
@@ -23,9 +22,9 @@ const pollVoteCounts = (userId: number | null) =>
     .groupBy(pollVotes.optionId)
 
 const aggrigateVotes = (
-  voteRows: { optionId: number; count: number; hasVoted: boolean }[]
+  voteRows: { optionId: string; count: number; hasVoted: boolean }[]
 ) => {
-  return voteRows.reduce<Record<number, { count: number; hasVoted: boolean }>>(
+  return voteRows.reduce<Record<string, { count: number; hasVoted: boolean }>>(
     (acc, row) => {
       acc[row.optionId] = {
         count: row.count,
@@ -42,15 +41,14 @@ export const pollService = {
 
   async getPage(
     page: number = 0,
-    userId: number | null = null
+    userId: string | null = null
   ): Promise<PollData[]> {
     const statement = sql`
       WITH P as (
         SELECT 
           ${polls.id},
-          ${polls.webId},
           ${polls.disabled},
-          ${polls.ownerWebId},
+          ${polls.ownerId},
           ${polls.desc},
           ${polls.startedAt},
           ${polls.endedAt}
@@ -59,6 +57,8 @@ export const pollService = {
           ${polls}
         WHERE
           ${polls.disabled} = false
+        ORDER BY 
+          ${polls.startedAt} DESC
         LIMIT
           ${this.pageSize}
         OFFSET
@@ -78,9 +78,9 @@ export const pollService = {
       )
       
       SELECT
-        P.web_id,
+        P.id,
         P.disabled,
-        P.owner_web_id,
+        P.owner_id,
         P.desc,
         P.started_at,
         P.ended_at,
@@ -101,6 +101,7 @@ export const pollService = {
     const res: postgres.RowList<Record<string, unknown>[]> = await db.execute(
       statement
     )
+    if (res.length === 0) return []
 
     // the query produces a result like this:
     // [{ "id": 1, "disabled": false, "owner_id": 1, "desc": "my first poll 😁", "started_at": "2023-06-16T00:00:00.000Z", "ended_at": null, "poll_option_id": 1, "poll_option_desc": "Option A", "poll_option_vote_optionid": 1, "poll_option_vote_count": "2", "poll_option_vote_hasvoted": true }, { "id": 1, "disabled": false, "owner_id": 1, "desc": "my first poll 😁", "started_at": "2023-06-16T00:00:00.000Z", "ended_at": null, "poll_option_id": 2, "poll_option_desc": "Option B", "poll_option_vote_optionid": null, "poll_option_vote_count": null, "poll_option_vote_hasvoted": null }]
@@ -109,13 +110,13 @@ export const pollService = {
     // and then reducing the rows into a single object
     // for each poll
     const pollMap = res.reduce<Record<string, PollData>>((acc, row) => {
-      const pollId = row.web_id as string
+      const pollId = row.id as string
       if (!acc[pollId]) {
         acc[pollId] = {
           poll: {
-            webId: pollId,
+            id: pollId,
             disabled: row.disabled as boolean,
-            ownerWebId: row.owner_web_id as string,
+            ownerId: row.owner_id as string,
             desc: row.desc as string,
             startedAt: row.started_at as string,
             endedAt: row.ended_at as string | null,
@@ -127,7 +128,7 @@ export const pollService = {
       const poll = acc[pollId]
       if (row.poll_option_id) {
         poll.options.push({
-          id: row.poll_option_id as number,
+          id: row.poll_option_id as string,
           desc: row.poll_option_desc as string,
         })
       }
@@ -142,7 +143,7 @@ export const pollService = {
     return Object.values(pollMap)
   },
 
-  async getById(id: number, userId: number | null = null): Promise<PollData> {
+  async getById(id: string, userId: string | null = null): Promise<PollData> {
     const [rows, votes] = await Promise.all([
       db
         .select()
@@ -157,15 +158,14 @@ export const pollService = {
       poll,
       options: rows.map((row) => row.poll_option as PollOption),
       voteCounts: aggrigateVotes(votes),
-    }
+    } as any as PollData
   },
 
   async save(
     poll: NewPoll & { options: string[] },
-    userId: RequestUserID
+    userId: string
   ): Promise<PollData> {
-    poll.ownerId = userId.numeric
-    poll.ownerWebId = userId.string
+    poll.ownerId = userId
     const { options, ...pollWithoutOptions } = poll
 
     const newPoll = (
@@ -189,19 +189,17 @@ export const pollService = {
       })
     )
 
-    const res = {
+    return {
       poll: newPoll,
       options: newOptions,
       voteCounts: {},
-    } as PollData & {
-      poll: {
-        id?: number
-        ownerId?: number
-      }
     }
-    delete res.poll.id
-    delete res.poll.ownerId
-
-    return res
+  },
+  async vote(pollId: string, optionId: string, userId: string): Promise<void> {
+    await db.insert(pollVotes).values({
+      pollId,
+      optionId,
+      userId,
+    })
   },
 }

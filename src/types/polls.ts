@@ -1,14 +1,14 @@
 export type PollData = {
   poll: {
-    webId: string
+    id: string
     disabled: boolean | null
-    ownerWebId: string
+    ownerId: string
     desc: string
-    startedAt: string
-    endedAt: string | null
+    startedAt: Date | string
+    endedAt: Date | string | null
   }
   options: {
-    id: number
+    id: string
     desc: string
   }[]
   voteCounts: {

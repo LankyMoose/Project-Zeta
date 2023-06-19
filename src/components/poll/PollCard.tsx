@@ -7,7 +7,6 @@ export const PollCard = (props: PollData) => {
   const totalVotes = props.options.reduce((acc, option) => {
     return acc + (props.voteCounts[option.id]?.count || 0)
   }, 0)
-  //const isOwner = userStore.value?.webId === props.poll.ownerWebId
   const titleText = props.poll.desc
   const titleClass =
     "card-title " +
@@ -17,7 +16,7 @@ export const PollCard = (props: PollData) => {
       ? "small"
       : "large")
   return (
-    <div key={props.poll.webId} className="card">
+    <div key={props.poll.id} className="card">
       <h3 className={titleClass}>{titleText}</h3>
       <div style="display:flex; flex-direction:column; gap:1rem">
         <Cinnabun.For
@@ -26,6 +25,7 @@ export const PollCard = (props: PollData) => {
             return (
               <PollOptionButton
                 {...option}
+                pollId={props.poll.id}
                 voteCounts={props.voteCounts[option.id]}
                 percent={
                   !props.voteCounts[option.id]

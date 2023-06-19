@@ -2,19 +2,18 @@ import {
   boolean,
   date,
   index,
-  integer,
   pgTable,
   serial,
   varchar,
   uuid,
+  timestamp,
 } from "drizzle-orm/pg-core"
 import { InferModel } from "drizzle-orm"
 
 export const users = pgTable(
   "user",
   {
-    id: serial("id").primaryKey(),
-    webId: uuid("web_id").defaultRandom(),
+    id: uuid("id").primaryKey().defaultRandom(),
     name: varchar("username", { length: 80 }).notNull(),
     createdAt: date("created_at").defaultNow(),
     disabled: boolean("disabled").default(false),
@@ -22,8 +21,7 @@ export const users = pgTable(
   },
   (table) => {
     return {
-      nameIdx: index("name_idx").on(table.name),
-      webIdIdx: index("web_id_idx").on(table.webId),
+      nameIdx: index("user_name_idx").on(table.name),
     }
   }
 )
@@ -36,7 +34,7 @@ export const userAuths = pgTable(
   {
     id: serial("id").primaryKey(),
     email: varchar("email", { length: 80 }).notNull(),
-    userId: integer("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => users.id),
     provider: varchar("provider", { length: 80 }).notNull(),
@@ -44,9 +42,9 @@ export const userAuths = pgTable(
   },
   (table) => {
     return {
-      emailIdx: index("email_idx").on(table.email),
-      userIdIdx: index("user_id_idx").on(table.userId),
-      providerIdIdx: index("provider_id_idx").on(table.providerId),
+      emailIdx: index("user_auth_email_idx").on(table.email),
+      userIdIdx: index("user_auth_user_id_idx").on(table.userId),
+      providerIdIdx: index("user_auth_provider_id_idx").on(table.providerId),
     }
   }
 )
@@ -57,24 +55,19 @@ export type NewUserAuth = InferModel<typeof userAuths, "insert">
 export const polls = pgTable(
   "poll",
   {
-    id: serial("id").primaryKey(),
-    webId: uuid("web_id").defaultRandom().notNull(),
-    ownerId: integer("owner_id")
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    ownerId: uuid("owner_id")
       .notNull()
       .references(() => users.id),
-    ownerWebId: uuid("owner_web_id")
-      .notNull()
-      .references(() => users.webId),
     desc: varchar("desc", { length: 255 }).notNull(),
-    startedAt: date("started_at").defaultNow().notNull(),
-    endedAt: date("ended_at"),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    endedAt: timestamp("ended_at"),
     disabled: boolean("disabled").default(false),
   },
   (table) => {
     return {
-      webIdIdx: index("web_id_idx").on(table.webId),
-      ownerIdIdx: index("owner_id_idx").on(table.ownerId),
-      startedAtIdx: index("started_at_idx").on(table.startedAt),
+      ownerIdIdx: index("poll_owner_id_idx").on(table.ownerId),
+      startedAtIdx: index("poll_started_at_idx").on(table.startedAt),
     }
   }
 )
@@ -85,15 +78,15 @@ export type NewPoll = InferModel<typeof polls, "insert">
 export const pollOptions = pgTable(
   "poll_option",
   {
-    id: serial("id").primaryKey(),
-    pollId: integer("poll_id")
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    pollId: uuid("poll_id")
       .notNull()
       .references(() => polls.id),
     desc: varchar("desc", { length: 255 }).notNull(),
   },
   (table) => {
     return {
-      pollIdIdx: index("poll_id_idx").on(table.pollId),
+      pollIdIdx: index("poll_option_poll_id_idx").on(table.pollId),
     }
   }
 )
@@ -104,22 +97,22 @@ export type NewPollOption = InferModel<typeof pollOptions, "insert">
 export const pollVotes = pgTable(
   "poll_vote",
   {
-    id: serial("id").primaryKey(),
-    pollId: integer("poll_id")
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    pollId: uuid("poll_id")
       .notNull()
       .references(() => polls.id),
-    optionId: integer("option_id")
+    optionId: uuid("option_id")
       .notNull()
       .references(() => pollOptions.id),
-    userId: integer("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => users.id),
   },
   (table) => {
     return {
-      pollIdIdx: index("poll_id_idx").on(table.pollId),
-      optionIdIdx: index("option_id_idx").on(table.optionId),
-      userIdIdx: index("user_id_idx").on(table.userId),
+      pollIdIdx: index("poll_vote_poll_id_idx").on(table.pollId),
+      optionIdIdx: index("poll_vote_option_id_idx").on(table.optionId),
+      userIdIdx: index("poll_vote_user_id_idx").on(table.userId),
     }
   }
 )

@@ -19,6 +19,8 @@ import { env } from "../env.js"
 import { authService } from "./services/authService.js"
 import { userService } from "./services/userService.js"
 
+let serverReady = false
+
 const port: number = parseInt(process.env.PORT ?? "3000")
 
 const _fetch = globalThis.fetch
@@ -27,6 +29,16 @@ globalThis.fetch = async (
   init?: RequestInit | undefined
 ) => {
   try {
+    if (!serverReady) {
+      // early return as the server is not ready yet
+      try {
+        return new Response(JSON.stringify({}), {
+          status: 200,
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
     if (typeof input === "string" && input.startsWith("/")) {
       input = `http://localhost:${port}${input}`
     }
@@ -125,22 +137,21 @@ app.get("/login/google/callback", async function (request, reply) {
 
   const { name, picture, id, email } = await loadUserInfo(access_token)
 
-  let webId, userId
+  let userId
   const userAuth = await authService.getByProviderId(id)
+
   if (userAuth) {
     const user = await userService.save({
       id: userAuth.userId,
       name,
       avatarUrl: picture,
     })
-    webId = user.webId
     userId = user.id
   } else {
     const user = await userService.save({
       name,
       avatarUrl: picture,
     })
-    webId = user.webId
     userId = user.id
     await authService.save({
       email,
@@ -151,7 +162,7 @@ app.get("/login/google/callback", async function (request, reply) {
     })
   }
 
-  if (!webId || !userId) throw new Error("unable to create user")
+  if (!userId) throw new Error("unable to create user")
   //clearCookies(reply)
 
   const cookieSettings: Partial<CookieSerializeOptions> = {
@@ -160,21 +171,14 @@ app.get("/login/google/callback", async function (request, reply) {
     sameSite: "lax",
     secure: !isDev,
   }
-  reply.setCookie("user", JSON.stringify({ webId, name, picture }), {
+  reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
     ...cookieSettings,
     httpOnly: false,
   })
-  reply.setCookie(
-    "user_id",
-    JSON.stringify({
-      numeric: userId,
-      string: webId,
-    }),
-    {
-      ...cookieSettings,
-      httpOnly: true,
-    }
-  )
+  reply.setCookie("user_id", userId, {
+    ...cookieSettings,
+    httpOnly: true,
+  })
   // if later you need to refresh the token you can use
   // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
   reply.setCookie("access_token", access_token, {
@@ -215,7 +219,7 @@ app.get("/*", async (req, res) => {
     path: req.url,
     data: {
       user: reqUser ? JSON.parse(reqUser) : null,
-      userId: reqUserId ? JSON.parse(reqUserId) : null,
+      userId: reqUserId ?? null,
     },
   })
 
@@ -238,6 +242,7 @@ app.listen({ port }, function (err) {
     app.log.error(err)
     process.exit(1)
   }
+  serverReady = true
 
   log(
     "FgGreen",
