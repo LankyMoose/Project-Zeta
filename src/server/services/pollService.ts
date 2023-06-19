@@ -4,6 +4,7 @@ import {
   NewPoll,
   Poll,
   PollOption,
+  PollVote,
   pollOptions,
   pollVotes,
   polls,
@@ -195,11 +196,22 @@ export const pollService = {
       voteCounts: {},
     }
   },
-  async vote(pollId: string, optionId: string, userId: string): Promise<void> {
-    await db.insert(pollVotes).values({
-      pollId,
-      optionId,
-      userId,
-    })
+  async vote(
+    pollId: string,
+    optionId: string,
+    userId: string
+  ): Promise<PollVote | null> {
+    return (
+      (
+        await db
+          .insert(pollVotes)
+          .values({
+            pollId,
+            optionId,
+            userId,
+          })
+          .returning()
+      ).at(0) ?? null
+    )
   },
 }

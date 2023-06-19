@@ -4,9 +4,11 @@ import { PollOptionButton } from "./PollOptionButton"
 //import { userStore } from "../../state"
 
 export const PollCard = (props: PollData) => {
-  const totalVotes = props.options.reduce((acc, option) => {
-    return acc + (props.voteCounts[option.id]?.count || 0)
-  }, 0)
+  let totalVotes = 0
+  for (const option of props.options) {
+    totalVotes += parseInt(props.voteCounts[option.id]?.count.toString() || "0")
+  }
+
   const titleText = props.poll.desc
   const titleClass =
     "card-title " +
@@ -22,16 +24,21 @@ export const PollCard = (props: PollData) => {
         <Cinnabun.For
           each={props.options}
           template={(option) => {
+            const percent = !props.voteCounts[option.id]
+              ? 0
+              : (props.voteCounts[option.id].count / totalVotes) * 100
+            console.log(
+              "percent",
+              percent,
+              props.voteCounts[option.id]?.count || 0,
+              totalVotes
+            )
             return (
               <PollOptionButton
                 {...option}
                 pollId={props.poll.id}
                 voteCounts={props.voteCounts[option.id]}
-                percent={
-                  !props.voteCounts[option.id]
-                    ? 0
-                    : (props.voteCounts[option.id].count / totalVotes) * 1000
-                }
+                percent={percent}
               />
             )
           }}

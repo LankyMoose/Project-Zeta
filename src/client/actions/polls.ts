@@ -48,12 +48,12 @@ export const deletePoll = async (id: string): Promise<void> => {
   })
   if (!res.ok) throw new Error("Failed to delete poll")
 }
-
+///api/polls/:id/vote/:optionId
 export const vote = async (pollId: string, optionId: string): Promise<void> => {
-  const res = await fetch(`/api/polls/${pollId}/vote`, {
+  const res = await fetch(`/api/polls/${pollId}/vote/${optionId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ optionId }),
+    body: JSON.stringify({}),
   })
   if (!res.ok) throw new Error("Failed to vote")
 }
