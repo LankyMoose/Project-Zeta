@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS "poll_vote" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"poll_id" uuid NOT NULL,
 	"option_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL
+	"user_id" uuid NOT NULL,
+	UNIQUE ("poll_id", "user_id")
 );
 
 CREATE TABLE IF NOT EXISTS "poll" (
