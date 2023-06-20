@@ -34,9 +34,9 @@
   background-color: rgba(0,0,0,.15);
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   .modal-body {
-    background-color: rgba(0, 0, 0, .05);
+    background-color: rgba(0, 0, 0, .15);
   }
 }
 

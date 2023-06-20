@@ -46,7 +46,7 @@ const removeOption = (id: string) => {
 const Options = () => (
   <div>
     <h4 className="m-0">Options</h4>
-
+    <br />
     <div className="flex flex-column gap">
       <ul
         className="option-list"
@@ -168,9 +168,8 @@ export const PollCreator = () => {
               <h3>Create Poll</h3>
             </div>
             <div className="modal-body flex flex-column gap">
-              <input
-                className="text-rg w-100"
-                type="text"
+              <textarea
+                className="text-sm w-100"
                 watch={[formState, loading]}
                 bind:disabled={() => loading.value}
                 bind:value={() => formState.value.desc}
