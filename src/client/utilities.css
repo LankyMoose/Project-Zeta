@@ -68,6 +68,10 @@
   align-items: center;
 }
 
+.gap-sm {
+  gap: .5rem;
+}
+
 .gap {
   gap: 1rem;
 }

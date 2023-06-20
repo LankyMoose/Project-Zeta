@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { ComponentChildren } from "cinnabun/types"
 import { KeyboardListener, NavigationListener } from "cinnabun/listeners"
-import { FadeInOut, SlideInOut, Transition } from "cinnabun-transitions"
+import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
 
 type ModalGestureProps = {

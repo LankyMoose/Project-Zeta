@@ -44,7 +44,7 @@ body {
 }
 
 a {
-  color: var(--primary);
+  color: var(--primary-light);
   text-decoration: none;
 }
 
@@ -58,7 +58,6 @@ nav ul {
 
 header {
   width: 100%;
-  min-height: 100px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -163,7 +162,7 @@ ul.card-list {
 
 @media (prefers-color-scheme: light) {
   .card {
-    --highlight: rgba(0, 0, 0, .075);
+    --highlight: rgba(0, 0, 0, .05);
     --border: rgba(0, 0, 0, .025);
   }
 }

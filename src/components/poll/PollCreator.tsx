@@ -7,7 +7,9 @@ import { createPoll } from "../../client/actions/polls"
 import { KeyboardListener } from "cinnabun/listeners"
 import "./PollCreator.css"
 import { addNotification } from "../Notifications"
+import { EllipsisLoader } from "../loaders/Ellipsis"
 
+const loading = Cinnabun.createSignal(false)
 const modalOpen = Cinnabun.createSignal(false)
 const formState = Cinnabun.createSignal<{
   desc: string
@@ -61,6 +63,8 @@ const Options = () => (
                   type="button"
                   className="btn btn-sm btn-danger hover-animate"
                   onclick={() => removeOption(item.id)}
+                  watch={loading}
+                  bind:disabled={() => loading.value}
                 >
                   Remove
                 </button>
@@ -74,8 +78,9 @@ const Options = () => (
     <div className="flex gap">
       <KeyboardListener keys={["Enter"]} onCapture={addOption}>
         <input
-          watch={formState}
+          watch={[formState, loading]}
           bind:value={() => formState.value.newOptionText}
+          bind:disabled={() => loading.value}
           oninput={(e: Event) => {
             const tgt = e.target as HTMLInputElement
             formState.value.newOptionText = tgt.value
@@ -104,10 +109,12 @@ const Options = () => (
 export const PollCreator = () => {
   const resetForm = () => {
     formState.value = { desc: "", newOptionText: "" }
+    options.value = []
   }
   const handleSubmit = async (e: Event) => {
     e.preventDefault()
     e.stopPropagation()
+    loading.value = true
     const { desc } = formState.value
     try {
       const res = await createPoll({
@@ -127,6 +134,7 @@ export const PollCreator = () => {
         text: error instanceof Error ? error.message : "Something went wrong",
       })
     }
+    loading.value = false
   }
   const handleTitleChange = (e: KeyboardEvent) => {
     const tgt = e.target as HTMLInputElement
@@ -155,7 +163,7 @@ export const PollCreator = () => {
           visible={modalOpen}
           onclose={resetForm}
         >
-          <form onsubmit={handleSubmit}>
+          <form disabled onsubmit={handleSubmit}>
             <div className="modal-header">
               <h3>Create Poll</h3>
             </div>
@@ -163,7 +171,8 @@ export const PollCreator = () => {
               <input
                 className="text-rg w-100"
                 type="text"
-                watch={formState}
+                watch={[formState, loading]}
+                bind:disabled={() => loading.value}
                 bind:value={() => formState.value.desc}
                 oninput={handleTitleChange}
                 placeholder="Title"
@@ -175,10 +184,17 @@ export const PollCreator = () => {
             <div className="modal-footer">
               <Button
                 className="btn btn-primary hover-animate text-rg"
-                watch={[formState, options]}
-                bind:disabled={() => isFormInvalid()}
+                watch={[formState, options, loading]}
+                bind:disabled={() => {
+                  if (loading.value) return true
+                  return isFormInvalid()
+                }}
               >
                 Create
+                <EllipsisLoader
+                  watch={loading}
+                  bind:visible={() => loading.value}
+                />
               </Button>
             </div>
           </form>
