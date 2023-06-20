@@ -21,6 +21,7 @@
     "@fastify/jwt": "^7.0.0",
     "@fastify/oauth2": "^7.1.0",
     "@fastify/static": "^6.10.2",
+    "@fastify/websocket": "^8.1.0",
     "cinnabun": "^0.1.38",
     "cinnabun-transitions": "^1.0.1",
     "dotenv": "^16.3.0",

@@ -1,3 +1,10 @@
+export type PollVoteCounts = {
+  [optionId: string]: {
+    count: number
+    hasVoted: boolean
+  }
+}
+
 export type PollData = {
   poll: {
     id: string
@@ -11,12 +18,7 @@ export type PollData = {
     id: string
     desc: string
   }[]
-  voteCounts: {
-    [optionId: string]: {
-      count: number
-      hasVoted: boolean
-    }
-  }
+  voteCounts: PollVoteCounts
 }
 
 export type NewPoll = {

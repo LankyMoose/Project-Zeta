@@ -5,11 +5,14 @@ import { Hydration } from "cinnabun/hydration"
 import { Document } from "../Document"
 import { SSRProps } from "cinnabun/src/types"
 import { App } from "../App"
+import { Cinnabun } from "cinnabun"
+import { createLiveSocket } from "./liveSocket"
 
 const env = process.env.NODE_ENV ?? "development"
 
 if ("__cbData" in window) {
   try {
+    Cinnabun.registerRuntimeServices(createLiveSocket())
     Hydration.hydrate(Document(App), window.__cbData as SSRProps)
   } catch (error) {
     console.error(error)

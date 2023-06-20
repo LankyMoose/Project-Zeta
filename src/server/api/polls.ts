@@ -15,17 +15,21 @@ export function configurePollRoutes(app: FastifyInstance) {
     return await pollService.getById(req.params.id, req.cookies.user_id ?? null)
   })
 
-  app.post<{ Body: { id?: string; desc: string; options: string[] } }>(
+  app.post<{ Body: { desc: string; options: string[] } }>(
     "/api/polls",
     async (req) => {
       if (!req.cookies.user_id) throw new Error("Not logged in")
 
       const userId = req.cookies.user_id
 
-      return await pollService.save(
+      const res = await pollService.save(
         req.body as NewPoll & { options: string[] },
         userId
       )
+      app.websocketServer?.clients.forEach(function each(client: any) {
+        client.send(JSON.stringify({ type: "+poll", data: res }))
+      })
+      return res
     }
   )
 
@@ -34,7 +38,20 @@ export function configurePollRoutes(app: FastifyInstance) {
     async (req) => {
       if (!req.cookies.user_id) throw new Error("Not logged in")
       const { pollId, optionId } = req.params
-      return await pollService.vote(pollId, optionId, req.cookies.user_id)
+      const res = await pollService.vote(pollId, optionId, req.cookies.user_id)
+      app.websocketServer?.clients.forEach(function each(client: any) {
+        client.send(
+          JSON.stringify({
+            type: "~voteCounts",
+            data: {
+              id: pollId,
+              voteCounts: res,
+            },
+          })
+        )
+      })
+
+      return res
     }
   )
 }

@@ -1,24 +1,29 @@
 import * as Cinnabun from "cinnabun"
-import { Suspense, For } from "cinnabun"
+import { Cinnabun as cb } from "cinnabun"
+import { For } from "cinnabun"
 import { getPolls } from "../../client/actions/polls"
 import { PollData } from "../../types/polls"
 import { PollCard } from "./PollCard"
+import { LiveSocket } from "../../client/liveSocket"
+
+let serverData = Cinnabun.createSignal<PollData[]>([])
 
 export const PollList = () => {
+  if (!cb.isClient) {
+    getPolls().then((res) => {
+      serverData.value = res
+    })
+  }
+
+  const polls = cb.isClient
+    ? cb.getRuntimeService(LiveSocket).polls
+    : serverData
+
   return (
     <div className="list-container">
-      <Suspense promise={getPolls} cache>
-        {(loading: boolean, items: PollData[]) => {
-          if (loading) return <i className="text-muted text-lg">Loading...</i>
-          return (
-            (items?.length && (
-              <ul className="card-list">
-                <For each={items} template={(item) => <PollCard {...item} />} />
-              </ul>
-            )) || <i className="text-muted text-lg">No polls found 😢</i>
-          )
-        }}
-      </Suspense>
+      <ul className="card-list">
+        <For each={polls} template={(item) => <PollCard {...item} />} />
+      </ul>
     </div>
   )
 }

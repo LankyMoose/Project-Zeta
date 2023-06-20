@@ -9,7 +9,7 @@ import {
   pollVotes,
   polls,
 } from "../../db/schema"
-import { PollData } from "../../types/polls"
+import { PollData, PollVoteCounts } from "../../types/polls"
 import postgres from "postgres"
 
 const pollVoteCounts = (userId: string | null) =>
@@ -200,24 +200,21 @@ export const pollService = {
     pollId: string,
     optionId: string,
     userId: string
-  ): Promise<PollVote | null> {
-    return (
-      (
-        await db
-          .insert(pollVotes)
-          .values({
-            pollId,
-            optionId,
-            userId,
-          })
-          .onConflictDoUpdate({
-            target: [pollVotes.pollId, pollVotes.userId],
-            set: {
-              optionId,
-            },
-          })
-          .returning()
-      ).at(0) ?? null
-    )
+  ): Promise<PollVoteCounts> {
+    await db
+      .insert(pollVotes)
+      .values({
+        pollId,
+        optionId,
+        userId,
+      })
+      .onConflictDoUpdate({
+        target: [pollVotes.pollId, pollVotes.userId],
+        set: {
+          optionId,
+        },
+      })
+    const res = await pollVoteCounts(userId).where(eq(pollVotes.pollId, pollId))
+    return aggrigateVotes(res)
   },
 }

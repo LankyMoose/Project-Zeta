@@ -1,5 +1,5 @@
 import { Signal, createSignal } from "cinnabun"
-import { PollData } from "../types/polls"
+import { PollData, PollVoteCounts } from "../types/polls"
 import { getPolls } from "./actions/polls"
 
 type TypedMessage = {
@@ -41,7 +41,17 @@ export class LiveSocket {
         this.polls.value.push(message.data as PollData)
         this.polls.notify()
         break
-      case "-chat":
+
+      case "~voteCounts":
+        const poll = this.polls.value.find(
+          (item) => item.poll.id === message.data.id
+        )
+        if (!poll) return console.error("Poll not found")
+        poll.voteCounts = message.data.voteCounts as PollVoteCounts
+        this.polls.notify()
+        break
+
+      case "-poll":
         const idx = this.polls.value.findIndex(
           (item) => item.poll.id === message.data.id
         )
@@ -49,6 +59,7 @@ export class LiveSocket {
         this.polls.value.splice(idx, 1)
         this.polls.notify()
         break
+
       case "ping":
         return
       default:

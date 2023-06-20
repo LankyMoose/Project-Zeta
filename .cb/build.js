@@ -60,7 +60,7 @@ emitter.on("build-finished", () => {
 /** @type {esbuild.BuildOptions} */
 const sharedSettings = {
   bundle: true,
-  minify: true,
+  minify: false,
   format: "esm",
   target: "esnext",
   tsconfig: ".cb/_tsconfig.json",

@@ -5,6 +5,8 @@ import fastify, { FastifyReply, FastifyRequest } from "fastify"
 import cookie, { CookieSerializeOptions } from "@fastify/cookie"
 import compress from "@fastify/compress"
 import fStatic from "@fastify/static"
+import websocket from "@fastify/websocket"
+
 import oauthPlugin, { OAuth2Namespace } from "@fastify/oauth2"
 
 import { SSR } from "cinnabun/ssr"
@@ -18,8 +20,7 @@ import { configureUserRoutes } from "./api/users.js"
 import { env } from "../env.js"
 import { authService } from "./services/authService.js"
 import { userService } from "./services/userService.js"
-
-let serverReady = false
+import { socketHandler } from "./socket.js"
 
 const port: number = parseInt(process.env.PORT ?? "3000")
 
@@ -29,16 +30,6 @@ globalThis.fetch = async (
   init?: RequestInit | undefined
 ) => {
   try {
-    if (!serverReady) {
-      // early return as the server is not ready yet
-      try {
-        return new Response(JSON.stringify({}), {
-          status: 200,
-        })
-      } catch (error) {
-        console.error(error)
-      }
-    }
     if (typeof input === "string" && input.startsWith("/")) {
       input = `http://localhost:${port}${input}`
     }
@@ -51,29 +42,6 @@ globalThis.fetch = async (
 }
 
 const isDev = process.env.NODE_ENV === "development"
-
-if (isDev) {
-  try {
-    log("Dim", "  evaluating application... 🔍")
-    await SSR.serverBake(Document(App), {
-      cinnabunInstance: new Cinnabun(),
-      stream: null,
-    })
-    log("Dim", "  good to go! ✅")
-  } catch (error) {
-    if ("message" in (error as Error)) {
-      const err = error as Error
-      log(
-        "FgRed",
-        `
-Failed to evaluate application.
-${err.stack}
-`
-      )
-      process.exit(96)
-    }
-  }
-}
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -93,6 +61,18 @@ app.register(fStatic, {
     path.dirname(fileURLToPath(import.meta.url)),
     "../../dist/static"
   ),
+})
+app.register(websocket, {
+  options: { maxPayload: 1024 },
+})
+
+app.register(async function () {
+  app.route({
+    method: "GET",
+    url: "/ws",
+    handler: (_, res) => res.status(400).send(),
+    wsHandler: socketHandler,
+  })
 })
 
 app.register(oauthPlugin, {
@@ -238,16 +218,38 @@ app.get("/*", async (req, res) => {
   res.raw.end("</html>")
 })
 
-app.listen({ port }, function (err) {
+app.listen({ port }, async (err) => {
   if (err) {
     app.log.error(err)
     process.exit(1)
   }
-  serverReady = true
 
   log(
     "FgGreen",
     `
 Server is listening on port ${port} - http://localhost:3000`
   )
+
+  if (isDev) {
+    try {
+      log("Dim", "  evaluating application... 🔍")
+      await SSR.serverBake(Document(App), {
+        cinnabunInstance: new Cinnabun(),
+        stream: null,
+      })
+      log("Dim", "  good to go! ✅")
+    } catch (error) {
+      if ("message" in (error as Error)) {
+        const err = error as Error
+        log(
+          "FgRed",
+          `
+Failed to evaluate application.
+${err.stack}
+`
+        )
+        process.exit(96)
+      }
+    }
+  }
 })
