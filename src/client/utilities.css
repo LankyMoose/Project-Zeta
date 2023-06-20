@@ -28,6 +28,10 @@
   display: none;
 }
 
+.inline {
+  display: inline;
+}
+
 .block {
   display: block;
 }

@@ -12,7 +12,7 @@
   --secondary: #8600f3;
   --dark: #1e1e1e;
   --light: #fafaff;
-  --danger: #ee3333;
+  --danger: #e34e4e;
   --text-muted: #888888;
   --content-area: #2e2e2e;
   --border: rgba(255, 255, 255, .025);
@@ -63,6 +63,10 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
+  position: sticky;
+  top: 0;
+  background-color: var(--content-area);
+  z-index: 1;
 }
 @media screen and (min-width: 480px) {
   header {

@@ -76,10 +76,12 @@ export const PollOptionButton = (props: {
       bind:style={() =>
         `--percent: ${getPercent(state.value.pollData, votes())}%`
       }
+      bind:disabled={() => hasVoted()}
     >
       <div className="fill"></div>
       <span watch={state} bind:children>
-        {props.option.desc} | {votes}
+        {props.option.desc} <div className="inline separator">|</div>{" "}
+        {() => getPercent(state.value.pollData, votes())}%
       </span>
     </button>
   )

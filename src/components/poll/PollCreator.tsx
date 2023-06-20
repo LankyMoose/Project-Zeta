@@ -44,6 +44,7 @@ const removeOption = (id: string) => {
 const Options = () => (
   <div>
     <h4 className="m-0">Options</h4>
+
     <div className="flex flex-column gap">
       <ul
         className="option-list"

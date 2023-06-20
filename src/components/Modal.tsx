@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { ComponentChildren } from "cinnabun/types"
 import { KeyboardListener, NavigationListener } from "cinnabun/listeners"
-import { FadeInOut, SlideInOut } from "cinnabun-transitions"
+import { FadeInOut, SlideInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
 
 type ModalGestureProps = {
@@ -43,10 +43,11 @@ export const Modal = (
         if (el.className === "modal-outer") toggle()
       }}
     >
-      <SlideInOut
+      <Transition
         className="modal"
-        settings={{ from: "bottom", duration: 300 }}
-        properties={[{ name: "scale", from: "0", to: "1" }]}
+        properties={[
+          { name: "translate", from: "0 -5rem", to: "0 0", ms: 350 },
+        ]}
         watch={visible}
         bind:visible={() => visible.value}
       >
@@ -56,7 +57,7 @@ export const Modal = (
           onCapture={() => closeOnEscape && toggle()}
         />
         {children}
-      </SlideInOut>
+      </Transition>
     </FadeInOut>
   )
 }

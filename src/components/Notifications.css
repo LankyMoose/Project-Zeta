@@ -13,7 +13,6 @@
   margin-top: .5rem;
   right: .5rem;
   padding: .75rem 1.5rem;
-  border-radius: .25rem;
   background-color: #444;
   transition: opacity .5s ease, transform .5s ease;
   text-shadow: 0 -1px rgba(0, 0, 0, .15);

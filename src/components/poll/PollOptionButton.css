@@ -27,4 +27,9 @@
 .poll-option span {
   position: relative;
   text-shadow: 0 -1px rgba(0, 0, 0, .15);
+  vertical-align: text-top;
+}
+.poll-option .separator {
+  margin: 0 .5rem;
+  color: rgba(255, 255, 255, .5);
 }
