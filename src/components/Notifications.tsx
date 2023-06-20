@@ -4,17 +4,17 @@ import "./Notifications.css"
 import { generateUUID } from "../utils"
 import { DomInterop } from "cinnabun/src/domInterop"
 
-export enum NotificationType {
-  INFO = "info",
-  SUCCESS = "success",
-  ERROR = "error",
-  WARNING = "warning",
+export const NotificationType = {
+  info: "info",
+  success: "success",
+  error: "error",
+  warning: "warning",
 }
 
 interface INotification {
   id: string
   text: string
-  type: NotificationType
+  type: keyof typeof NotificationType
   duration: number
   component: NotificationComponent
 }
@@ -25,11 +25,11 @@ export const notificationStore = createSignal<Map<string, INotification>>(
 
 export const addNotification = ({
   text,
-  type = NotificationType.INFO,
+  type = "info",
   duration = 3000,
 }: {
   text: string
-  type?: NotificationType
+  type?: keyof typeof NotificationType
   duration?: number
 }) => {
   const id = generateUUID()
@@ -44,7 +44,7 @@ export const addNotification = ({
 }
 
 class NotificationComponent extends Component {
-  constructor(id: string, type: NotificationType, text: string) {
+  constructor(id: string, type: keyof typeof NotificationType, text: string) {
     super("div", {
       ["data-id"]: id,
       className: `notification ${type}`,

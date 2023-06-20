@@ -134,7 +134,7 @@ export const pollService = {
         })
       }
       if (row.poll_option_vote_optionid) {
-        poll.voteCounts[row.poll_option_vote_optionid as number] = {
+        poll.voteCounts[row.poll_option_vote_optionid as string] = {
           count: row.poll_option_vote_count as number,
           hasVoted: row.poll_option_vote_hasvoted as boolean,
         }
@@ -209,6 +209,12 @@ export const pollService = {
             pollId,
             optionId,
             userId,
+          })
+          .onConflictDoUpdate({
+            target: [pollVotes.pollId, pollVotes.userId],
+            set: {
+              optionId,
+            },
           })
           .returning()
       ).at(0) ?? null

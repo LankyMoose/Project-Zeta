@@ -42,6 +42,7 @@ globalThis.fetch = async (
     if (typeof input === "string" && input.startsWith("/")) {
       input = `http://localhost:${port}${input}`
     }
+
     return await _fetch(input, init)
   } catch (error) {
     console.error(error)

@@ -7,7 +7,7 @@ import { PollCard } from "./PollCard"
 export const PollList = () => {
   return (
     <div className="list-container">
-      <Suspense promise={getPolls} cache prefetch:defer>
+      <Suspense promise={getPolls} cache>
         {(loading: boolean, items: PollData[]) => {
           if (loading) return <i className="text-muted text-lg">Loading...</i>
           return (

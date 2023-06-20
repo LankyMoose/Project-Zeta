@@ -110,14 +110,14 @@ export const PollCreator = () => {
       })
       console.log("handleSubmit", res)
       addNotification({
-        type: NotificationType.SUCCESS,
+        type: "success",
         text: "Poll created successfully",
       })
       resetForm()
       modalOpen.value = false
     } catch (error) {
       addNotification({
-        type: NotificationType.ERROR,
+        type: "error",
         text: error instanceof Error ? error.message : "Something went wrong",
       })
     }
