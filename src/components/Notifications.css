@@ -19,16 +19,22 @@
   text-shadow: 0 -1px rgba(0, 0, 0, .15);
 }
 
+@media (prefers-color-scheme: light) {
+  .notification {
+    color: #FFF;
+  }
+}
+
 .notification.info {
   background-color: #436fa4;
 }
 
 .notification.error {
-  background-color: #832e2e;
+  background-color: #993333;
 }
 
 .notification.success {
-  background-color: #236e2c;
+  background-color: #288233;
 }
 
 .notification.warning {

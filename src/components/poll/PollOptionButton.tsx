@@ -5,6 +5,7 @@ import { vote } from "../../client/actions/polls"
 import { addNotification } from "../Notifications"
 import { LiveSocket } from "../../client/liveSocket"
 import { PollData } from "../../types/polls"
+import { userStore } from "../../state"
 
 const getTotalVotes = (pollData: PollData) => {
   let totalVotes = 0
@@ -28,6 +29,11 @@ export const PollOptionButton = (props: {
   const state = Cinnabun.createSignal(props)
 
   const voteForOption = async (id: string) => {
+    if (!userStore.value)
+      return addNotification({
+        text: "You must be logged in to vote",
+        type: "error",
+      })
     const res = await vote(props.pollData.poll.id, id)
     addNotification({
       text: res ? "Voted!" : "Failed to vote",

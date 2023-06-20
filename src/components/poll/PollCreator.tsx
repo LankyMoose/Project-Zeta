@@ -45,7 +45,11 @@ const Options = () => (
   <div>
     <h4 className="m-0">Options</h4>
     <div className="flex flex-column gap">
-      <ul className="option-list">
+      <ul
+        className="option-list"
+        watch={options}
+        bind:visible={() => options.value.length > 0}
+      >
         <Cinnabun.For
           each={options}
           template={(item) => {
@@ -65,6 +69,7 @@ const Options = () => (
         />
       </ul>
     </div>
+    <br />
     <div className="flex gap">
       <KeyboardListener keys={["Enter"]} onCapture={addOption}>
         <input

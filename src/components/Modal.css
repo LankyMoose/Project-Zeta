@@ -34,6 +34,13 @@
   background-color: rgba(0,0,0,.15);
 }
 
+@media (prefers-color-scheme: light) {
+  .modal-body {
+    background-color: rgba(0, 0, 0, .05);
+  }
+}
+
+
 .modal-footer {
   padding: 1rem;
   border-top: 1px solid var(--border);

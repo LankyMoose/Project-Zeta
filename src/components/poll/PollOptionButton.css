@@ -2,8 +2,7 @@
   padding: .5rem;
   border: 0;
   cursor: pointer;
-  /* border-radius: .25rem; */
-  background-color: rgba(var(--primary-rgb), .5);
+  background-color: rgba(var(--primary-rgb), .75);
   color: #fff;
   text-shadow: 0 0 1rem rgba(0, 0, 0, .5);
   position: relative;
@@ -27,4 +26,5 @@
 }
 .poll-option span {
   position: relative;
+  text-shadow: 0 -1px rgba(0, 0, 0, .15);
 }
