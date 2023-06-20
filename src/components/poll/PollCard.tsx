@@ -1,6 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { PollData } from "../../types/polls"
 import { PollOptionButton } from "./PollOptionButton"
+import { getTotalVotes } from "./utils"
 //import { userStore } from "../../state"
 
 export const PollCard = (props: PollData) => {
@@ -23,6 +24,11 @@ export const PollCard = (props: PollData) => {
             <PollOptionButton option={option} pollData={props} />
           )}
         />
+      </div>
+      <div>
+        <span className="text-muted">
+          Total votes: {() => getTotalVotes(props)}
+        </span>
       </div>
     </div>
   )

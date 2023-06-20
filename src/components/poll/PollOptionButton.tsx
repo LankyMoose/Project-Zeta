@@ -6,16 +6,8 @@ import { addNotification } from "../Notifications"
 import { LiveSocket } from "../../client/liveSocket"
 import { PollData } from "../../types/polls"
 import { userStore } from "../../state"
+import { getTotalVotes } from "./utils"
 
-const getTotalVotes = (pollData: PollData) => {
-  let totalVotes = 0
-  for (const option of pollData.options) {
-    totalVotes += parseInt(
-      pollData.voteCounts[option.id]?.count.toString() || "0"
-    )
-  }
-  return totalVotes
-}
 const getPercent = (pollData: PollData, votes: number) => {
   const totalVotes = getTotalVotes(pollData)
   if (totalVotes === 0) return 0
