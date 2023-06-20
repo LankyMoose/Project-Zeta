@@ -4,7 +4,6 @@ import {
   NewPoll,
   Poll,
   PollOption,
-  PollVote,
   pollOptions,
   pollVotes,
   polls,

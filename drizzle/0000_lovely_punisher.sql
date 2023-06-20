@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS "poll" (
 );
 
 CREATE TABLE IF NOT EXISTS "user_auth" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"email" varchar(80) NOT NULL,
 	"user_id" uuid NOT NULL,
 	"provider" varchar(80) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS "user_auth" (
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" varchar(80) NOT NULL,
-	"created_at" date DEFAULT now(),
+	"created_at" timestamp NOT NULL DEFAULT now() ,
 	"disabled" boolean DEFAULT false,
 	"avatar_url" varchar(255)
 );

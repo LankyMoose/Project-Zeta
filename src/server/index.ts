@@ -139,7 +139,6 @@ app.get("/login/google/callback", async function (request, reply) {
       provider: "google",
       providerId: id,
       userId: user.id,
-      id: 0,
     })
   }
 

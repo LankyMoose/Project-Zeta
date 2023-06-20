@@ -1,9 +1,7 @@
 import {
   boolean,
-  date,
   index,
   pgTable,
-  serial,
   varchar,
   uuid,
   timestamp,
@@ -15,7 +13,7 @@ export const users = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: varchar("username", { length: 80 }).notNull(),
-    createdAt: date("created_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow(),
     disabled: boolean("disabled").default(false),
     avatarUrl: varchar("avatar_url", { length: 255 }),
   },
@@ -32,7 +30,7 @@ export type NewUser = InferModel<typeof users, "insert">
 export const userAuths = pgTable(
   "user_auth",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     email: varchar("email", { length: 80 }).notNull(),
     userId: uuid("user_id")
       .notNull()

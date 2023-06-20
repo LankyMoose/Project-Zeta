@@ -6,7 +6,7 @@ import { userStore, isAuthenticated } from "../../state"
 import { createPoll } from "../../client/actions/polls"
 import { KeyboardListener } from "cinnabun/listeners"
 import "./PollCreator.css"
-import { NotificationType, addNotification } from "../Notifications"
+import { addNotification } from "../Notifications"
 
 const modalOpen = Cinnabun.createSignal(false)
 const formState = Cinnabun.createSignal<{
