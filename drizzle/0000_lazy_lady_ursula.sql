@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "poll_option" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"poll_id" uuid NOT NULL,
-	"desc" varchar(255) NOT NULL
+	"desc" varchar(32) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "poll_vote" (
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS "user_auth" (
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" varchar(80) NOT NULL,
-	"created_at" timestamp NOT NULL DEFAULT now() ,
+	"created_at" timestamp DEFAULT now(),
 	"disabled" boolean DEFAULT false,
 	"avatar_url" varchar(255)
 );
@@ -48,7 +48,7 @@ CREATE INDEX IF NOT EXISTS "user_auth_user_id_idx" ON "user_auth" ("user_id");
 CREATE INDEX IF NOT EXISTS "user_auth_provider_id_idx" ON "user_auth" ("provider_id");
 CREATE INDEX IF NOT EXISTS "user_name_idx" ON "user" ("username");
 DO $$ BEGIN
- ALTER TABLE "poll_option" ADD CONSTRAINT "poll_option_poll_id_poll_id_fk" FOREIGN KEY ("poll_id") REFERENCES "poll"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "poll_option" ADD CONSTRAINT "poll_option_poll_id_poll_id_fk" FOREIGN KEY ("poll_id") REFERENCES "poll"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -60,7 +60,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "poll_vote" ADD CONSTRAINT "poll_vote_option_id_poll_option_id_fk" FOREIGN KEY ("option_id") REFERENCES "poll_option"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "poll_vote" ADD CONSTRAINT "poll_vote_option_id_poll_option_id_fk" FOREIGN KEY ("option_id") REFERENCES "poll_option"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

@@ -79,7 +79,9 @@ export const pollOptions = pgTable(
     id: uuid("id").primaryKey().defaultRandom().notNull(),
     pollId: uuid("poll_id")
       .notNull()
-      .references(() => polls.id),
+      .references(() => polls.id, {
+        onDelete: "cascade",
+      }),
     desc: varchar("desc", { length: 32 }).notNull(),
   },
   (table) => {
@@ -98,10 +100,14 @@ export const pollVotes = pgTable(
     id: uuid("id").primaryKey().defaultRandom().notNull(),
     pollId: uuid("poll_id")
       .notNull()
-      .references(() => polls.id),
+      .references(() => polls.id, {
+        onDelete: "cascade",
+      }),
     optionId: uuid("option_id")
       .notNull()
-      .references(() => pollOptions.id),
+      .references(() => pollOptions.id, {
+        onDelete: "cascade",
+      }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id),

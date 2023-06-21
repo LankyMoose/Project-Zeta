@@ -1,5 +1,5 @@
 export const pollValidation = {
-  minPollDescLength: 24,
+  minPollDescLength: 6,
   maxPollDescLength: 255,
   minPollOptions: 2,
   minPollOptionDescLength: 1,

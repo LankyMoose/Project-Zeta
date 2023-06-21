@@ -50,6 +50,10 @@ export const PollCard = (props: PollData) => {
 
       polls.value = polls.value.filter((poll) => poll.poll.id !== props.poll.id)
       polls.notify()
+      addNotification({
+        text: "Deleted",
+        type: "success",
+      })
     } catch (error) {
       addNotification({
         text: "Error",

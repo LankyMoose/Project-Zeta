@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "1eda660e-b3b0-4edb-93cd-dc953e5dcadb",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "989659c4-d01a-4509-a99a-35c89b5c4ce8",
+  "prevId": "1eda660e-b3b0-4edb-93cd-dc953e5dcadb",
   "tables": {
     "poll_option": {
       "name": "poll_option",
@@ -118,7 +118,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "poll_vote_option_id_poll_option_id_fk": {

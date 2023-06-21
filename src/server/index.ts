@@ -91,7 +91,7 @@ app.register(oauthPlugin, {
   callbackUri: "http://localhost:3000/login/google/callback",
 })
 
-app.setErrorHandler(function (error, request, reply) {
+app.setErrorHandler(function (error, _, reply) {
   // Log error
   this.log.error(error)
   // Send error response
