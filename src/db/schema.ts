@@ -80,7 +80,7 @@ export const pollOptions = pgTable(
     pollId: uuid("poll_id")
       .notNull()
       .references(() => polls.id),
-    desc: varchar("desc", { length: 255 }).notNull(),
+    desc: varchar("desc", { length: 32 }).notNull(),
   },
   (table) => {
     return {

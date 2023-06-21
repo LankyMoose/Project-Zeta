@@ -8,6 +8,7 @@ import { KeyboardListener } from "cinnabun/listeners"
 import "./PollCreator.css"
 import { addNotification } from "../Notifications"
 import { EllipsisLoader } from "../loaders/Ellipsis"
+import { pollValidation } from "../../db/validation"
 
 const loading = Cinnabun.createSignal(false)
 const modalOpen = Cinnabun.createSignal(false)
@@ -142,10 +143,11 @@ export const PollCreator = () => {
     formState.notify()
   }
 
-  const isFormInvalid = () => {
-    const { desc } = formState.value
-    return !desc || options.value.length < 2
-  }
+  const isFormInvalid = () =>
+    !pollValidation.isPollValid(
+      formState.value.desc,
+      options.value.map((o) => o.value)
+    )
 
   return (
     <div>

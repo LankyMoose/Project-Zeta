@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify"
 import { pollService } from "../services/pollService"
 import { NewPoll } from "../../db/schema"
+import { pollValidation } from "../../db/validation"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/polls", async (req) => {
@@ -19,6 +20,9 @@ export function configurePollRoutes(app: FastifyInstance) {
     "/api/polls",
     async (req) => {
       if (!req.cookies.user_id) throw new Error("Not logged in")
+      if (!pollValidation.isPollValid(req.body.desc, req.body.options)) {
+        throw new Error("Invalid poll")
+      }
 
       const userId = req.cookies.user_id
 
