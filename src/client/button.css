@@ -84,6 +84,10 @@
   background-color: rgba(255, 255, 255, .15);
   z-index: 2;
 }
+.btn.btn-secondary.hover-animate span {
+  transition: color .25s ease-in-out;
+}
+
 .btn:not(:disabled).hover-animate:hover::after,
 .btn:not(:disabled).hover-animate:active::after, 
 .btn:not(:disabled).hover-animate:focus::after {
@@ -97,9 +101,7 @@
   opacity: 1;
 }
 
-.btn.btn-secondary.hover-animate span {
-  transition: color .25s ease-in-out;
-}
+
 .btn.btn-secondary.hover-animate:after {
   background-color: var(--primary);
 }

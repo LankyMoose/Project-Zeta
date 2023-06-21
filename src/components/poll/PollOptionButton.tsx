@@ -26,6 +26,32 @@ export const PollOptionButton = (props: {
         text: "You must be logged in to vote",
         type: "error",
       })
+    const polls = cb.getRuntimeService(LiveSocket).polls
+    const pollData = polls.value.find(
+      (pollData) => pollData.poll.id === props.pollData.poll.id
+    )
+    // perform optimistic update
+    if (pollData) {
+      let matched = false
+      for (const [k, v] of Object.entries(pollData.voteCounts)) {
+        if (k === id) {
+          matched = true
+          if (v.hasVoted) return
+          v.count++
+          v.hasVoted = true
+        } else if (v.hasVoted) {
+          v.hasVoted = false
+          v.count--
+        }
+      }
+      if (!matched) {
+        pollData.voteCounts[id] = {
+          count: 1,
+          hasVoted: true,
+        }
+      }
+      polls.notify()
+    }
     const res = await vote(props.pollData.poll.id, id)
     addNotification({
       text: res ? "Voted!" : "Failed to vote",
