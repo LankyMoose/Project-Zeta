@@ -88,7 +88,10 @@ export const PollCard = (props: PollData) => {
       </div>
       {props.poll.ownerId === userStore.value?.userId ? (
         <div className="card-footer">
-          <Button onclick={handleDelete} className="btn btn-danger">
+          <Button
+            onclick={handleDelete}
+            className="btn btn-danger hover-animate"
+          >
             Delete
           </Button>
         </div>
