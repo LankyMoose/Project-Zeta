@@ -7,9 +7,13 @@ type TypedMessage = {
   data?: any
 }
 
+type RealTimePollData = PollData & { loading?: boolean }
+
 export class LiveSocket {
   socket: any
-  public polls: Signal<PollData[]> = createSignal([] as PollData[])
+  public polls: Signal<RealTimePollData[]> = createSignal(
+    [] as RealTimePollData[]
+  )
   constructor(url: string) {
     this.socket = new WebSocket(url)
     this.socket.onmessage = (msg: any) => {
