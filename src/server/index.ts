@@ -91,6 +91,13 @@ app.register(oauthPlugin, {
   callbackUri: "http://localhost:3000/login/google/callback",
 })
 
+app.setErrorHandler(function (error, request, reply) {
+  // Log error
+  this.log.error(error)
+  // Send error response
+  reply.status(500).send({ ok: false })
+})
+
 const loadUserInfo = async (reqOrToken: FastifyRequest | string) => {
   const tkn =
     typeof reqOrToken === "string"

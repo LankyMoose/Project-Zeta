@@ -216,4 +216,16 @@ export const pollService = {
     const res = await pollVoteCounts(userId).where(eq(pollVotes.pollId, pollId))
     return aggrigateVotes(res)
   },
+
+  async delete(pollId: string, userId: string) {
+    try {
+      return await db
+        .delete(polls)
+        .where(and(eq(polls.id, pollId), eq(polls.ownerId, userId)))
+        .returning()
+    } catch (error) {
+      console.error(error)
+      return []
+    }
+  },
 }

@@ -58,4 +58,28 @@ export function configurePollRoutes(app: FastifyInstance) {
       return res
     }
   )
+
+  app.delete<{ Params: { pollId: string } }>(
+    "/api/polls/:pollId",
+    async (req, res) => {
+      if (!req.cookies.user_id) throw new Error("Not logged in")
+      const { pollId } = req.params
+
+      const rows = await pollService.delete(pollId, req.cookies.user_id)
+      if (!rows.length) {
+        throw new Error("Failed to delete poll")
+      }
+      app.websocketServer?.clients.forEach(function each(client: any) {
+        client.send(
+          JSON.stringify({
+            type: "-poll",
+            data: {
+              id: pollId,
+            },
+          })
+        )
+      })
+      res.send(200)
+    }
+  )
 }

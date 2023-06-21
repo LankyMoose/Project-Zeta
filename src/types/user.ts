@@ -1,5 +1,5 @@
 export type PublicUser = {
   name: string
-  avatarUrl: string
-  id: string
+  picture: string
+  userId: string
 }

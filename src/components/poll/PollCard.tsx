@@ -4,9 +4,14 @@ import { PollData } from "../../types/polls"
 import { PollOptionButton } from "./PollOptionButton"
 import { getTotalVotes } from "./utils"
 import { LiveSocket } from "../../client/liveSocket"
-//import { userStore } from "../../state"
+import { userStore } from "../../state"
+import { deletePoll } from "../../client/actions/polls"
+import { addNotification } from "../Notifications"
+import { Button } from "../Button"
 
 export const PollCard = (props: PollData) => {
+  const deleting = Cinnabun.createSignal(false)
+
   const state = Cinnabun.createSignal(props)
   const titleText = props.poll.desc
   const titleClass =
@@ -33,12 +38,35 @@ export const PollCard = (props: PollData) => {
     unsub()
   }
 
+  const handleDelete = async () => {
+    try {
+      if (deleting.value) return
+      const polls = cb.getRuntimeService(LiveSocket).polls
+      const poll = polls.value.find((poll) => poll.poll.id === props.poll.id)!
+      if (poll.loading) return
+
+      deleting.value = true
+      await deletePoll(props.poll.id)
+
+      polls.value = polls.value.filter((poll) => poll.poll.id !== props.poll.id)
+      polls.notify()
+    } catch (error) {
+      addNotification({
+        text: "Error",
+        type: "error",
+      })
+      deleting.value = false
+    }
+  }
+
   return (
     <div
       onMounted={onMounted}
       onUnmounted={onUnmounted}
       key={props.poll.id}
       className="card"
+      watch={deleting}
+      bind:visible={() => !deleting.value}
     >
       <h3 className={titleClass}>{titleText}</h3>
       <div style="display:flex; flex-direction:column; gap:1rem">
@@ -54,6 +82,15 @@ export const PollCard = (props: PollData) => {
           Total votes: {() => getTotalVotes(state.value)}
         </small>
       </div>
+      {props.poll.ownerId === userStore.value?.userId ? (
+        <div className="card-footer">
+          <Button onclick={handleDelete} className="btn btn-danger">
+            Delete
+          </Button>
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   )
 }
