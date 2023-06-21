@@ -76,11 +76,11 @@ export const PollOptionButton = (props: {
         }
       }
       polls.notify()
+      addNotification({
+        text: "Failed to vote",
+        type: "error",
+      })
     }
-    addNotification({
-      text: res ? "Voted!" : "Failed to vote",
-      type: res ? "success" : "error",
-    })
   }
 
   let unsub: { (): void } | undefined = undefined
