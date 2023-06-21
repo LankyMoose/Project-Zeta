@@ -1,8 +1,9 @@
 import * as Cinnabun from "cinnabun"
-import { createSignal, Component } from "cinnabun"
+import { Component } from "cinnabun"
 import "./Notifications.css"
 import { generateUUID } from "../utils"
 import { DomInterop } from "cinnabun/src/domInterop"
+import { useTransition } from "cinnabun-transitions"
 
 export const NotificationType = {
   info: "info",
@@ -19,9 +20,7 @@ interface INotification {
   component: NotificationComponent
 }
 
-export const notificationStore = createSignal<Map<string, INotification>>(
-  new Map()
-)
+export const notificationStore: Record<string, INotification> = {}
 
 export const addNotification = ({
   text,
@@ -40,15 +39,33 @@ export const addNotification = ({
     duration,
   }
   notification.component = new NotificationComponent(id, type, text)
-  notificationStore.value.set(notification.id!, notification as INotification)
+  const iNotif = notification as INotification
+  notificationStore[iNotif.id] = iNotif
 }
 
 class NotificationComponent extends Component {
   constructor(id: string, type: keyof typeof NotificationType, text: string) {
+    const { onMounted, onBeforeUnmounted, initialStyle } = useTransition({
+      properties: [
+        {
+          name: "opacity",
+          from: "0",
+          to: "1",
+        },
+        {
+          name: "translate",
+          from: "100%",
+          to: "0%",
+        },
+      ],
+    })
     super("div", {
       ["data-id"]: id,
       className: `notification ${type}`,
       children: [text],
+      style: initialStyle,
+      onMounted,
+      onBeforeUnmounted,
     })
   }
 }
@@ -80,7 +97,7 @@ export class NotificationTrayComponent extends Component {
         child.props.hovered = false
       })
       DomInterop.unRender(child)
-      notificationStore.value.delete(notification.id)
+      delete notificationStore[notification.id]
     }
 
     if (Cinnabun.Cinnabun.isClient) {
@@ -89,7 +106,7 @@ export class NotificationTrayComponent extends Component {
       setInterval(() => {
         const children = this.children as NotificationComponent[]
 
-        for (const [k, notification] of notificationStore.value.entries()) {
+        for (const [k, notification] of Object.entries(notificationStore)) {
           const c = children.find((child) => child.props["data-id"] === k)
           if (!c) {
             addNotification(notification)
@@ -99,10 +116,9 @@ export class NotificationTrayComponent extends Component {
         children.forEach((c) => {
           if (c.props.hovered) return
 
-          const element = c.element,
-            notifId: string = c.props["data-id"],
-            notification: INotification | undefined =
-              notificationStore.value.get(notifId)
+          const notifId: string = c.props["data-id"]
+          const notification: INotification | undefined =
+            notificationStore[notifId]
 
           if (!notification) throw new Error("failed to get notification")
 
@@ -113,7 +129,6 @@ export class NotificationTrayComponent extends Component {
             deleteList.push(notifId)
           } else if (notification.duration < this.animationDuration) {
             if (!c.props.hidden) {
-              element?.classList.add("hide")
               c.props.hidden = true
             }
           }
@@ -123,6 +138,9 @@ export class NotificationTrayComponent extends Component {
           this.children = children.filter(
             (c) => !deleteList.includes(c.props["data-id"])
           )
+          for (const id of deleteList) {
+            delete notificationStore[id]
+          }
         }
       }, tickRateMs)
     }

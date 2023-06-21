@@ -24,11 +24,11 @@ dependencies:
     specifier: ^8.1.0
     version: 8.1.0
   cinnabun:
-    specifier: ^0.1.38
-    version: 0.1.38
+    specifier: ^0.1.39
+    version: 0.1.39
   cinnabun-transitions:
-    specifier: ^1.0.1
-    version: 1.0.1
+    specifier: ^1.0.3
+    version: 1.0.3
   dotenv:
     specifier: ^16.3.0
     version: 16.3.0
@@ -527,14 +527,14 @@ packages:
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
     dev: true
 
-  /cinnabun-transitions@1.0.1:
-    resolution: {integrity: sha512-6zAvYxoVijX5fgKc/FQzozDjr6/6frIcQIWHYPL2bq5+mb4I+d5koeR3E0JaRFWdhtVCNTMu5tsZR+6HrVd0XA==}
+  /cinnabun-transitions@1.0.3:
+    resolution: {integrity: sha512-AJqUQXb+3956hFplR4+5AGXdBtekcMC3+oGkIWXRRIIotj1T/psybCry/Ip9Mz6CyIZVE+IVdwAUTbc+HYLtpg==}
     dependencies:
-      cinnabun: 0.1.38
+      cinnabun: 0.1.39
     dev: false
 
-  /cinnabun@0.1.38:
-    resolution: {integrity: sha512-2wyAOgsPQxMat4iprVHWe19OaVQaJ780ET4pnzuEAE0MHV5xFVonfmtz1IWzupr4Q4SJPbzWuywCzmL8zoCFGg==}
+  /cinnabun@0.1.39:
+    resolution: {integrity: sha512-pwwjuucFjwH0emDERyHbjNgLqB4druMkX4cUrpEEpgOvxgY335k8giFZSm7WLRTpgsFtz6eC4GyesAyQ2fO01w==}
     dev: false
 
   /cli-color@2.0.3:
