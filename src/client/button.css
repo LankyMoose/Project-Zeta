@@ -30,6 +30,14 @@
 .btn.btn-primary {
   background-color: var(--primary);
 }
+.btn.btn-secondary {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+.btn.btn-secondary:disabled * {
+  color: var(--primary);
+}
 .btn.btn-danger {
   background-color: var(--danger);
 }
@@ -46,6 +54,15 @@
   transition: opacity .25s ease-in-out, width .25s ease-in-out;
   background-color: rgba(255,255,255,.15);
   z-index: 1;
+}
+.btn.btn-secondary.hover-animate span {
+  transition: color .25s ease-in-out;
+}
+.btn.btn-secondary.hover-animate:after {
+  background-color: var(--primary);
+}
+.btn.btn-secondary.hover-animate:hover span {
+  color: #fff;
 }
 
 .btn:not(:disabled).hover-animate:hover::after {

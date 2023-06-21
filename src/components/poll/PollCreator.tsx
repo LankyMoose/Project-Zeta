@@ -74,7 +74,7 @@ const Options = () => (
         />
       </ul>
     </div>
-    <br />
+    <br watch={options} bind:visible={() => options.value.length > 0} />
     <div className="flex gap">
       <KeyboardListener keys={["Enter"]} onCapture={addOption}>
         <input
@@ -161,7 +161,6 @@ export const PollCreator = () => {
         <Modal
           toggle={() => (modalOpen.value = !modalOpen.value)}
           visible={modalOpen}
-          onclose={resetForm}
         >
           <form disabled onsubmit={handleSubmit}>
             <div className="modal-header">
@@ -177,10 +176,22 @@ export const PollCreator = () => {
                 placeholder="Title"
                 onMounted={(self) => self.element?.focus()}
               />
-              <hr className="w-100" style="opacity:.3" />
+              <hr className="w-100" style="opacity:.15" />
               <Options />
             </div>
             <div className="modal-footer">
+              <Button
+                className="btn btn-secondary hover-animate text-rg"
+                type="button"
+                watch={[formState, options, loading]}
+                bind:disabled={() => loading.value}
+                onclick={() => {
+                  modalOpen.value = false
+                  resetForm()
+                }}
+              >
+                Cancel
+              </Button>
               <Button
                 className="btn btn-primary hover-animate text-rg"
                 watch={[formState, options, loading]}

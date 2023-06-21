@@ -3,23 +3,16 @@ ul.option-list {
     padding: 0;
     margin: 0;
     width: 100%;
-    background: rgba(0, 0, 0, .075);
     padding: 0.25rem;
 }
-@media (prefers-color-scheme: light) {
-    ul.option-list {
-        background: rgba(0, 0, 0, .035);
-    }
-}
+
 
 .option-list li {
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid var(--border);
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, .025);
+    border-bottom: 1px solid rgba(var(--primary-rgb), .25);
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.option-list li:last-child {
-    border-bottom: none;
+    margin-bottom: .5rem;
 }

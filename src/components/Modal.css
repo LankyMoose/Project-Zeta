@@ -12,13 +12,19 @@
 }
 
 .modal {
-  background-color: var(--content-area);
+  background-color: var(--dark);
   overflow: hidden;
   margin: auto;
   flex-basis: 350px;
+  --padding: 1.25rem 1.5rem;
+}
+@media (prefers-color-scheme: light) {
+  .modal {
+    background-color: #fefefe;
+  }
 }
 .modal-header {
-  padding: 1rem;
+  padding: var(--padding);
   border-bottom: 1px solid var(--border);
 }
 
@@ -30,21 +36,19 @@
 }
 
 .modal-body {
-  padding: 1rem;
-  background-color: rgba(0,0,0,.15);
+  padding: var(--padding);
+  background-color: rgba(0, 0, 0, .05);
 }
-
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   .modal-body {
-    background-color: rgba(0, 0, 0, .15);
+    background-color: rgba(0, 0, 0, .025);
   }
 }
 
-
 .modal-footer {
-  padding: 1rem;
+  padding: var(--padding);
   border-top: 1px solid var(--border);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 1rem;
 }
