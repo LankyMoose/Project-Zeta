@@ -31,6 +31,7 @@ export const PollOptionButton = (props: {
       (pollData) => pollData.poll.id === props.pollData.poll.id
     )
     // perform optimistic update
+    let prevVoteId: string | undefined = undefined
     if (pollData) {
       let matched = false
       for (const [k, v] of Object.entries(pollData.voteCounts)) {
@@ -40,6 +41,7 @@ export const PollOptionButton = (props: {
           v.count++
           v.hasVoted = true
         } else if (v.hasVoted) {
+          prevVoteId = k
           v.hasVoted = false
           v.count--
         }
@@ -53,6 +55,29 @@ export const PollOptionButton = (props: {
       polls.notify()
     }
     const res = await vote(props.pollData.poll.id, id)
+    if (!res) {
+      // revert optimistic update
+      if (pollData) {
+        for (const [k, v] of Object.entries(pollData.voteCounts)) {
+          if (k === id) {
+            v.count--
+            v.hasVoted = false
+          }
+        }
+        if (prevVoteId) {
+          if (pollData.voteCounts[prevVoteId]) {
+            pollData.voteCounts[prevVoteId].count++
+            pollData.voteCounts[prevVoteId].hasVoted = true
+          } else {
+            pollData.voteCounts[prevVoteId] = {
+              count: 1,
+              hasVoted: true,
+            }
+          }
+        }
+        polls.notify()
+      }
+    }
     addNotification({
       text: res ? "Voted!" : "Failed to vote",
       type: res ? "success" : "error",

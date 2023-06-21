@@ -59,7 +59,7 @@ export const vote = async (
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   })
-  if (!res.ok) throw new Error("Failed to vote")
+  if (!res.ok) return null
 
   return await res.json()
 }
