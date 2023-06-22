@@ -41,6 +41,12 @@ export const PollCard = (props: PollData) => {
   const handleDelete = async () => {
     try {
       if (deleting.value) return
+      if (
+        !confirm(
+          "Are you really sure you want to delete this poll? This can't be undone!"
+        )
+      )
+        return
       const polls = cb.getRuntimeService(LiveSocket).polls
       const poll = polls.value.find((poll) => poll.poll.id === props.poll.id)!
       if (poll.loading) return
