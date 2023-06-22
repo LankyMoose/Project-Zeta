@@ -9,6 +9,8 @@ export const env = {
     password: process.env.DB_PASSWORD,
   },
   port: process.env.PORT || 3000,
+  url: process.env.URL || "",
+  domain: process.env.DOMAIN || "",
   auth0: {
     domain: process.env.AUTH0_DOMAIN,
     clientId: process.env.AUTH0_CLIENT_ID,

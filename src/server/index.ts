@@ -23,7 +23,7 @@ import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
 import { generateUUID } from "../utils.js"
 
-const port: number = parseInt(process.env.PORT ?? "3000")
+const baseUrl = `${env.url || `http://localhost:${env.port}`}`
 
 const _fetch = globalThis.fetch
 globalThis.fetch = async (
@@ -32,7 +32,7 @@ globalThis.fetch = async (
 ) => {
   try {
     if (typeof input === "string" && input.startsWith("/")) {
-      input = `http://localhost:${port}${input}`
+      input = `${baseUrl}${input}`
     }
 
     return await _fetch(input, init)
@@ -102,7 +102,7 @@ app.register(oauthPlugin, {
   // register a fastify url to start the redirect flow
   startRedirectPath: "/login/google",
   // facebook redirect here after the user login
-  callbackUri: "http://localhost:3000/login/google/callback",
+  callbackUri: `${baseUrl}/login/google/callback`,
 })
 
 app.setErrorHandler(function (error, _, reply) {
@@ -167,7 +167,7 @@ app.get("/login/google/callback", async function (request, reply) {
   //clearCookies(reply)
 
   const cookieSettings: Partial<CookieSerializeOptions> = {
-    domain: "localhost",
+    domain: env.domain || "localhost",
     path: "/",
     sameSite: "lax",
     secure: !isDev,
@@ -238,7 +238,7 @@ app.get("/*", async (req, res) => {
   res.raw.end("</html>")
 })
 
-app.listen({ port }, async (err) => {
+app.listen({ port: parseInt(env.port.toString()) }, async (err) => {
   if (err) {
     app.log.error(err)
     process.exit(1)
@@ -247,7 +247,7 @@ app.listen({ port }, async (err) => {
   log(
     "FgGreen",
     `
-Server is listening on port ${port} - http://localhost:3000`
+Server is running at ${baseUrl}`
   )
 
   if (isDev) {
