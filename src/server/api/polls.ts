@@ -3,6 +3,7 @@ import { pollService } from "../services/pollService"
 import { NewPoll } from "../../db/schema"
 import { pollValidation } from "../../db/validation"
 import { broadcastPollUpdate, subscribeToPolls } from "../socket"
+import { SocketStream } from "@fastify/websocket"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/polls", async (req) => {
@@ -38,7 +39,10 @@ export function configurePollRoutes(app: FastifyInstance) {
         req.body as NewPoll & { options: string[] },
         userId
       )
-      broadcastPollUpdate(res.poll.id, { type: "+poll", data: res })
+      // broadcast to everyone - should probably be applying filter/pagination strategy
+      app.websocketServer?.clients.forEach((client: any) => {
+        client.send(JSON.stringify({ type: "+poll", data: res }))
+      })
       return res
     }
   )
