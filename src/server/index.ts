@@ -23,7 +23,9 @@ import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
 import { generateUUID } from "../utils.js"
 
-const baseUrl = `${env.url + env.port || `http://localhost:${env.port}`}`
+const baseUrl = `${
+  env.url ? env.url + ":" + env.port : `http://localhost:${env.port}`
+}`
 
 const _fetch = globalThis.fetch
 globalThis.fetch = async (
@@ -239,38 +241,41 @@ app.get("/*", async (req, res) => {
   res.raw.end("</html>")
 })
 
-app.listen({ port: parseInt(env.port.toString()) }, async (err) => {
-  if (err) {
-    app.log.error(err)
-    process.exit(1)
-  }
+app.listen(
+  { port: parseInt(env.port.toString()), host: "0.0.0.0" },
+  async (err) => {
+    if (err) {
+      app.log.error(err)
+      process.exit(1)
+    }
 
-  log(
-    "FgGreen",
-    `
+    log(
+      "FgGreen",
+      `
 Server is running at ${baseUrl}`
-  )
+    )
 
-  if (isDev) {
-    try {
-      log("Dim", "  evaluating application... 🔍")
-      await SSR.serverBake(Document(App), {
-        cinnabunInstance: new Cinnabun(),
-        stream: null,
-      })
-      log("Dim", "  good to go! ✅")
-    } catch (error) {
-      if ("message" in (error as Error)) {
-        const err = error as Error
-        log(
-          "FgRed",
-          `
+    if (isDev) {
+      try {
+        log("Dim", "  evaluating application... 🔍")
+        await SSR.serverBake(Document(App), {
+          cinnabunInstance: new Cinnabun(),
+          stream: null,
+        })
+        log("Dim", "  good to go! ✅")
+      } catch (error) {
+        if ("message" in (error as Error)) {
+          const err = error as Error
+          log(
+            "FgRed",
+            `
 Failed to evaluate application.
 ${err.stack}
 `
-        )
-        process.exit(96)
+          )
+          process.exit(96)
+        }
       }
     }
   }
-})
+)
