@@ -71,7 +71,6 @@ app.register(websocket, {
 })
 
 app.addHook("onRequest", async (req, res) => {
-  console.log("got req", req.url)
   if (!req.cookies["user_anon_id"]) {
     res.setCookie("user_anon_id", generateUUID(), {
       domain: "localhost",
