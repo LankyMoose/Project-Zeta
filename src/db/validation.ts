@@ -1,12 +1,10 @@
 export const pollValidation = {
-  minPollDescLength: 6,
+  minPollDescLength: 1,
   maxPollDescLength: 255,
   minPollOptions: 2,
   minPollOptionDescLength: 1,
   maxPollOptionDescLength: 32,
   isPollValid: (desc: string, options: string[]): boolean => {
-    // rewrite the below with early returns
-
     if (
       desc.length < pollValidation.minPollDescLength ||
       desc.length > pollValidation.maxPollDescLength
@@ -17,11 +15,15 @@ export const pollValidation = {
     if (options.length < pollValidation.minPollOptions) {
       return false
     }
-
-    return options.every(
-      (option) =>
-        option.length > pollValidation.minPollOptionDescLength &&
-        option.length <= pollValidation.maxPollOptionDescLength
-    )
+    if (
+      options.some(
+        (option) =>
+          option.length < pollValidation.minPollOptionDescLength ||
+          option.length > pollValidation.maxPollOptionDescLength
+      )
+    ) {
+      return false
+    }
+    return true
   },
 }
