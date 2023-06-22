@@ -23,7 +23,7 @@ import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
 import { generateUUID } from "../utils.js"
 
-const baseUrl = `${env.url || `http://localhost:${env.port}`}`
+const baseUrl = `${env.url + env.port || `http://localhost:${env.port}`}`
 
 const _fetch = globalThis.fetch
 globalThis.fetch = async (
