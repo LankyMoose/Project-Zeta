@@ -3,7 +3,6 @@ import { pollService } from "../services/pollService"
 import { NewPoll } from "../../db/schema"
 import { pollValidation } from "../../db/validation"
 import { broadcastPollUpdate, subscribeToPolls } from "../socket"
-import { SocketStream } from "@fastify/websocket"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/polls", async (req) => {
