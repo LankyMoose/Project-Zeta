@@ -99,9 +99,6 @@ export const PollCard = (props: PollData) => {
           <IconButton type="button" onclick={handleDelete}>
             <Icons.TrashIcon color="#aaa" color:hover="var(--danger)" />
           </IconButton>
-          <IconButton type="button">
-            <Icons.EditIcon color="#aaa" color:hover="var(--primary)" />
-          </IconButton>
         </div>
       ) : (
         <></>
