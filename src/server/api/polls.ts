@@ -12,7 +12,7 @@ export function configurePollRoutes(app: FastifyInstance) {
     )
 
     subscribeToPolls(
-      req.raw.socket,
+      req,
       res.map((pollData) => pollData.poll.id)
     )
 

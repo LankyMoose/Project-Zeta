@@ -21,6 +21,7 @@ import { env } from "../env.js"
 import { authService } from "./services/authService.js"
 import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
+import { generateUUID } from "../utils.js"
 
 const port: number = parseInt(process.env.PORT ?? "3000")
 
@@ -53,6 +54,7 @@ declare module "fastify" {
 }
 
 const app = fastify()
+
 app.register(cookie)
 app.register(compress, { global: false })
 app.register(fStatic, {
@@ -64,6 +66,18 @@ app.register(fStatic, {
 })
 app.register(websocket, {
   options: { maxPayload: 1024 },
+})
+
+app.addHook("onRequest", async (req, res) => {
+  if (!req.cookies["user_anon_id"]) {
+    res.setCookie("user_anon_id", generateUUID(), {
+      domain: "localhost",
+      path: "/",
+      sameSite: "lax",
+      httpOnly: true,
+      secure: !isDev,
+    })
+  }
 })
 
 app.register(async function () {
@@ -176,14 +190,14 @@ app.get("/login/google/callback", async function (request, reply) {
   reply.redirect("/")
 })
 
-function clearCookies(reply: FastifyReply) {
+function clearAuthCookies(reply: FastifyReply) {
   reply.clearCookie("user")
   reply.clearCookie("user_id")
   reply.clearCookie("access_token")
 }
 
 app.get("/logout", async function (_, reply) {
-  clearCookies(reply)
+  clearAuthCookies(reply)
   reply.redirect("/")
 })
 

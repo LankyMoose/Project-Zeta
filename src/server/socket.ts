@@ -1,42 +1,45 @@
-import { FastifyRequest, RawRequestDefaultExpression } from "fastify"
+import { FastifyRequest } from "fastify"
 import { SocketStream } from "@fastify/websocket"
 
-type Socket = RawRequestDefaultExpression["socket"]
+type PollID = string
 
-const userPollSubscriptions: Record<string, UserConn[]> = {}
+const pollSubscriptions: Record<PollID, UserConn[]> = {}
 type UserConn = {
   stream: SocketStream
-  socket: Socket
+  anonId: string
 }
 const userConnections: UserConn[] = []
-const findUserConnBySocket = (socket: Socket) => {
-  return userConnections.find((conn) => conn.socket === socket)
+const findUserConnByReq = (req: FastifyRequest) => {
+  return userConnections.find(
+    (conn) => conn.anonId === req.cookies["user_anon_id"]
+  )
 }
-export const subscribeToPolls = (conn: Socket, pollIds: string[]) => {
-  const userConn = findUserConnBySocket(conn)
+export const subscribeToPolls = (req: FastifyRequest, pollIds: string[]) => {
+  const userConn = findUserConnByReq(req)
   if (!userConn) return
   pollIds.forEach((pollId) => {
-    if (!userPollSubscriptions[pollId]) {
-      userPollSubscriptions[pollId] = []
+    if (!pollSubscriptions[pollId]) {
+      pollSubscriptions[pollId] = []
     }
-    userPollSubscriptions[pollId].push(userConn)
+    pollSubscriptions[pollId].push(userConn)
   })
 }
 
 export const broadcastPollUpdate = (pollId: string, pollUpdateMessage: any) => {
-  const pollSubs = userPollSubscriptions[pollId]
+  const pollSubs = pollSubscriptions[pollId]
   if (!pollSubs) return
   pollSubs.forEach((conn) => {
     conn.stream.socket.send(JSON.stringify(pollUpdateMessage))
   })
 }
 
-export const socketHandler = (conn: SocketStream, _req: FastifyRequest) => {
+export const socketHandler = (conn: SocketStream, req: FastifyRequest) => {
   const ref = {
     stream: conn,
-    socket: _req.socket,
+    anonId: req.cookies["user_anon_id"] ?? "",
   }
-  userConnections.push(ref)
+
+  if (ref.anonId) userConnections.push(ref)
 
   conn.setEncoding("utf8")
   conn.on("data", (chunk) => {
@@ -51,7 +54,8 @@ export const socketHandler = (conn: SocketStream, _req: FastifyRequest) => {
   })
   conn.on("close", () => {
     userConnections.splice(userConnections.indexOf(ref), 1)
-    Object.values(userPollSubscriptions).forEach((pollSubs) => {
+    if (!ref.anonId) return
+    Object.values(pollSubscriptions).forEach((pollSubs) => {
       pollSubs.splice(pollSubs.indexOf(ref), 1)
     })
   })
