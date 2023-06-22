@@ -18,6 +18,7 @@ const decodeCookie = (str: string) =>
 const getUserDataFromCookie = (): PublicUser | null => {
   if (!window.document.cookie) return null
   const { user } = decodeCookie(window.document.cookie)
+  if (!user) return null
   const parsed = JSON.parse(user)
   return parsed ?? null
 }
