@@ -1,0 +1,26 @@
+.icon-button {
+  background: transparent;
+  padding: .5rem;
+  line-height: 1rem;
+  border-color: transparent;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background-color: rgba(0, 0, 0, .1);
+  border-color: transparent;
+}
+@media (prefers-color-scheme: light) {
+  .icon-button:hover {
+    background-color: rgba(0, 0, 0, .05);
+  }
+}
+
+.icon-button:hover .stroke {
+  stroke: var(--hover-stroke);
+}
+
+.icon-button:hover .fill {
+  fill: var(--hover-fill);
+}

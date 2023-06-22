@@ -19,6 +19,7 @@ export const PollList = () => {
           (isClient && (polls as Signal<PollData[]>).value.length === 0)
         }
       />
+
       <ul className="card-list">
         <For
           each={isClient ? cb.getRuntimeService(LiveSocket).polls : []}

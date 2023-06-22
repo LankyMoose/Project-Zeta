@@ -22,6 +22,11 @@
   opacity: 1;
   color: var(--light)
 }
+@media (prefers-color-scheme: light) {
+  .btn.btn.btn-secondary:disabled * {
+    color: var(--primary)
+  }
+}
 
 .btn span {
   position: relative;
@@ -39,9 +44,9 @@
   border: 1px solid #eee;
 }
 
-.btn.btn-secondary:hover,
-.btn.btn-secondary:focus,
-.btn.btn-secondary:active {
+.btn:not(:disabled).btn-secondary:hover,
+.btn:not(:disabled).btn-secondary:focus,
+.btn:not(:disabled).btn-secondary:active {
   border-color: var(--primary-light);
 }
 @media (prefers-color-scheme: light) {
@@ -51,9 +56,6 @@
   }
 }
 
-.btn.btn-secondary:disabled * {
-  color: var(--primary);
-}
 .btn.btn-danger {
   background-color: var(--danger);
 }
@@ -94,20 +96,20 @@
   width: 100%;
   opacity: 1;
 }
-.btn.btn-secondary.hover-animate:hover::before,
+/* .btn.btn-secondary.hover-animate:hover::before,
 .btn.btn-secondary.hover-animate:active::before,
 .btn.btn-secondary.hover-animate:focus::before {
   width: 100%;
   opacity: 1;
-}
+} */
 
 
-.btn.btn-secondary.hover-animate:after {
+.btn:not(:disabled).btn-secondary.hover-animate:after {
   background-color: var(--primary);
 }
-.btn.btn-secondary.hover-animate:not(:disabled):hover span,
-.btn.btn-secondary.hover-animate:not(:disabled):active span,
-.btn.btn-secondary.hover-animate:not(:disabled):focus span {
+.btn:not(:disabled).btn-secondary.hover-animate:hover span,
+.btn:not(:disabled).btn-secondary.hover-animate:active span,
+.btn:not(:disabled).btn-secondary.hover-animate:focus span {
   color: #fff;
 }
 

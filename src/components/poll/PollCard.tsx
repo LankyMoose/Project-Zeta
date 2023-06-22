@@ -7,7 +7,8 @@ import { LiveSocket } from "../../client/liveSocket"
 import { userStore } from "../../state"
 import { deletePoll } from "../../client/actions/polls"
 import { addNotification } from "../Notifications"
-import { Button } from "../Button"
+import { IconButton } from "../IconButton"
+import * as Icons from "../icons"
 
 export const PollCard = (props: PollData) => {
   const deleting = Cinnabun.createSignal(false)
@@ -94,12 +95,13 @@ export const PollCard = (props: PollData) => {
       </div>
       {props.poll.ownerId === userStore.value?.userId ? (
         <div className="card-footer">
-          <Button
-            onclick={handleDelete}
-            className="btn btn-danger hover-animate"
-          >
-            Delete
-          </Button>
+          <hr style="opacity: .3" />
+          <IconButton type="button" onclick={handleDelete}>
+            <Icons.TrashIcon color="#aaa" color:hover="var(--danger)" />
+          </IconButton>
+          <IconButton type="button">
+            <Icons.EditIcon color="#aaa" color:hover="var(--primary)" />
+          </IconButton>
         </div>
       ) : (
         <></>

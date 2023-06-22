@@ -150,7 +150,7 @@ export const PollCreator = () => {
     )
 
   return (
-    <div>
+    <>
       <Button
         watch={userStore}
         bind:visible={isAuthenticated}
@@ -212,6 +212,6 @@ export const PollCreator = () => {
           </form>
         </Modal>
       </Portal>
-    </div>
+    </>
   )
 }
