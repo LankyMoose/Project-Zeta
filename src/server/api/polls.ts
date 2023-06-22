@@ -2,13 +2,21 @@ import { FastifyInstance } from "fastify"
 import { pollService } from "../services/pollService"
 import { NewPoll } from "../../db/schema"
 import { pollValidation } from "../../db/validation"
+import { broadcastPollUpdate, subscribeToPolls } from "../socket"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/polls", async (req) => {
-    return await pollService.getPage(
+    const res = await pollService.getPage(
       req.query.page,
       req.cookies.user_id ?? null
     )
+
+    subscribeToPolls(
+      req.raw.socket,
+      res.map((pollData) => pollData.poll.id)
+    )
+
+    return res
   })
 
   app.get<{ Params: { id?: string } }>("/api/polls/:id", async (req) => {
@@ -30,9 +38,7 @@ export function configurePollRoutes(app: FastifyInstance) {
         req.body as NewPoll & { options: string[] },
         userId
       )
-      app.websocketServer?.clients.forEach(function each(client: any) {
-        client.send(JSON.stringify({ type: "+poll", data: res }))
-      })
+      broadcastPollUpdate(res.poll.id, { type: "+poll", data: res })
       return res
     }
   )
@@ -43,16 +49,9 @@ export function configurePollRoutes(app: FastifyInstance) {
       if (!req.cookies.user_id) throw new Error("Not logged in")
       const { pollId, optionId } = req.params
       const res = await pollService.vote(pollId, optionId, req.cookies.user_id)
-      app.websocketServer?.clients.forEach(function each(client: any) {
-        client.send(
-          JSON.stringify({
-            type: "~voteCounts",
-            data: {
-              id: pollId,
-              voteCounts: res,
-            },
-          })
-        )
+      broadcastPollUpdate(pollId, {
+        type: "~voteCounts",
+        data: { id: pollId, voteCounts: res },
       })
 
       return res
@@ -69,16 +68,8 @@ export function configurePollRoutes(app: FastifyInstance) {
       if (!rows.length) {
         throw new Error("Failed to delete poll")
       }
-      app.websocketServer?.clients.forEach(function each(client: any) {
-        client.send(
-          JSON.stringify({
-            type: "-poll",
-            data: {
-              id: pollId,
-            },
-          })
-        )
-      })
+
+      broadcastPollUpdate(pollId, { type: "-poll", data: pollId })
       res.send(200)
     }
   )

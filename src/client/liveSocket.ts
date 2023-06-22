@@ -11,6 +11,7 @@ type RealTimePollData = PollData & { loading?: boolean }
 
 export class LiveSocket {
   socket: any
+  public loading: Signal<boolean> = createSignal(true)
   public polls: Signal<RealTimePollData[]> = createSignal(
     [] as RealTimePollData[]
   )
@@ -37,6 +38,7 @@ export class LiveSocket {
 
   private async load() {
     this.polls.value = await getPolls()
+    this.loading.value = false
   }
 
   private handleMessage(message: TypedMessage) {
@@ -46,7 +48,7 @@ export class LiveSocket {
         this.polls.notify()
         break
 
-      case "~voteCounts":
+      case "~voteCounts": {
         const poll = this.polls.value.find(
           (item) => item.poll.id === message.data.id
         )
@@ -54,6 +56,17 @@ export class LiveSocket {
         poll.voteCounts = message.data.voteCounts as PollVoteCounts
         this.polls.notify()
         break
+      }
+
+      case "~pollUpdate": {
+        let poll = this.polls.value.find(
+          (item) => item.poll.id === message.data.id
+        )
+        if (!poll) return console.error("Poll not found")
+        poll = message.data.pollData as PollData
+        this.polls.notify()
+        break
+      }
 
       case "-poll":
         const idx = this.polls.value.findIndex(

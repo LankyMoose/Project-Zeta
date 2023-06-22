@@ -35,7 +35,6 @@ const aggrigateVotes = (
     {}
   )
 }
-
 export const pollService = {
   pageSize: 100,
 
@@ -195,6 +194,7 @@ export const pollService = {
       voteCounts: {},
     }
   },
+
   async vote(
     pollId: string,
     optionId: string,
