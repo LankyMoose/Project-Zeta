@@ -32,6 +32,10 @@ export const broadcastPollUpdate = (pollId: string, pollUpdateMessage: any) => {
   )
   const pollSubs = pollSubscriptions[pollId]
   if (!pollSubs) return
+  console.log(
+    "broadcasting to",
+    pollSubs.map((uc) => uc.anonId)
+  )
   pollSubs.forEach((conn) => {
     conn.stream.socket.send(JSON.stringify(pollUpdateMessage))
   })

@@ -52,6 +52,7 @@ export class LiveSocket {
         const poll = this.polls.value.find(
           (item) => item.poll.id === message.data.id
         )
+        console.log("received vote counts", message.data, poll)
         if (!poll) return console.error("Poll not found")
         poll.voteCounts = message.data.voteCounts as PollVoteCounts
         this.polls.notify()
