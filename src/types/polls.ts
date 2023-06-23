@@ -1,8 +1,12 @@
+export type PollVoteCountData = {
+  count: number
+  hasVoted: boolean
+}
 export type PollVoteCounts = {
-  [optionId: string]: {
-    count: number
-    hasVoted: boolean
-  }
+  [optionId: string]: PollVoteCountData
+}
+export type AnonPollVoteCounts = {
+  [optionId: string]: Omit<PollVoteCountData, "hasVoted">
 }
 
 export type PollData = {

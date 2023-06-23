@@ -1,5 +1,10 @@
 import { Signal, createSignal } from "cinnabun"
-import { PollData, PollVoteCounts } from "../types/polls"
+import {
+  AnonPollVoteCounts,
+  PollData,
+  PollVoteCountData,
+  PollVoteCounts,
+} from "../types/polls"
 import { getPolls } from "./actions/polls"
 
 type TypedMessage = {
@@ -52,9 +57,28 @@ export class LiveSocket {
         const poll = this.polls.value.find(
           (item) => item.poll.id === message.data.id
         )
-        console.log("received vote counts", message.data, poll)
         if (!poll) return console.error("Poll not found")
-        poll.voteCounts = message.data.voteCounts as PollVoteCounts
+        const counts = message.data.voteCounts as AnonPollVoteCounts
+
+        // update existing & new vote counts
+        Object.entries(counts).forEach(([optionId, voteCountData]) => {
+          if (!poll.voteCounts[optionId])
+            poll.voteCounts[optionId] = {
+              count: 0,
+              hasVoted: false,
+            } as PollVoteCountData
+
+          poll.voteCounts[optionId].count = voteCountData.count
+        })
+
+        // remove vote counts for options that no longer exist
+        Object.entries(poll.voteCounts).forEach(([optionId]) => {
+          if (!counts[optionId]) {
+            poll.voteCounts[optionId].count = 0
+            poll.voteCounts[optionId].hasVoted = false
+          }
+        })
+
         this.polls.notify()
         break
       }

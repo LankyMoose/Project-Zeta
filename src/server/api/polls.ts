@@ -51,7 +51,13 @@ export function configurePollRoutes(app: FastifyInstance) {
     async (req) => {
       if (!req.cookies.user_id) throw new Error("Not logged in")
       const { pollId, optionId } = req.params
-      const res = await pollService.vote(pollId, optionId, req.cookies.user_id)
+      const returnAnonResult = false
+      const res = await pollService.vote(
+        pollId,
+        optionId,
+        req.cookies.user_id,
+        returnAnonResult
+      )
       broadcastPollUpdate(pollId, {
         type: "~voteCounts",
         data: { id: pollId, voteCounts: res },

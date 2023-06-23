@@ -8,7 +8,7 @@ import {
   pollVotes,
   polls,
 } from "../../db/schema"
-import { PollData, PollVoteCounts } from "../../types/polls"
+import { AnonPollVoteCounts, PollData, PollVoteCounts } from "../../types/polls"
 import postgres from "postgres"
 
 const pollVoteCounts = (userId: string | null) =>
@@ -22,13 +22,16 @@ const pollVoteCounts = (userId: string | null) =>
     .groupBy(pollVotes.optionId)
 
 const aggrigateVotes = (
-  voteRows: { optionId: string; count: number; hasVoted: boolean }[]
-) => {
-  return voteRows.reduce<Record<string, { count: number; hasVoted: boolean }>>(
+  voteRows: { optionId: string; count: number; hasVoted: boolean }[],
+  anon = false
+): PollVoteCounts | AnonPollVoteCounts => {
+  return voteRows.reduce<Record<string, { count: number; hasVoted?: boolean }>>(
     (acc, row) => {
       acc[row.optionId] = {
         count: row.count,
-        hasVoted: row.hasVoted,
+      }
+      if (!anon) {
+        acc[row.optionId].hasVoted = row.hasVoted
       }
       return acc
     },
@@ -198,8 +201,9 @@ export const pollService = {
   async vote(
     pollId: string,
     optionId: string,
-    userId: string
-  ): Promise<PollVoteCounts> {
+    userId: string,
+    anon: boolean = false
+  ): Promise<PollVoteCounts | AnonPollVoteCounts> {
     await db
       .insert(pollVotes)
       .values({
@@ -214,7 +218,7 @@ export const pollService = {
         },
       })
     const res = await pollVoteCounts(userId).where(eq(pollVotes.pollId, pollId))
-    return aggrigateVotes(res)
+    return aggrigateVotes(res, anon)
   },
 
   async delete(pollId: string, userId: string) {

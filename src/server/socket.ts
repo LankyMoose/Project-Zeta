@@ -2,53 +2,63 @@ import { FastifyRequest } from "fastify"
 import { SocketStream } from "@fastify/websocket"
 
 type PollID = string
-type ReqID = string
+type AnonID = string
 
-const pollSubscriptions: Record<PollID, ReqID[]> = {}
-type UserConn = {
-  stream: SocketStream
-  reqId: ReqID
-}
-let userConnections: UserConn[] = []
-const findUserConnByReq = (req: FastifyRequest) => {
-  return userConnections.find((uc) => uc.reqId === req.id)
-}
+const pollSubscriptions: Record<PollID, AnonID[]> = {}
+
+const userConns: Map<AnonID, SocketStream[]> = new Map()
+
 export const subscribeToPolls = (req: FastifyRequest, pollIds: string[]) => {
-  const userConn = findUserConnByReq(req)
-  if (!userConn) return
+  const anonId = req.cookies["user_anon_id"]
+  if (!anonId) return
+
   pollIds.forEach((pollId) => {
     if (!pollSubscriptions[pollId]) {
       pollSubscriptions[pollId] = []
     }
-    pollSubscriptions[pollId].push(userConn.reqId)
+    if (pollSubscriptions[pollId].includes(anonId)) return
+    pollSubscriptions[pollId].push(anonId)
   })
 }
-
-const removeUserRef = (reqId: string) => {
-  userConnections = userConnections.filter((uc) => uc.reqId !== reqId)
-  Object.values(pollSubscriptions).forEach((ids) => {
-    ids = ids.filter((id) => id !== reqId)
+const addUserRef = (anonId: string, socket: SocketStream) => {
+  const current = userConns.get(anonId) ?? []
+  if (current.includes(socket)) return
+  current.push(socket)
+  userConns.set(anonId, current)
+}
+const removeUserRef = (anonId: string) => {
+  const current = userConns.get(anonId) ?? []
+  current.forEach((conn) => {
+    conn.socket.close()
   })
+  userConns.delete(anonId)
 }
 
 export const broadcastPollUpdate = (pollId: string, pollUpdateMessage: any) => {
-  console.log(
-    "broadcasting poll update",
-    userConnections.map((uc) => uc.reqId)
-  )
-  const reqIds = pollSubscriptions[pollId]
-  if (!reqIds) return
-  console.log("broadcasting to", reqIds)
-  reqIds.forEach((id) => {
-    const conn = userConnections.find((uc) => uc.reqId === id)?.stream
-    if (!conn || conn.closed) return removeUserRef(id)
-    conn.socket.send(JSON.stringify(pollUpdateMessage))
+  const anonIds = pollSubscriptions[pollId]
+  if (!anonIds || anonIds.length === 0) return
+  console.log("broadcasting poll update to", anonIds, pollUpdateMessage)
+  anonIds.forEach((id) => {
+    const conns = userConns.get(id)
+    if (!conns) return
+    conns.forEach((conn) => {
+      if (conn.socket.readyState !== 1) return
+      if (conn.socket.readyState === 1) {
+        conn.socket.send(JSON.stringify(pollUpdateMessage))
+      }
+      if (conn.socket.readyState === 2) {
+        console.log("closing socket")
+        conn.socket.close()
+      }
+    })
   })
 }
 
 export const socketHandler = (conn: SocketStream, req: FastifyRequest) => {
-  const ref = { stream: conn, reqId: req.id }
-  userConnections.push(ref)
+  const anonId = req.cookies["user_anon_id"]
+  if (!anonId) return console.error("new ws req - no anon id")
+
+  addUserRef(anonId, conn)
 
   conn.setEncoding("utf8")
   conn.on("data", (chunk) => {
@@ -61,5 +71,7 @@ export const socketHandler = (conn: SocketStream, req: FastifyRequest) => {
       default:
     }
   })
-  conn.on("close", () => removeUserRef(req.id))
+  conn.on("close", () => removeUserRef(anonId))
+  conn.on("end", () => removeUserRef(anonId))
+  conn.on("error", () => removeUserRef(anonId))
 }

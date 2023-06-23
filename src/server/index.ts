@@ -22,6 +22,7 @@ import { env } from "../env.js"
 import { authService } from "./services/authService.js"
 import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
+import { generateUUID } from "../utils.js"
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (
@@ -64,6 +65,18 @@ app.register(fStatic, {
 })
 app.register(websocket, {
   options: { maxPayload: 1024 },
+})
+
+app.addHook("onRequest", async (req, res) => {
+  if (!req.cookies["user_anon_id"]) {
+    res.setCookie("user_anon_id", generateUUID(), {
+      domain: env.domain,
+      path: "/",
+      sameSite: "lax",
+      httpOnly: true,
+      secure: !isDev,
+    })
+  }
 })
 
 app.register(async function () {
