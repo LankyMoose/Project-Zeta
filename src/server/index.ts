@@ -1,5 +1,6 @@
 import path from "path"
 import { fileURLToPath } from "url"
+import fetch from "node-fetch"
 
 import fastify, { FastifyReply, FastifyRequest } from "fastify"
 import cookie, { CookieSerializeOptions } from "@fastify/cookie"
@@ -25,7 +26,7 @@ import { generateUUID } from "../utils.js"
 
 const baseUrl = env.url || `http://localhost:${env.port}`
 
-const _fetch = globalThis.fetch
+const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (
   input: RequestInfo | URL,
   init?: RequestInit | undefined
@@ -71,7 +72,7 @@ app.register(websocket, {
 app.addHook("onRequest", async (req, res) => {
   if (!req.cookies["user_anon_id"]) {
     res.setCookie("user_anon_id", generateUUID(), {
-      domain: "localhost",
+      domain: env.domain || "localhost",
       path: "/",
       sameSite: "lax",
       httpOnly: true,
@@ -137,7 +138,7 @@ app.get("/login/google/callback", async function (request, reply) {
     token: { access_token },
   } = await app.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
-  const { name, picture, id, email } = await loadUserInfo(access_token)
+  const { name, picture, id, email } = (await loadUserInfo(access_token)) as any
 
   let userId
   const userAuth = await authService.getByProviderId(id)
