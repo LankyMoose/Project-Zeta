@@ -123,7 +123,7 @@ export const PollOptionButton = (props: {
       <div className="fill"></div>
       <span watch={state} bind:children>
         {props.option.desc} <div className="inline separator">|</div>{" "}
-        {() => getPercent(state.value.pollData, votes())}%
+        {() => getPercent(state.value.pollData, votes()).toFixed(1)}%
       </span>
     </button>
   )
