@@ -26,6 +26,10 @@ export const subscribeToPolls = (req: FastifyRequest, pollIds: string[]) => {
 }
 
 export const broadcastPollUpdate = (pollId: string, pollUpdateMessage: any) => {
+  console.log(
+    "broadcasting poll update",
+    userConnections.map((uc) => uc.anonId)
+  )
   const pollSubs = pollSubscriptions[pollId]
   if (!pollSubs) return
   pollSubs.forEach((conn) => {
@@ -39,7 +43,10 @@ export const socketHandler = (conn: SocketStream, req: FastifyRequest) => {
     anonId: req.cookies["user_anon_id"] ?? "",
   }
 
-  if (ref.anonId) userConnections.push(ref)
+  if (ref.anonId) {
+    console.log("New user ws connection", ref.anonId)
+    userConnections.push(ref)
+  }
 
   conn.setEncoding("utf8")
   conn.on("data", (chunk) => {
