@@ -22,9 +22,6 @@ import { env } from "../env.js"
 import { authService } from "./services/authService.js"
 import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
-import { generateUUID } from "../utils.js"
-
-const baseUrl = env.url || `http://localhost:${env.port}`
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (
@@ -33,7 +30,7 @@ globalThis.fetch = async (
 ) => {
   try {
     if (typeof input === "string" && input.startsWith("/")) {
-      input = `${baseUrl}${input}`
+      input = `${env.url}${input}`
     }
 
     return await _fetch(input, init)
@@ -69,18 +66,6 @@ app.register(websocket, {
   options: { maxPayload: 1024 },
 })
 
-app.addHook("onRequest", async (req, res) => {
-  if (!req.cookies["user_anon_id"]) {
-    res.setCookie("user_anon_id", generateUUID(), {
-      domain: env.domain || "localhost",
-      path: "/",
-      sameSite: "lax",
-      httpOnly: true,
-      secure: !isDev,
-    })
-  }
-})
-
 app.register(async function () {
   app.route({
     method: "GET",
@@ -103,7 +88,7 @@ app.register(oauthPlugin, {
   // register a fastify url to start the redirect flow
   startRedirectPath: "/login/google",
   // facebook redirect here after the user login
-  callbackUri: `${baseUrl}/login/google/callback`,
+  callbackUri: `${env.url}/login/google/callback`,
 })
 
 app.setErrorHandler(function (error, _, reply) {
@@ -239,41 +224,38 @@ app.get("/*", async (req, res) => {
   res.raw.end("</html>")
 })
 
-app.listen(
-  { port: parseInt(env.port.toString()), host: "0.0.0.0" },
-  async (err) => {
-    if (err) {
-      app.log.error(err)
-      process.exit(1)
-    }
+app.listen({ port: parseInt(env.port), host: "0.0.0.0" }, async (err) => {
+  if (err) {
+    app.log.error(err)
+    process.exit(1)
+  }
 
-    log(
-      "FgGreen",
-      `
-Server is running at ${baseUrl}:${env.port}`
-    )
+  log(
+    "FgGreen",
+    `
+Server is running at ${env.url}`
+  )
 
-    if (isDev) {
-      try {
-        log("Dim", "  evaluating application... 🔍")
-        await SSR.serverBake(Document(App), {
-          cinnabunInstance: new Cinnabun(),
-          stream: null,
-        })
-        log("Dim", "  good to go! ✅")
-      } catch (error) {
-        if ("message" in (error as Error)) {
-          const err = error as Error
-          log(
-            "FgRed",
-            `
+  if (isDev) {
+    try {
+      log("Dim", "  evaluating application... 🔍")
+      await SSR.serverBake(Document(App), {
+        cinnabunInstance: new Cinnabun(),
+        stream: null,
+      })
+      log("Dim", "  good to go! ✅")
+    } catch (error) {
+      if ("message" in (error as Error)) {
+        const err = error as Error
+        log(
+          "FgRed",
+          `
 Failed to evaluate application.
 ${err.stack}
 `
-          )
-          process.exit(96)
-        }
+        )
+        process.exit(96)
       }
     }
   }
-)
+})

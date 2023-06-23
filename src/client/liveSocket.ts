@@ -30,7 +30,7 @@ export class LiveSocket {
       setInterval(() => {
         if (this.socket.readyState !== this.socket.OPEN) return
         this.socket.send(JSON.stringify({ type: "ping" }))
-      }, 1000)
+      }, 3000)
     }
 
     this.load()
