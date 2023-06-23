@@ -55,6 +55,14 @@ declare module "fastify" {
 const app = fastify()
 
 app.register(cookie)
+
+const cookieSettings: Partial<CookieSerializeOptions> = {
+  domain: env.domain || "localhost",
+  path: "/",
+  sameSite: "lax",
+  secure: !isDev,
+}
+
 app.register(compress, { global: false })
 app.register(fStatic, {
   prefix: "/static/",
@@ -165,12 +173,6 @@ app.get("/login/google/callback", async function (request, reply) {
   if (!userId) throw new Error("unable to create user")
   //clearCookies(reply)
 
-  const cookieSettings: Partial<CookieSerializeOptions> = {
-    domain: env.domain || "localhost",
-    path: "/",
-    sameSite: "lax",
-    secure: !isDev,
-  }
   reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
     ...cookieSettings,
     httpOnly: false,
@@ -190,9 +192,18 @@ app.get("/login/google/callback", async function (request, reply) {
 })
 
 function clearAuthCookies(reply: FastifyReply) {
-  reply.clearCookie("user")
-  reply.clearCookie("user_id")
-  reply.clearCookie("access_token")
+  reply.clearCookie("user", {
+    ...cookieSettings,
+    httpOnly: false,
+  })
+  reply.clearCookie("user_id", {
+    ...cookieSettings,
+    httpOnly: true,
+  })
+  reply.clearCookie("access_token", {
+    ...cookieSettings,
+    httpOnly: true,
+  })
 }
 
 app.get("/logout", async function (_, reply) {

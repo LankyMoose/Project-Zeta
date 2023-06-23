@@ -50,6 +50,25 @@ export const userAuths = pgTable(
 export type UserAuth = InferModel<typeof userAuths>
 export type NewUserAuth = InferModel<typeof userAuths, "insert">
 
+// export const userRoles = pgTable(
+//   "user_role",
+//   {
+//     id: uuid("id").primaryKey().defaultRandom(),
+//     userId: uuid("user_id")
+//       .notNull()
+//       .references(() => users.id),
+//     role: varchar("role", { length: 80 }).notNull(),
+//   },
+//   (table) => {
+//     return {
+//       userIdIdx: index("user_role_user_id_idx").on(table.userId),
+//     }
+//   }
+// )
+
+// export type UserRole = InferModel<typeof userRoles>
+// export type NewUserRole = InferModel<typeof userRoles, "insert">
+
 export const polls = pgTable(
   "poll",
   {
