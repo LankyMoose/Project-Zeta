@@ -1,10 +1,5 @@
 import { Signal, createSignal } from "cinnabun"
-import {
-  AnonPollVoteCounts,
-  PollData,
-  PollVoteCountData,
-  PollVoteCounts,
-} from "../types/polls"
+import { AnonPollVoteCounts, PollData, PollVoteCountData } from "../types/polls"
 import { getPolls } from "./actions/polls"
 
 type TypedMessage = {
