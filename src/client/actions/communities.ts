@@ -33,7 +33,7 @@ export const getCommunity = async (id: string): Promise<Community | void> => {
 }
 
 export const createCommunity = async (
-  community: NewCommunity
+  community: Omit<NewCommunity, "url_title">
 ): Promise<{ id: string } | void> => {
   try {
     const response = await fetch(`${API_URL}/communities`, {

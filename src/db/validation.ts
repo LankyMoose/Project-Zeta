@@ -40,6 +40,10 @@ export const communityValidation = {
     ) {
       return false
     }
+    // ensure name has no special characters (except hyphens and spaces)
+    if (!/^[a-zA-Z0-9- ]*$/.test(name)) {
+      return false
+    }
 
     if (
       desc.length < communityValidation.minCommunityDescLength ||

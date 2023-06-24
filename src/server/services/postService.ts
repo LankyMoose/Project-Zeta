@@ -11,12 +11,12 @@ export const postService = {
       .where(eq(posts.communityId, communityId))
       .orderBy(posts.createdAt)
   },
-  async createPost(post: NewPost): Promise<Post> {
+  async createPost(post: NewPost): Promise<Post | undefined> {
     const member = await communityService.getCommunityMember(
       post.communityId,
       post.ownerId
     )
     if (!member) throw new Error("Invalid user or community")
-    return (await db.insert(posts).values(post).returning()).at(0) as Post
+    return (await db.insert(posts).values(post).returning()).at(0)
   },
 }

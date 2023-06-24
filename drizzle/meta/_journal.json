@@ -29,6 +29,13 @@
       "when": 1687595446324,
       "tag": "0003_spicy_revanche",
       "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1687600963435,
+      "tag": "0004_giant_jackpot",
+      "breakpoints": false
     }
   ]
 }

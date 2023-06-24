@@ -23,11 +23,9 @@ export const authService = {
     ).at(0)
   },
 
-  async save(userAuth: UserAuth | NewUserAuth): Promise<UserAuth> {
+  async save(userAuth: UserAuth | NewUserAuth): Promise<UserAuth | undefined> {
     if (!userAuth.id) {
-      return (await db.insert(userAuths).values(userAuth).returning()).at(
-        0
-      ) as UserAuth
+      return (await db.insert(userAuths).values(userAuth).returning()).at(0)
     }
     return (
       await db
@@ -35,6 +33,6 @@ export const authService = {
         .set(userAuth)
         .where(eq(userAuths.id, userAuth.id))
         .returning()
-    ).at(0) as UserAuth
+    ).at(0)
   },
 }

@@ -57,14 +57,17 @@ export const communities = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom().notNull(),
     title: varchar("title", { length: 128 }).notNull(),
+    url_title: varchar("url_title", { length: 128 }),
     description: varchar("description", { length: 255 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     disabled: boolean("disabled").default(false),
+    private: boolean("private").default(false),
   },
   (table) => {
     return {
       createdAtIdx: index("community_created_at_idx").on(table.createdAt),
       titleIdx: index("community_title_idx").on(table.title),
+      url_titleIdx: index("community_url_title_idx").on(table.title),
     }
   }
 )

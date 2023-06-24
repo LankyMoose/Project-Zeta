@@ -16,14 +16,18 @@ import { log } from "../../.cb/logger.js"
 
 import { Document } from "../Document.jsx"
 import { App } from "../App"
-import { configureUserRoutes } from "./api/users.js"
+
 import { env } from "../env.js"
 import { authService } from "./services/authService.js"
 import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
 import { generateUUID } from "../utils.js"
+
 import { configureCommunityRoutes } from "./api/communities.js"
 import { configurePostsRoutes } from "./api/posts.js"
+import { configureUserRoutes } from "./api/users.js"
+
+import { ServerError } from "../errors.jsx"
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (
@@ -117,7 +121,9 @@ app.setErrorHandler(function (error, _, reply) {
   // Log error
   this.log.error(error)
   // Send error response
-  reply.status(500).send({ ok: false })
+  reply
+    .status(error.statusCode ?? 500)
+    .send({ message: error.message ?? "Internal Server Error" })
 })
 
 const loadUserInfo = async (reqOrToken: FastifyRequest | string) => {
@@ -156,23 +162,25 @@ app.get("/login/google/callback", async function (request, reply) {
       name,
       avatarUrl: picture,
     })
+    if (!user) throw new ServerError()
     userId = user.id
   } else {
     const user = await userService.save({
       name,
       avatarUrl: picture,
     })
+    if (!user) throw new ServerError()
     userId = user.id
-    await authService.save({
+    const res = await authService.save({
       email,
       provider: "google",
       providerId: id,
       userId: user.id,
     })
+    if (!res) throw new ServerError()
   }
 
-  if (!userId) throw new Error("unable to create user")
-  //clearCookies(reply)
+  if (!userId) throw new ServerError()
 
   reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
     ...cookieSettings,

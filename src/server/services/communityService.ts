@@ -10,53 +10,77 @@ import {
 export const communityService = {
   pageSize: 10,
 
-  async getCommunity(id: string) {
-    return await db.query.communities.findFirst({
-      where: (community, { eq }) => eq(community.id, id),
-      with: {
-        posts: {
-          limit: 10,
-        },
-        members: {
-          limit: 10,
-          where: (members, { eq }) => eq(members.memberType, "member"),
-          with: {
-            user: true,
+  async getCommunity(titleOrId: string, useId: boolean = false) {
+    try {
+      return await db.query.communities.findFirst({
+        where: (community, { eq, and }) =>
+          and(
+            eq(useId ? community.id : community.url_title, titleOrId),
+            eq(community.disabled, false)
+          ),
+        with: {
+          posts: {
+            limit: 10,
+          },
+          members: {
+            limit: 10,
+            where: (members, { eq }) => eq(members.memberType, "member"),
+            with: {
+              user: true,
+            },
+          },
+          moderators: {
+            limit: 3,
+            where: (members, { eq }) => eq(members.memberType, "moderator"),
+            with: {
+              user: true,
+            },
+          },
+          owner: {
+            with: {
+              user: true,
+            },
           },
         },
-        moderators: {
-          limit: 3,
-          where: (members, { eq }) => eq(members.memberType, "moderator"),
-          with: {
-            user: true,
-          },
-        },
-        owner: {
-          with: {
-            user: true,
-          },
-        },
-      },
-    })
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
   },
 
   async getCommunityMember(communityId: string, userId: string) {
-    return await db.query.communityMembers.findFirst({
-      where: (member, { and, eq }) =>
-        and(eq(member.communityId, communityId), eq(member.userId, userId)),
-    })
+    try {
+      return await db.query.communityMembers.findFirst({
+        where: (member, { and, eq }) =>
+          and(
+            eq(member.communityId, communityId),
+            eq(member.userId, userId),
+            eq(member.disabled, false)
+          ),
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
   },
 
   async getPage(page = 0) {
     const _page = page < 0 ? 0 : page
-    return await db.query.communities.findMany({
-      limit: this.pageSize,
-      offset: _page * this.pageSize,
-    })
+    try {
+      return await db.query.communities.findMany({
+        limit: this.pageSize,
+        offset: _page * this.pageSize,
+        where: (community, { eq }) => eq(community.disabled, false),
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
   },
 
   async createCommunity(
-    community: NewCommunity,
+    community: Omit<NewCommunity, "url_title">,
     userId: string,
     categoryIds?: string[]
   ): Promise<{ id: string } | void> {
@@ -91,6 +115,7 @@ export const communityService = {
       }
     } catch (error) {
       console.error(error)
+      return
     }
   },
 }

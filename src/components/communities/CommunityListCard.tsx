@@ -8,7 +8,7 @@ export const CommunityListCard = (props: Community) => (
   <div
     className="card"
     key={props.id}
-    onclick={() => setPath(pathStore, `/communities/${props.id}`)}
+    onclick={() => setPath(pathStore, `/communities/${props.url_title}`)}
   >
     <h3 className="card-title">{props.title}</h3>
     <p>{truncateText(props.description, 128)}</p>

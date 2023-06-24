@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify"
 import { userService } from "../services/userService"
+import { InvalidRequestError } from "../../errors"
 
 export function configureUserRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/users", async (req) => {
@@ -8,7 +9,7 @@ export function configureUserRoutes(app: FastifyInstance) {
   })
 
   app.get<{ Params: { id?: string } }>("/api/users/:id", async (req) => {
-    if (!req.params.id) throw new Error("No id provided")
+    if (!req.params.id) throw new InvalidRequestError()
     const user = await userService.getById(req.params.id)
     return { user }
   })
