@@ -9,9 +9,11 @@ export const CommunityList = ({
   communities: Community[]
 }) => {
   return (
-    <For
-      each={communities}
-      template={(community) => <CommunityListCard {...community} />}
-    />
+    <ul className="card-list w-100">
+      <For
+        each={communities}
+        template={(community) => <CommunityListCard {...community} />}
+      />
+    </ul>
   )
 }

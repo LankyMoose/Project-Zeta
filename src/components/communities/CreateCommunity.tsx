@@ -8,6 +8,7 @@ import { KeyboardListener } from "cinnabun/listeners"
 import { createCommunity } from "../../client/actions/communities"
 import { pathStore } from "../../state"
 import { communityValidation } from "../../db/validation"
+import { setPath } from "cinnabun/router"
 
 const communityCreatorOpen = createSignal(false)
 
@@ -31,13 +32,12 @@ const CommunityCreator = () => {
   const handleSubmit = async (e: Event) => {
     e.preventDefault()
     loading.value = true
-    console.log("creating new community", state.value)
     const res = await createCommunity(state.value)
     loading.value = false
     if (!res) return
     resetState()
     communityCreatorOpen.value = false
-    pathStore.value = `/communities/${res.id}`
+    setPath(pathStore, `/communities/${res.id}`)
   }
 
   const handleChange = (e: Event) => {

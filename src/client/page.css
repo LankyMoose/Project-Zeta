@@ -1,0 +1,12 @@
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.page-body {
+  display: flex;
+  justify-content: center;
+}

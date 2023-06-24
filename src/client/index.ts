@@ -1,3 +1,4 @@
+import "./page.css"
 import "./utilities.css"
 import "./index.css"
 import "./button.css"

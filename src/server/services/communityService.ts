@@ -57,7 +57,6 @@ export const communityService = {
       const newCommunity = (
         await db.insert(communities).values(community).returning()
       ).at(0)
-      console.log("new community", newCommunity)
       if (!newCommunity) throw new Error("failed to create community")
 
       await db

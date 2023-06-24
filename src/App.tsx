@@ -15,7 +15,7 @@ const Header = () => {
   return (
     <header>
       <Link to="/" store={pathStore}>
-        <div id="logo">Logo</div>
+        <div id="logo">Zetabase</div>
       </Link>
 
       <div className="flex gap align-items-center">
