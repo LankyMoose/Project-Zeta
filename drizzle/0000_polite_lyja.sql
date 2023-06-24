@@ -1,8 +1,18 @@
 DO $$ BEGIN
+ CREATE TYPE "community_member_type" AS ENUM('member', 'moderator', 'owner');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
  CREATE TYPE "post_content_type" AS ENUM('poll', 'image', 'video');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
+
+create function now_utc() returns timestamp as $$
+  select now() at time zone 'utc';
+$$ language sql;
 
 CREATE TABLE IF NOT EXISTS "category" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -26,11 +36,13 @@ CREATE TABLE IF NOT EXISTS "category_user" (
 
 CREATE TABLE IF NOT EXISTS "community" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"owner_id" uuid NOT NULL,
 	"title" varchar(128) NOT NULL,
+	"url_title" varchar(128) UNIQUE GENERATED ALWAYS AS (lower(replace(replace("title", '-', '_'), ' ', '-'))) STORED,
 	"description" varchar(255) NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
+	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"disabled" boolean DEFAULT false,
+	"private" boolean DEFAULT false,
+	UNIQUE ("url_title"),
 	UNIQUE ("title")
 );
 
@@ -38,8 +50,9 @@ CREATE TABLE IF NOT EXISTS "community_member" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"community_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
+	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"disabled" boolean DEFAULT false,
+	"member_types" community_member_type DEFAULT 'member' NOT NULL,
 	UNIQUE ("community_id", "user_id")
 );
 
@@ -62,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "poll" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"post_id" uuid NOT NULL,
 	"desc" varchar(255) NOT NULL,
-	"started_at" timestamp DEFAULT now() NOT NULL,
+	"started_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"ended_at" timestamp,
 	"disabled" boolean DEFAULT false
 );
@@ -72,7 +85,7 @@ CREATE TABLE IF NOT EXISTS "post_comment" (
 	"post_id" uuid NOT NULL,
 	"owner_id" uuid NOT NULL,
 	"content" varchar(255) NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
+	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"deleted" boolean DEFAULT false
 );
 
@@ -95,8 +108,9 @@ CREATE TABLE IF NOT EXISTS "post" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"community_id" uuid NOT NULL,
 	"owner_id" uuid NOT NULL,
+	"title" varchar(128) NOT NULL,
 	"content" varchar(1024) NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
+	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"disabled" boolean DEFAULT false,
 	"deleted" boolean DEFAULT false
 );
@@ -112,7 +126,7 @@ CREATE TABLE IF NOT EXISTS "user_auth" (
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" varchar(80) NOT NULL,
-	"created_at" timestamp DEFAULT now(),
+	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"disabled" boolean DEFAULT false,
 	"avatar_url" varchar(255),
 	"deleted" boolean DEFAULT false
@@ -123,8 +137,9 @@ CREATE INDEX IF NOT EXISTS "category_community_community_id_idx" ON "category_co
 CREATE INDEX IF NOT EXISTS "category_community_category_id_idx" ON "category_community" ("category_id");
 CREATE INDEX IF NOT EXISTS "category_user_user_id_idx" ON "category_user" ("user_id");
 CREATE INDEX IF NOT EXISTS "category_user_category_id_idx" ON "category_user" ("category_id");
-CREATE INDEX IF NOT EXISTS "community_owner_id_idx" ON "community" ("owner_id");
 CREATE INDEX IF NOT EXISTS "community_created_at_idx" ON "community" ("created_at");
+CREATE INDEX IF NOT EXISTS "community_title_idx" ON "community" ("title");
+CREATE INDEX IF NOT EXISTS "community_url_title_idx" ON "community" ("title");
 CREATE INDEX IF NOT EXISTS "community_member_community_id_idx" ON "community_member" ("community_id");
 CREATE INDEX IF NOT EXISTS "community_member_user_id_idx" ON "community_member" ("user_id");
 CREATE INDEX IF NOT EXISTS "poll_option_poll_id_idx" ON "poll_option" ("poll_id");
@@ -166,12 +181,6 @@ END $$;
 
 DO $$ BEGIN
  ALTER TABLE "category_user" ADD CONSTRAINT "category_user_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
- ALTER TABLE "community" ADD CONSTRAINT "community_owner_id_user_id_fk" FOREIGN KEY ("owner_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

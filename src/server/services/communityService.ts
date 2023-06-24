@@ -22,6 +22,39 @@ export const communityService = {
         with: {
           posts: {
             limit: 10,
+            orderBy: (posts, { desc }) => [desc(posts.createdAt)],
+            where: (post, { eq }) => eq(post.disabled, false),
+            with: {
+              user: {
+                columns: {
+                  id: true,
+                  name: true,
+                  avatarUrl: true,
+                },
+              },
+              comments: {
+                limit: 3,
+                columns: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                },
+                with: {
+                  user: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      avatarUrl: true,
+                    },
+                  },
+                },
+              },
+              reactions: {
+                columns: {
+                  reaction: true,
+                },
+              },
+            },
           },
           members: {
             limit: 10,
@@ -124,7 +157,7 @@ export const communityService = {
       }
 
       return {
-        id: newCommunity.id,
+        id: newCommunity.url_title!,
       }
     } catch (error) {
       console.error(error)

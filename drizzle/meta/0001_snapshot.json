@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "3ed10859-bfa5-437d-bc47-809fd8d094a4",
-  "prevId": "8b31b057-09dd-4c5a-b316-9d04cae0ad9f",
+  "id": "55a766de-8b57-4b85-b41a-9668163e57d4",
+  "prevId": "ad2202e5-9f4e-411f-a4cd-f99a5ba21c91",
   "tables": {
     "category": {
       "name": "category",
@@ -185,17 +185,17 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "owner_id": {
-          "name": "owner_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "title": {
           "name": "title",
           "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true
+        },
+        "url_title": {
+          "name": "url_title",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
         },
         "description": {
           "name": "description",
@@ -216,39 +216,39 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "private": {
+          "name": "private",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {
-        "community_owner_id_idx": {
-          "name": "community_owner_id_idx",
-          "columns": [
-            "owner_id"
-          ],
-          "isUnique": false
-        },
         "community_created_at_idx": {
           "name": "community_created_at_idx",
           "columns": [
             "created_at"
           ],
           "isUnique": false
+        },
+        "community_title_idx": {
+          "name": "community_title_idx",
+          "columns": [
+            "title"
+          ],
+          "isUnique": false
+        },
+        "community_url_title_idx": {
+          "name": "community_url_title_idx",
+          "columns": [
+            "title"
+          ],
+          "isUnique": false
         }
       },
-      "foreignKeys": {
-        "community_owner_id_user_id_fk": {
-          "name": "community_owner_id_user_id_fk",
-          "tableFrom": "community",
-          "tableTo": "user",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {}
     },
     "community_member": {
@@ -811,9 +811,15 @@
           "primaryKey": false,
           "notNull": true
         },
+        "title": {
+          "name": "title",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "content": {
           "name": "content",
-          "type": "varchar(1024)",
+          "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": true
         },

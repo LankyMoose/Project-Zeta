@@ -1,0 +1,1 @@
+ALTER TABLE "post" ALTER COLUMN "content" SET DATA TYPE varchar(2048);

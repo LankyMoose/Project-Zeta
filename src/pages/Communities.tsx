@@ -32,8 +32,24 @@ export default function Communities() {
         <Cinnabun.Suspense promise={getCommunities} cache>
           {(loading: boolean, res: Community[] | undefined) => {
             if (loading) return <DefaultLoader />
+            if (!res)
+              return (
+                <div>
+                  <span className="text-danger">
+                    Oops! Something went wrong 😢
+                  </span>
+                </div>
+              )
+            if (res.length === 0)
+              return (
+                <div>
+                  <span className="text-muted">
+                    There are no communities to show... Why not create one?
+                  </span>
+                </div>
+              )
 
-            return <CommunityList communities={res ?? []} />
+            return <CommunityList communities={res} />
           }}
         </Cinnabun.Suspense>
       </div>

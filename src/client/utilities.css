@@ -92,6 +92,9 @@
 .text-muted {
   color: var(--text-muted);
 }
+.text-danger {
+  color: var(--danger);
+}
 
 .text-sm {
   font-size: .75rem;

@@ -1,9 +1,9 @@
 import * as Cinnabun from "cinnabun"
 import { For } from "cinnabun"
-import { Post } from "../../db/schema"
 import { PostCard } from "./PostCard"
+import { CommunityPostData } from "../../types/post"
 
-export const CommunityPosts = ({ posts }: { posts: Post[] }) => {
+export const CommunityPosts = ({ posts }: { posts: CommunityPostData[] }) => {
   return (
     <div className="flex flex-column">
       {posts.length ? (

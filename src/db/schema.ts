@@ -96,6 +96,11 @@ export const categories = pgTable(
   }
 )
 
+export const categoryRelations = relations(categories, ({ many }) => ({
+  communities: many(categoryCommunities),
+  users: many(categoryUsers),
+}))
+
 export type Category = InferModel<typeof categories>
 export type NewCategory = InferModel<typeof categories, "insert">
 
@@ -119,6 +124,17 @@ export const categoryUsers = pgTable(
     }
   }
 )
+
+export const categoryUserRelations = relations(categoryUsers, ({ one }) => ({
+  user: one(users, {
+    fields: [categoryUsers.userId],
+    references: [users.id],
+  }),
+  category: one(categories, {
+    fields: [categoryUsers.categoryId],
+    references: [categories.id],
+  }),
+}))
 
 export type CategoryUser = InferModel<typeof categoryUsers>
 export type NewCategoryUser = InferModel<typeof categoryUsers, "insert">
@@ -146,6 +162,20 @@ export const categoryCommunities = pgTable(
       ),
     }
   }
+)
+
+export const categoryCommunityRelations = relations(
+  categoryCommunities,
+  ({ one }) => ({
+    community: one(communities, {
+      fields: [categoryCommunities.communityId],
+      references: [communities.id],
+    }),
+    category: one(categories, {
+      fields: [categoryCommunities.categoryId],
+      references: [categories.id],
+    }),
+  })
 )
 
 export type CategoryCommunity = InferModel<typeof categoryCommunities>
@@ -218,7 +248,7 @@ export const posts = pgTable(
       .notNull()
       .references(() => users.id),
     title: varchar("title", { length: 128 }).notNull(),
-    content: varchar("content", { length: 1024 }).notNull(),
+    content: varchar("content", { length: 2048 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     disabled: boolean("disabled").default(false),
     deleted: boolean("deleted").default(false),
@@ -232,11 +262,17 @@ export const posts = pgTable(
   }
 )
 
-export const postRelations = relations(posts, ({ one }) => ({
+export const postRelations = relations(posts, ({ one, many }) => ({
   community: one(communities, {
     fields: [posts.communityId],
     references: [communities.id],
   }),
+  user: one(users, {
+    fields: [posts.ownerId],
+    references: [users.id],
+  }),
+  comments: many(postComments),
+  reactions: many(postReactions),
 }))
 
 export type Post = InferModel<typeof posts>
@@ -269,6 +305,17 @@ export const postComments = pgTable(
   }
 )
 
+export const postCommentsRelations = relations(postComments, ({ one }) => ({
+  post: one(posts, {
+    fields: [postComments.postId],
+    references: [posts.id],
+  }),
+  user: one(users, {
+    fields: [postComments.ownerId],
+    references: [users.id],
+  }),
+}))
+
 export type PostComment = InferModel<typeof postComments>
 export type NewPostComment = InferModel<typeof postComments, "insert">
 
@@ -295,6 +342,17 @@ export const postReactions = pgTable(
     }
   }
 )
+
+export const postReactionsRelations = relations(postReactions, ({ one }) => ({
+  post: one(posts, {
+    fields: [postReactions.postId],
+    references: [posts.id],
+  }),
+  user: one(users, {
+    fields: [postReactions.ownerId],
+    references: [users.id],
+  }),
+}))
 
 export type PostReaction = InferModel<typeof postReactions>
 export type NewPostReaction = InferModel<typeof postReactions, "insert">
@@ -323,6 +381,13 @@ export const postContent = pgTable(
   }
 )
 
+export const postContentRelations = relations(postContent, ({ one }) => ({
+  post: one(posts, {
+    fields: [postContent.postId],
+    references: [posts.id],
+  }),
+}))
+
 export const polls = pgTable(
   "poll",
   {
@@ -342,6 +407,15 @@ export const polls = pgTable(
     }
   }
 )
+
+export const pollRelations = relations(polls, ({ one, many }) => ({
+  postContent: one(postContent, {
+    fields: [polls.postId],
+    references: [postContent.id],
+  }),
+  options: many(pollOptions),
+  votes: many(pollVotes),
+}))
 
 export type Poll = InferModel<typeof polls>
 export type NewPoll = InferModel<typeof polls, "insert">
@@ -363,6 +437,13 @@ export const pollOptions = pgTable(
     }
   }
 )
+
+export const pollOptionRelations = relations(pollOptions, ({ one }) => ({
+  poll: one(polls, {
+    fields: [pollOptions.pollId],
+    references: [polls.id],
+  }),
+}))
 
 export type PollOption = InferModel<typeof pollOptions>
 export type NewPollOption = InferModel<typeof pollOptions, "insert">
@@ -393,6 +474,21 @@ export const pollVotes = pgTable(
     }
   }
 )
+
+export const pollVoteRelations = relations(pollVotes, ({ one }) => ({
+  poll: one(polls, {
+    fields: [pollVotes.pollId],
+    references: [polls.id],
+  }),
+  option: one(pollOptions, {
+    fields: [pollVotes.optionId],
+    references: [pollOptions.id],
+  }),
+  user: one(users, {
+    fields: [pollVotes.userId],
+    references: [users.id],
+  }),
+}))
 
 export type PollVote = InferModel<typeof pollVotes>
 export type NewPollVote = InferModel<typeof pollVotes, "insert">

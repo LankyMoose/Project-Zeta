@@ -38,7 +38,23 @@ export const PostCreator = () => {
       communityId: selectedCommunity.value,
       ownerId: userId,
     })
-    console.log("Create post res", res)
+
+    if (res.message) {
+      loading.value = false
+      addNotification({
+        type: "error",
+        text: res.message,
+      })
+      return
+    }
+
+    addNotification({
+      type: "success",
+      text: "Post created",
+    })
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   }
 
   const handleChange = (e: Event) => {

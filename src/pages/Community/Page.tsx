@@ -4,12 +4,12 @@ import { getCommunity } from "../../client/actions/communities"
 import { Community } from "../../db/schema"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
-import { pathStore, postCreatorModalOpen } from "../../state"
+import { pathStore, postCreatorModalOpen, selectedCommunity } from "../../state"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
 import { Button } from "../../components/Button"
 
-export default function Communities({
+export default function CommunitiesPage({
   params,
 }: {
   params?: { communityId?: string }
@@ -22,6 +22,7 @@ export default function Communities({
       setPath(pathStore, "/communities")
       return
     }
+    selectedCommunity.value = res.id
     return res
   }
 

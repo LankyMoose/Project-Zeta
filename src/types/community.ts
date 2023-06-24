@@ -1,4 +1,4 @@
-import { Post } from "../db/schema"
+import { CommunityPostData } from "./post"
 
 export type CommunityMemberUserData = {
   avatarUrl?: string
@@ -25,6 +25,6 @@ export type CommunityData = {
   members: CommunityMemberData[]
   moderators: CommunityMemberData[]
   owner: CommunityMemberData
-  posts: Post[]
+  posts: CommunityPostData[]
   title: string
 }

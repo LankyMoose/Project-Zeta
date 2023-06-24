@@ -5,36 +5,15 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1687569477942,
-      "tag": "0000_complex_living_mummy",
+      "when": 1687615947226,
+      "tag": "0000_polite_lyja",
       "breakpoints": false
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1687581443200,
-      "tag": "0001_free_patch",
-      "breakpoints": false
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1687590701130,
-      "tag": "0002_slippery_rawhide_kid",
-      "breakpoints": false
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1687595446324,
-      "tag": "0003_spicy_revanche",
-      "breakpoints": false
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1687600963435,
-      "tag": "0004_giant_jackpot",
+      "when": 1687616927991,
+      "tag": "0001_keen_bucky",
       "breakpoints": false
     }
   ]
