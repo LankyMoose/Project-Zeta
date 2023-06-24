@@ -40,6 +40,13 @@ export const communityService = {
     })
   },
 
+  async getCommunityMember(communityId: string, userId: string) {
+    return await db.query.communityMembers.findFirst({
+      where: (member, { and, eq }) =>
+        and(eq(member.communityId, communityId), eq(member.userId, userId)),
+    })
+  },
+
   async getPage(page = 0) {
     const _page = page < 0 ? 0 : page
     return await db.query.communities.findMany({

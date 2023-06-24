@@ -1,0 +1,1 @@
+ALTER TABLE "post" ADD COLUMN "title" varchar(128) NOT NULL;

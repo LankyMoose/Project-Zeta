@@ -51,3 +51,27 @@ export const communityValidation = {
     return true
   },
 }
+
+export const postValidation = {
+  minPostTitleLength: 1,
+  maxPostTitleLength: 128,
+  minPostContentLength: 1,
+  maxPostContentLength: 2048,
+  isPostValid: (title: string, content: string) => {
+    if (
+      title.length < postValidation.minPostTitleLength ||
+      title.length > postValidation.maxPostTitleLength
+    ) {
+      return false
+    }
+
+    if (
+      content.length < postValidation.minPostContentLength ||
+      content.length > postValidation.maxPostContentLength
+    ) {
+      return false
+    }
+
+    return true
+  },
+}

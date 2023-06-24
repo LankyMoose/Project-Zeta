@@ -2,6 +2,7 @@ import "./page.css"
 import "./utilities.css"
 import "./index.css"
 import "./button.css"
+
 import { Hydration } from "cinnabun/hydration"
 import { Document } from "../Document"
 import { SSRProps } from "cinnabun/src/types"

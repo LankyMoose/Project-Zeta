@@ -1,0 +1,17 @@
+.community-page-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: space-between;
+  
+}
+@media screen and (min-width: 768px) {
+  .community-page-inner {
+    flex-direction: row;
+  }
+}
+
+
+/*
+    flex flex-row w-100 justify-content-between gap
+*/

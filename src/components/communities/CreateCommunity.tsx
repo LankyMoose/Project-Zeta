@@ -6,7 +6,7 @@ import { Modal, ModalBody, ModalHeader } from "../Modal"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { KeyboardListener } from "cinnabun/listeners"
 import { createCommunity } from "../../client/actions/communities"
-import { pathStore } from "../../state"
+import { isNotAuthenticated, pathStore, userStore } from "../../state"
 import { communityValidation } from "../../db/validation"
 import { setPath } from "cinnabun/router"
 
@@ -111,10 +111,15 @@ export const CreateCommunity = () => {
   return (
     <>
       <Button
+        watch={userStore}
+        bind:disabled={isNotAuthenticated}
+        bind:title={() =>
+          userStore.value ? "" : "Login to create a community"
+        }
         className="btn btn-primary hover-animate"
         onclick={() => (communityCreatorOpen.value = true)}
       >
-        Create Community
+        Create a Community
       </Button>
       <Portal>
         <CommunityCreator />

@@ -23,6 +23,7 @@ import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
 import { generateUUID } from "../utils.js"
 import { configureCommunityRoutes } from "./api/communities.js"
+import { configurePostsRoutes } from "./api/posts.js"
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (
@@ -220,6 +221,7 @@ if (isDev)
 
 configureUserRoutes(app)
 configureCommunityRoutes(app)
+configurePostsRoutes(app)
 
 app.get("/*", async (req, res) => {
   const reqUser = req.cookies["user"]

@@ -214,6 +214,7 @@ export const posts = pgTable(
     ownerId: uuid("owner_id")
       .notNull()
       .references(() => users.id),
+    title: varchar("title", { length: 128 }).notNull(),
     content: varchar("content", { length: 1024 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     disabled: boolean("disabled").default(false),
@@ -236,7 +237,7 @@ export const postRelations = relations(posts, ({ one }) => ({
 }))
 
 export type Post = InferModel<typeof posts>
-export type CommunityPost = InferModel<typeof posts, "insert">
+export type NewPost = InferModel<typeof posts, "insert">
 
 // threadPost comments
 
