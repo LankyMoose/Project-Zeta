@@ -12,6 +12,25 @@
 .btn.btn-sm {
   padding: .25rem .5rem;
   font-size: .65rem;
+  line-height: 1.5;
+}
+@media screen and (max-width: 480px) {
+  .btn[sm="btn-sm"] {
+    padding: .25rem .5rem !important;
+    font-size: .65rem !important;
+    line-height: 1.5;
+  }
+}
+
+.btn.btn-lg {
+  padding: .75rem 1.5rem;
+  font-size: 1.35rem;
+}
+@media screen and (min-width: 760px) {
+  .btn[lg="btn-lg"] {
+    padding: .75rem 1.5rem !important;
+    font-size: 1.35rem !important;
+  }
 }
 
 .btn:disabled {
@@ -41,7 +60,7 @@
 .btn.btn-secondary {
   background-color: transparent;
   color: #eee;
-  border: 1px solid #eee;
+  border: 1px solid #aaa;
 }
 
 .btn:not(:disabled).btn-secondary:hover,

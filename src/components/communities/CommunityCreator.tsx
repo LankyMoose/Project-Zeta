@@ -1,18 +1,14 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { Button } from "../Button"
-import { Portal } from "../Portal"
 import { Modal, ModalBody, ModalHeader } from "../Modal"
 import { EllipsisLoader } from "../loaders/Ellipsis"
-import { KeyboardListener } from "cinnabun/listeners"
 import { createCommunity } from "../../client/actions/communities"
-import { isNotAuthenticated, pathStore, userStore } from "../../state"
+import { communityCreatorModalOpen, pathStore } from "../../state"
 import { communityValidation } from "../../db/validation"
 import { setPath } from "cinnabun/router"
 
-const communityCreatorOpen = createSignal(false)
-
-const CommunityCreator = () => {
+export const CommunityCreator = () => {
   const loading = createSignal(false)
   const state = createSignal({
     title: "",
@@ -36,7 +32,7 @@ const CommunityCreator = () => {
     loading.value = false
     if (!res) return
     resetState()
-    communityCreatorOpen.value = false
+    communityCreatorModalOpen.value = false
     setPath(pathStore, `/communities/${res.id}`)
   }
 
@@ -49,18 +45,15 @@ const CommunityCreator = () => {
   return (
     <Modal
       onclose={onModalClose}
-      visible={communityCreatorOpen}
-      toggle={() => (communityCreatorOpen.value = !communityCreatorOpen.value)}
+      visible={communityCreatorModalOpen}
+      toggle={() =>
+        (communityCreatorModalOpen.value = !communityCreatorModalOpen.value)
+      }
     >
       <ModalHeader>
         <h2>Create Community</h2>
       </ModalHeader>
       <ModalBody>
-        <KeyboardListener
-          keys={["Escape"]}
-          onCapture={() => (communityCreatorOpen.value = false)}
-        />
-
         <form onsubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="title">Name</label>
@@ -104,26 +97,5 @@ const CommunityCreator = () => {
         </form>
       </ModalBody>
     </Modal>
-  )
-}
-
-export const CreateCommunity = () => {
-  return (
-    <>
-      <Button
-        watch={userStore}
-        bind:disabled={isNotAuthenticated}
-        bind:title={() =>
-          userStore.value ? "" : "Login to create a community"
-        }
-        className="btn btn-primary hover-animate"
-        onclick={() => (communityCreatorOpen.value = true)}
-      >
-        Create a Community
-      </Button>
-      <Portal>
-        <CommunityCreator />
-      </Portal>
-    </>
   )
 }

@@ -145,11 +145,11 @@ footer {
   }
 }
 
-@media screen and (min-width: 1440px) {
+/* @media screen and (min-width: 1440px) {
   .container {
     max-width: 1680px;
   }
-}
+} */
 
 
 .list-container {

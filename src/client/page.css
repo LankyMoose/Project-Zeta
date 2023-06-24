@@ -4,11 +4,13 @@
   align-items: center;
   margin-bottom: 1rem;
   gap: 1rem;
+  width: 100%;
 }
 
 .page-body {
   display: flex;
   justify-content: center;
+  width: 100%;
 }
 
 .section-title {

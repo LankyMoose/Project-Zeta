@@ -1,13 +1,13 @@
 import * as Cinnabun from "cinnabun"
+import "./Page.css"
 import { getCommunity } from "../../client/actions/communities"
 import { Community } from "../../db/schema"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
-import { pathStore } from "../../state"
+import { pathStore, postCreatorModalOpen } from "../../state"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
-import { PostCreator } from "../../components/community/PostCreator"
-import "./Page.css"
+import { Button } from "../../components/Button"
 
 export default function Communities({
   params,
@@ -22,7 +22,6 @@ export default function Communities({
       setPath(pathStore, "/communities")
       return
     }
-    console.log("Load community", res)
     return res
   }
 
@@ -54,11 +53,16 @@ export default function Communities({
                 <div className="flex flex-column flex-grow">
                   <div className="section-title">
                     <h3>Posts</h3>
-                    <PostCreator communityId={community.id} />
+                    <Button
+                      className="btn btn-primary hover-animate"
+                      onclick={() => (postCreatorModalOpen.value = true)}
+                    >
+                      Create post
+                    </Button>
                   </div>
                   <CommunityPosts posts={community.posts} />
                 </div>
-                <div className="flex flex-column">
+                <div className="flex flex-column community-page-members">
                   <h3>Members</h3>
                   <div className="flex-row">
                     {community.members.map((member) => (

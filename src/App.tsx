@@ -10,6 +10,8 @@ import CommunitiesPage from "./pages/Communities"
 import CommunityPage from "./pages/Community/Page"
 import CommunityPostPage from "./pages/Community/Post"
 import CommunityMembersPage from "./pages/Community/Members"
+import { CommunityCreator } from "./components/communities/CommunityCreator"
+import { PostCreator } from "./components/community/PostCreator"
 
 const Header = () => {
   return (
@@ -34,25 +36,24 @@ export const App = () => {
       <Header />
       <main className="container">
         <Router store={pathStore}>
-          <Route path="/" component={<HomePage />} />
-          <Route path="/communities" component={<CommunitiesPage />} />
+          <Route path="/" component={HomePage} />
+          <Route path="/communities" component={CommunitiesPage} />
 
-          <Route
-            path="/communities/:communityId"
-            component={(props) => <CommunityPage {...props} />}
-          />
+          <Route path="/communities/:communityId" component={CommunityPage} />
           <Route
             path="/communities/:communityId/:postId"
-            component={(props) => <CommunityPostPage {...props} />}
+            component={CommunityPostPage}
           />
           <Route
             path="/communities/:communityId/members"
-            component={(props) => <CommunityMembersPage {...props} />}
+            component={CommunityMembersPage}
           />
         </Router>
       </main>
       <Portal>
         <NotificationTray />
+        <PostCreator />
+        <CommunityCreator />
       </Portal>
     </>
   )

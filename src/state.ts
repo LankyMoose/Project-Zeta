@@ -32,3 +32,7 @@ export const getUser = (self: Component) =>
 
 export const isAuthenticated = (self: Component) => !!getUser(self)
 export const isNotAuthenticated = (self: Component) => !getUser(self)
+
+export const postCreatorModalOpen = createSignal(false)
+export const communityCreatorModalOpen = createSignal(false)
+export const selectedCommunity = createSignal<string | null>(null)

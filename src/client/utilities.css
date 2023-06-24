@@ -96,6 +96,11 @@
 .text-sm {
   font-size: .75rem;
 }
+@media screen and (max-width: 480px) {
+  [sm="text-sm"] {
+    font-size: .75rem;
+  }
+}
 
 .text-rg {
   font-size: 1rem;
@@ -103,6 +108,11 @@
 
 .text-lg {
   font-size: 1.5rem;
+}
+@media screen and (max-width: 760px) {
+  [lg="text-lg"] {
+    font-size: 1.5rem;
+  }
 }
 
 .text-xl {
