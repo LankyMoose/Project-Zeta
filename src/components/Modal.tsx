@@ -1,5 +1,5 @@
 import * as Cinnabun from "cinnabun"
-import { ComponentChildren } from "cinnabun/types"
+import { ComponentChildren, ComponentProps } from "cinnabun/types"
 import { KeyboardListener, NavigationListener } from "cinnabun/listeners"
 import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
@@ -59,5 +59,38 @@ export const Modal = (
         {children}
       </Transition>
     </FadeInOut>
+  )
+}
+
+export const ModalHeader = (
+  props: ComponentProps,
+  children: ComponentChildren
+) => {
+  return (
+    <div className="modal-header" {...props}>
+      {children}
+    </div>
+  )
+}
+
+export const ModalBody = (
+  props: ComponentProps,
+  children: ComponentChildren
+) => {
+  return (
+    <div className="modal-body" {...props}>
+      {children}
+    </div>
+  )
+}
+
+export const ModalFooter = (
+  props: ComponentProps,
+  children: ComponentChildren
+) => {
+  return (
+    <div className="modal-footer" {...props}>
+      {children}
+    </div>
   )
 }

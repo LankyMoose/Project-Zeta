@@ -5,8 +5,9 @@ import {
   varchar,
   uuid,
   timestamp,
+  pgEnum,
 } from "drizzle-orm/pg-core"
-import { InferModel } from "drizzle-orm"
+import { InferModel, relations } from "drizzle-orm"
 
 export const users = pgTable(
   "user",
@@ -16,6 +17,7 @@ export const users = pgTable(
     createdAt: timestamp("created_at").defaultNow(),
     disabled: boolean("disabled").default(false),
     avatarUrl: varchar("avatar_url", { length: 255 }),
+    deleted: boolean("deleted").default(false),
   },
   (table) => {
     return {
@@ -50,32 +52,280 @@ export const userAuths = pgTable(
 export type UserAuth = InferModel<typeof userAuths>
 export type NewUserAuth = InferModel<typeof userAuths, "insert">
 
-// export const userRoles = pgTable(
-//   "user_role",
-//   {
-//     id: uuid("id").primaryKey().defaultRandom(),
-//     userId: uuid("user_id")
-//       .notNull()
-//       .references(() => users.id),
-//     role: varchar("role", { length: 80 }).notNull(),
-//   },
-//   (table) => {
-//     return {
-//       userIdIdx: index("user_role_user_id_idx").on(table.userId),
-//     }
-//   }
-// )
+export const communities = pgTable(
+  "community",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    title: varchar("title", { length: 128 }).notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    disabled: boolean("disabled").default(false),
+  },
+  (table) => {
+    return {
+      createdAtIdx: index("community_created_at_idx").on(table.createdAt),
+      titleIdx: index("community_title_idx").on(table.title),
+    }
+  }
+)
 
-// export type UserRole = InferModel<typeof userRoles>
-// export type NewUserRole = InferModel<typeof userRoles, "insert">
+export const communityRelations = relations(communities, ({ many, one }) => ({
+  posts: many(posts),
+  members: many(communityMembers),
+  moderators: many(communityMembers),
+  owner: one(communityMembers),
+  categories: many(categories),
+}))
+
+export type Community = InferModel<typeof communities>
+export type NewCommunity = InferModel<typeof communities, "insert">
+
+export const categories = pgTable(
+  "category",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    name: varchar("name", { length: 80 }).notNull(),
+  },
+  (table) => {
+    return {
+      nameIdx: index("category_name_idx").on(table.name),
+    }
+  }
+)
+
+export type Category = InferModel<typeof categories>
+export type NewCategory = InferModel<typeof categories, "insert">
+
+export const categoryUsers = pgTable(
+  "category_user",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id),
+  },
+  (table) => {
+    return {
+      userIdIdx: index("category_user_user_id_idx").on(table.userId),
+      categoryIdIdx: index("category_user_category_id_idx").on(
+        table.categoryId
+      ),
+    }
+  }
+)
+
+export type CategoryUser = InferModel<typeof categoryUsers>
+export type NewCategoryUser = InferModel<typeof categoryUsers, "insert">
+
+export const categoryCommunities = pgTable(
+  "category_community",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    communityId: uuid("community_id")
+      .notNull()
+      .references(() => communities.id, {
+        onDelete: "cascade",
+      }),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id),
+  },
+  (table) => {
+    return {
+      communityIdIdx: index("category_community_community_id_idx").on(
+        table.communityId
+      ),
+      categoryIdIdx: index("category_community_category_id_idx").on(
+        table.categoryId
+      ),
+    }
+  }
+)
+
+export type CategoryCommunity = InferModel<typeof categoryCommunities>
+export type NewCategoryCommunity = InferModel<
+  typeof categoryCommunities,
+  "insert"
+>
+
+export const communityMemberTypeEnum = pgEnum("community_member_type", [
+  "member",
+  "moderator",
+  "owner",
+])
+
+export const communityMembers = pgTable(
+  "community_member",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    communityId: uuid("community_id")
+      .notNull()
+      .references(() => communities.id, {
+        onDelete: "cascade",
+      }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    disabled: boolean("disabled").default(false),
+    memberType: communityMemberTypeEnum("member_types")
+      .notNull()
+      .default("member"),
+  },
+  (table) => {
+    return {
+      communityIdIdx: index("community_member_community_id_idx").on(
+        table.communityId
+      ),
+      userIdIdx: index("community_member_user_id_idx").on(table.userId),
+    }
+  }
+)
+
+export const communityMemberRelations = relations(
+  communityMembers,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [communityMembers.userId],
+      references: [users.id],
+    }),
+    community: one(communities, {
+      fields: [communityMembers.communityId],
+      references: [communities.id],
+    }),
+  })
+)
+
+export type CommunityMember = InferModel<typeof communityMembers>
+export type NewCommunityMember = InferModel<typeof communityMembers, "insert">
+
+export const posts = pgTable(
+  "post",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    communityId: uuid("community_id")
+      .notNull()
+      .references(() => communities.id, {
+        onDelete: "cascade",
+      }),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id),
+    content: varchar("content", { length: 1024 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    disabled: boolean("disabled").default(false),
+    deleted: boolean("deleted").default(false),
+  },
+  (table) => {
+    return {
+      communityIdIdx: index("post_community_id_idx").on(table.communityId),
+      ownerIdIdx: index("post_owner_id_idx").on(table.ownerId),
+      createdAtIdx: index("post_created_at_idx").on(table.createdAt),
+    }
+  }
+)
+
+export const postRelations = relations(posts, ({ one }) => ({
+  community: one(communities, {
+    fields: [posts.communityId],
+    references: [communities.id],
+  }),
+}))
+
+export type Post = InferModel<typeof posts>
+export type CommunityPost = InferModel<typeof posts, "insert">
+
+// threadPost comments
+
+export const postComments = pgTable(
+  "post_comment",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, {
+        onDelete: "cascade",
+      }),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id),
+    content: varchar("content", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deleted: boolean("deleted").default(false),
+  },
+  (table) => {
+    return {
+      postIdIdx: index("post_comment_post_id_idx").on(table.postId),
+      ownerIdIdx: index("post_comment_owner_id_idx").on(table.ownerId),
+      createdAtIdx: index("post_comment_created_at_idx").on(table.createdAt),
+    }
+  }
+)
+
+export type PostComment = InferModel<typeof postComments>
+export type NewPostComment = InferModel<typeof postComments, "insert">
+
+// threadPost reactions
+
+export const postReactions = pgTable(
+  "post_reaction",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, {
+        onDelete: "cascade",
+      }),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id),
+    reaction: boolean("reaction").notNull(),
+  },
+  (table) => {
+    return {
+      postIdIdx: index("post_reaction_post_id_idx").on(table.postId),
+      ownerIdIdx: index("post_reaction_owner_id_idx").on(table.ownerId),
+    }
+  }
+)
+
+export type PostReaction = InferModel<typeof postReactions>
+export type NewPostReaction = InferModel<typeof postReactions, "insert">
+
+export const postContentTypeEnum = pgEnum("post_content_type", [
+  "poll",
+  "image",
+  "video",
+])
+
+export const postContent = pgTable(
+  "post_content",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, {
+        onDelete: "cascade",
+      }),
+    type: postContentTypeEnum("type").notNull(),
+  },
+  (table) => {
+    return {
+      postIdIdx: index("post_content_post_id_idx").on(table.postId),
+    }
+  }
+)
 
 export const polls = pgTable(
   "poll",
   {
     id: uuid("id").primaryKey().defaultRandom().notNull(),
-    ownerId: uuid("owner_id")
+    postId: uuid("post_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => posts.id),
     desc: varchar("desc", { length: 255 }).notNull(),
     startedAt: timestamp("started_at").defaultNow().notNull(),
     endedAt: timestamp("ended_at"),
@@ -83,7 +333,7 @@ export const polls = pgTable(
   },
   (table) => {
     return {
-      ownerIdIdx: index("poll_owner_id_idx").on(table.ownerId),
+      ownerIdIdx: index("poll_post_id_idx").on(table.postId),
       startedAtIdx: index("poll_started_at_idx").on(table.startedAt),
     }
   }

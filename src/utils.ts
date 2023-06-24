@@ -20,3 +20,7 @@ export const generateUUID = () => {
     return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
   })
 }
+
+export const truncateText = (text: string, limit: number) => {
+  return text.substring(0, limit) + (text.length > limit ? "..." : "")
+}

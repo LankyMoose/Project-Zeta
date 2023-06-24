@@ -16,13 +16,13 @@ import { log } from "../../.cb/logger.js"
 
 import { Document } from "../Document.jsx"
 import { App } from "../App"
-import { configurePollRoutes } from "./api/polls.js"
 import { configureUserRoutes } from "./api/users.js"
 import { env } from "../env.js"
 import { authService } from "./services/authService.js"
 import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
 import { generateUUID } from "../utils.js"
+import { configureCommunityRoutes } from "./api/communities.js"
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (
@@ -219,7 +219,7 @@ if (isDev)
   await import("../../.cb/sse").then(({ configureSSE }) => configureSSE(app))
 
 configureUserRoutes(app)
-configurePollRoutes(app)
+configureCommunityRoutes(app)
 
 app.get("/*", async (req, res) => {
   const reqUser = req.cookies["user"]

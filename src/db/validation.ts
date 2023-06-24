@@ -27,3 +27,27 @@ export const pollValidation = {
     return true
   },
 }
+
+export const communityValidation = {
+  minCommunityNameLength: 6,
+  maxCommunityNameLength: 128,
+  minCommunityDescLength: 0,
+  maxCommunityDescLength: 255,
+  isCommunityValid: (name: string, desc: string) => {
+    if (
+      name.length < communityValidation.minCommunityNameLength ||
+      name.length > communityValidation.maxCommunityNameLength
+    ) {
+      return false
+    }
+
+    if (
+      desc.length < communityValidation.minCommunityDescLength ||
+      desc.length > communityValidation.maxCommunityDescLength
+    ) {
+      return false
+    }
+
+    return true
+  },
+}
