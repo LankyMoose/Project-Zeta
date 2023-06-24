@@ -1,7 +1,7 @@
 .community-page-inner {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2rem;
   justify-content: space-between;
   width: 100%;
 }
@@ -11,6 +11,9 @@
 @media screen and (min-width: 768px) {
   .community-page-inner {
     flex-direction: row;
+  }
+  .community-page-members {
+    flex-basis: 300px;
   }
 }
 

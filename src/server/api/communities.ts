@@ -3,12 +3,10 @@ import { communityService } from "../services/communityService"
 import { NewCommunity } from "../../db/schema"
 import { communityValidation } from "../../db/validation"
 import {
-  ForbiddenError,
   InvalidRequestError,
   NotAuthenticatedError,
   NotFoundError,
   ServerError,
-  UnauthorizedError,
 } from "../../errors"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
@@ -30,12 +28,11 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
     if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
-    const member = await communityService.getCommunityMember(
+    const error = await communityService.checkCommunityMemberValidity(
       req.params.id,
       req.cookies.user_id
     )
-    if (!member) throw new UnauthorizedError()
-    if (member.disabled) throw new ForbiddenError()
+    if (error) throw error
 
     return res
   })

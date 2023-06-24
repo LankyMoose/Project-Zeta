@@ -6,6 +6,7 @@ import {
   communities,
   communityMembers,
 } from "../../db/schema"
+import { ForbiddenError, UnauthorizedError } from "../../errors"
 
 export const communityService = {
   pageSize: 10,
@@ -63,6 +64,18 @@ export const communityService = {
       console.error(error)
       return
     }
+  },
+
+  async checkCommunityMemberValidity(
+    communityId: string,
+    userId: string
+  ): Promise<Error | void> {
+    const member = await communityService.getCommunityMember(
+      communityId,
+      userId
+    )
+    if (!member) return new UnauthorizedError()
+    if (member.disabled) return new ForbiddenError()
   },
 
   async getPage(page = 0) {

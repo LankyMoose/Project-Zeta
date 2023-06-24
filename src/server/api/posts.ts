@@ -8,6 +8,7 @@ import {
   ServerError,
   UnauthorizedError,
 } from "../../errors"
+import { communityService } from "../services/communityService"
 
 export function configurePostsRoutes(app: FastifyInstance) {
   app.post<{ Body: NewPost }>("/api/posts", async (req) => {
@@ -17,6 +18,12 @@ export function configurePostsRoutes(app: FastifyInstance) {
 
     if (!postValidation.isPostValid(req.body.title, req.body.content))
       throw new InvalidRequestError()
+
+    const error = await communityService.checkCommunityMemberValidity(
+      req.body.communityId,
+      userId
+    )
+    if (error) throw error
 
     const res = await postService.createPost(req.body)
     if (!res) throw new ServerError()

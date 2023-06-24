@@ -1,3 +1,5 @@
+import { Post } from "../db/schema"
+
 export type CommunityMemberUserData = {
   avatarUrl?: string
   createdAt: string | Date
@@ -23,6 +25,6 @@ export type CommunityData = {
   members: CommunityMemberData[]
   moderators: CommunityMemberData[]
   owner: CommunityMemberData
-  posts: any[]
+  posts: Post[]
   title: string
 }
