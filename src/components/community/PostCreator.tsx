@@ -35,7 +35,7 @@ export const PostCreator = () => {
     const res = await addPost({
       title,
       content,
-      communityId: selectedCommunity.value,
+      communityId: selectedCommunity.value.id,
       ownerId: userId,
     })
 
@@ -65,10 +65,7 @@ export const PostCreator = () => {
 
   return (
     <>
-      <Modal
-        visible={postCreatorModalOpen}
-        toggle={() => (postCreatorModalOpen.value = false)}
-      >
+      <Modal visible={postCreatorModalOpen} toggle={() => (postCreatorModalOpen.value = false)}>
         <ModalHeader>
           <h3>Create post</h3>
         </ModalHeader>
@@ -84,11 +81,7 @@ export const PostCreator = () => {
           </div>
           <div className="flex flex-column">
             <label htmlFor="body">Content</label>
-            <textarea
-              id="content"
-              bind:value={() => state.value.content}
-              oninput={handleChange}
-            />
+            <textarea id="content" bind:value={() => state.value.content} oninput={handleChange} />
           </div>
         </ModalBody>
         <ModalFooter>
@@ -104,11 +97,7 @@ export const PostCreator = () => {
             className="btn btn-primary hover-animate"
             watch={[loading, state]}
             bind:disabled={() =>
-              loading.value ||
-              !postValidation.isPostValid(
-                state.value.title,
-                state.value.content
-              )
+              loading.value || !postValidation.isPostValid(state.value.title, state.value.content)
             }
             onclick={createPost}
           >

@@ -33,6 +33,7 @@ export const isNotAuthenticated = (self: Component) => !getUser(self)
 
 export const postCreatorModalOpen = createSignal(false)
 export const communityCreatorModalOpen = createSignal(false)
+export const communityEditorModalOpen = createSignal(false)
 export const selectedCommunity = createSignal<{
   id: string
   url_title: string

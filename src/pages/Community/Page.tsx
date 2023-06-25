@@ -1,9 +1,11 @@
 import * as Cinnabun from "cinnabun"
+import { createSignal } from "cinnabun"
 import "./Page.css"
 import { getCommunity } from "../../client/actions/communities"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
 import {
+  communityEditorModalOpen,
   isNotAuthenticated,
   pathStore,
   postCreatorModalOpen,
@@ -14,16 +16,19 @@ import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
 import { Button } from "../../components/Button"
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"
+import { IconButton } from "../../components/IconButton"
+import { EditIcon } from "../../components/icons"
 
 export default function CommunitiesPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
-
+  const state = createSignal<CommunityData | undefined>(undefined)
   const loadCommunity = async (): Promise<CommunityData | undefined> => {
     const res = await getCommunity(params.url_title!)
     if (!res) {
       setPath(pathStore, "/communities")
       return
     }
+    state.value = res
     selectedCommunity.value = {
       id: res.id,
       url_title: params.url_title!,
@@ -51,7 +56,16 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
         return (
           <>
             <div className="page-title flex-column">
-              <h2>{community.title}</h2>
+              <h2>
+                {community.title}{" "}
+                {community.owner.user.id === userStore.value?.userId ? (
+                  <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
+                    <EditIcon color="var(--primary)" />
+                  </IconButton>
+                ) : (
+                  <></>
+                )}
+              </h2>
               {community.description && <p className="text-muted">{community.description}</p>}
             </div>
             <div className="page-body">
