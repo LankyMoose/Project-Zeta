@@ -7,14 +7,26 @@ import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../client/actions/posts"
-import { isNotAuthenticated, pathStore, selectedCommunity, userStore } from "../../state"
-import "./PostCard.css"
+import { pathStore, selectedCommunity, userStore } from "../../state"
 import { PostCardComments } from "./PostCardComments"
+import "./PostCard.css"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
+  const reacting = createSignal(false)
 
+  const hasReacted = (reaction: boolean) => {
+    if (!userStore.value) return false
+    return state.value.reactions.some(
+      (r) => r.ownerId === userStore.value?.userId && r.reaction === reaction
+    )
+  }
   const addReaction = async (reaction: boolean) => {
+    if (reacting.value) return
+    if (!userStore.value) return
+    if (hasReacted(reaction)) return
+
+    reacting.value = true
     const res = await addPostReaction(post.id, reaction)
     if (res) {
       // find and remove previous reaction
@@ -26,9 +38,14 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       state.value.reactions.push(res)
       state.notify()
     }
+    reacting.value = false
   }
 
-  // get total positive / negative reactions
+  const disableReaction = () => {
+    if (reacting.value) return true
+    if (!userStore.value) return true
+    return false
+  }
 
   const totalReactions = computed(state, () => {
     return state.value.reactions.reduce(
@@ -68,8 +85,8 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
         <IconButton
           onclick={() => addReaction(true)}
           className="rounded-lg flex align-items-center gap-sm"
-          watch={userStore}
-          bind:disabled={isNotAuthenticated}
+          watch={[userStore, reacting]}
+          bind:disabled={disableReaction}
         >
           <ThumbsUpIcon
             color="var(--primary)"
@@ -83,8 +100,8 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
         <IconButton
           onclick={() => addReaction(false)}
           className="rounded-lg flex align-items-center gap-sm"
-          watch={userStore}
-          bind:disabled={isNotAuthenticated}
+          watch={[userStore, reacting]}
+          bind:disabled={disableReaction}
         >
           <ThumbsDownIcon
             color="var(--primary)"
