@@ -84,7 +84,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           onclick={() => addReaction(true)}
           bind:className={() =>
             `icon-button flex align-items-center gap-sm ${
-              userReaction.value?.reaction === true ? "active" : ""
+              userReaction.value?.reaction === true ? "selected" : ""
             }`
           }
           watch={[userStore, reacting, userReaction]}
@@ -103,7 +103,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           onclick={() => addReaction(false)}
           bind:className={() =>
             `icon-button flex align-items-center gap-sm ${
-              userReaction.value?.reaction === false ? "active" : ""
+              userReaction.value?.reaction === false ? "selected" : ""
             }`
           }
           watch={[userStore, reacting, userReaction]}

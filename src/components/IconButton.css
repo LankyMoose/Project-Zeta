@@ -11,11 +11,11 @@
   opacity: .85;
 }
 
-.icon-button.active {
+.icon-button.selected {
   background-color: rgba(0, 0, 0, .1);
 }
 @media (prefers-color-scheme: light) {
-  .icon-button.active {
+  .icon-button.selected {
     background-color: rgba(0, 0, 0, .05);
   }
 }

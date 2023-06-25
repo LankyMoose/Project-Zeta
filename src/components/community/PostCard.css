@@ -27,7 +27,7 @@
 }
 
 .post-card .comments-list {
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
   background: rgba(0, 0, 0, .075);
 }
 @media (prefers-color-scheme: light) {
@@ -38,9 +38,8 @@
 
 
 .post-card .comment-item {
-  margin-bottom: 1rem;
   border-bottom: 1px solid rgba(0, 0, 0, .15);
-  padding: 0.5rem;
+  padding: 0.5rem 0;
 }
 @media (prefers-color-scheme: light) {
   .post-card .comment-item {

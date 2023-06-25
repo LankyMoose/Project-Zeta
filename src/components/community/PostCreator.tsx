@@ -35,7 +35,7 @@ export const PostCreator = () => {
     const res = await addPost({
       title,
       content,
-      communityId: selectedCommunity.value.id,
+      communityId: selectedCommunity.value.id!,
       ownerId: userId,
     })
 
