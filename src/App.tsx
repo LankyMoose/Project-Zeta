@@ -40,14 +40,8 @@ export const App = () => {
           <Route path="/communities" component={CommunitiesPage} />
 
           <Route path="/communities/:communityId" component={CommunityPage} />
-          <Route
-            path="/communities/:communityId/:postId"
-            component={CommunityPostPage}
-          />
-          <Route
-            path="/communities/:communityId/members"
-            component={CommunityMembersPage}
-          />
+          <Route path="/communities/:communityId/:postId" component={CommunityPostPage} />
+          <Route path="/communities/:communityId/members" component={CommunityMembersPage} />
         </Router>
       </main>
       <Portal>

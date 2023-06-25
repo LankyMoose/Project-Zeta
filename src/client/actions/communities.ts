@@ -5,10 +5,10 @@ import { Community, NewCommunity } from "../../db/schema"
 export const getCommunities = async (page = 0): Promise<Community[] | void> => {
   try {
     const response = await fetch(`${API_URL}/communities?page=${page}`)
-    if (!response.ok)
-      throw new Error(response.statusText ?? "failed to get communities")
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
 
-    return response.json()
+    return data
   } catch (error: any) {
     addNotification({
       type: "error",
@@ -20,10 +20,10 @@ export const getCommunities = async (page = 0): Promise<Community[] | void> => {
 export const getCommunity = async (id: string): Promise<Community | void> => {
   try {
     const response = await fetch(`${API_URL}/communities/${id}`)
-    if (!response.ok)
-      throw new Error(response.statusText ?? "failed to get community")
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
 
-    return response.json()
+    return data
   } catch (error: any) {
     addNotification({
       type: "error",
@@ -43,10 +43,10 @@ export const createCommunity = async (
       },
       body: JSON.stringify(community),
     })
-    if (!response.ok)
-      throw new Error(response.statusText ?? "failed to create community")
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
 
-    return response.json()
+    return data
   } catch (error: any) {
     addNotification({
       type: "error",
@@ -64,10 +64,10 @@ export const updateCommunity = async (community: NewCommunity) => {
       },
       body: JSON.stringify(community),
     })
-    if (!response.ok)
-      throw new Error(response.statusText ?? "failed to update community")
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
 
-    return response.json()
+    return data
   } catch (error: any) {
     addNotification({
       type: "error",

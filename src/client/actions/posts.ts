@@ -11,11 +11,12 @@ export const addPost = async (post: NewPost) => {
       },
       body: JSON.stringify(post),
     })
-    if (!response.ok)
-      throw new Error(response.statusText ?? "failed to add post")
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
 
-    return response.json()
+    return data
   } catch (error: any) {
+    console.error(error)
     addNotification({
       type: "error",
       text: error.message,
@@ -25,13 +26,11 @@ export const addPost = async (post: NewPost) => {
 
 export const getPosts = async (communityId: string, offset: number) => {
   try {
-    const response = await fetch(
-      `${API_URL}/posts?communityId=${communityId}&offset=${offset}`
-    )
-    if (!response.ok)
-      throw new Error(response.statusText ?? "failed to get posts")
+    const response = await fetch(`${API_URL}/posts?communityId=${communityId}&offset=${offset}`)
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
 
-    return response.json()
+    return data
   } catch (error: any) {
     addNotification({
       type: "error",

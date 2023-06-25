@@ -1,12 +1,7 @@
 import { db } from "../../db"
 
-import {
-  NewCommunity,
-  categoryCommunities,
-  communities,
-  communityMembers,
-} from "../../db/schema"
-import { ForbiddenError, UnauthorizedError } from "../../errors"
+import { NewCommunity, categoryCommunities, communities, communityMembers } from "../../db/schema"
+import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
 
 export const communityService = {
   pageSize: 10,
@@ -15,10 +10,7 @@ export const communityService = {
     try {
       return await db.query.communities.findFirst({
         where: (community, { eq, and }) =>
-          and(
-            eq(useId ? community.id : community.url_title, titleOrId),
-            eq(community.disabled, false)
-          ),
+          and(eq(useId ? community.id : community.url_title, titleOrId), eq(community.disabled, false)),
         with: {
           posts: {
             limit: 10,
@@ -87,11 +79,7 @@ export const communityService = {
     try {
       return await db.query.communityMembers.findFirst({
         where: (member, { and, eq }) =>
-          and(
-            eq(member.communityId, communityId),
-            eq(member.userId, userId),
-            eq(member.disabled, false)
-          ),
+          and(eq(member.communityId, communityId), eq(member.userId, userId), eq(member.disabled, false)),
       })
     } catch (error) {
       console.error(error)
@@ -99,14 +87,8 @@ export const communityService = {
     }
   },
 
-  async checkCommunityMemberValidity(
-    communityId: string,
-    userId: string
-  ): Promise<Error | void> {
-    const member = await communityService.getCommunityMember(
-      communityId,
-      userId
-    )
+  async checkCommunityMemberValidity(communityId: string, userId: string): Promise<Error | void> {
+    const member = await communityService.getCommunityMember(communityId, userId)
     if (!member) return new UnauthorizedError()
     if (member.disabled) return new ForbiddenError()
   },
@@ -129,12 +111,10 @@ export const communityService = {
     community: Omit<NewCommunity, "url_title">,
     userId: string,
     categoryIds?: string[]
-  ): Promise<{ id: string } | void> {
+  ): Promise<{ id: string } | ApiError | undefined> {
     try {
-      const newCommunity = (
-        await db.insert(communities).values(community).returning()
-      ).at(0)
-      if (!newCommunity) throw new Error("failed to create community")
+      const newCommunity = (await db.insert(communities).values(community).onConflictDoNothing().returning()).at(0)
+      if (!newCommunity) return new ServerError("Failed to create community - name must be unique")
 
       await db
         .insert(communityMembers)

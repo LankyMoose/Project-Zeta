@@ -12,7 +12,7 @@ export class ApiError implements FastifyError {
   stack?: string | undefined
   cause?: unknown
 
-  constructor(code: string, message: API_ERROR, statusCode?: number) {
+  constructor(code: string, message: API_ERROR | string, statusCode?: number) {
     this.code = code
     this.name = code
     this.message = message
@@ -21,37 +21,43 @@ export class ApiError implements FastifyError {
 }
 
 export class InvalidRequestError extends ApiError {
-  constructor() {
-    super("VALIDATION_ERROR", API_ERROR.INVALID_REQUEST, 400)
+  constructor(message?: string) {
+    super("VALIDATION_ERROR", message ?? API_ERROR.INVALID_REQUEST, 400)
   }
 }
 export class NotFoundError extends ApiError {
-  constructor() {
-    super("NOT_FOUND", API_ERROR.NOT_FOUND, 404)
+  constructor(message?: string) {
+    super("NOT_FOUND", message ?? API_ERROR.NOT_FOUND, 404)
   }
 }
 export class NotAuthenticatedError extends ApiError {
-  constructor() {
-    super("NOT_AUTHENTICATED", API_ERROR.NOT_AUTHENTICATED, 401)
+  constructor(message?: string) {
+    super("NOT_AUTHENTICATED", message ?? API_ERROR.NOT_AUTHENTICATED, 401)
   }
 }
 export class UnauthorizedError extends ApiError {
-  constructor() {
-    super("UNAUTHORIZED", API_ERROR.UNAUTHORIZED, 403)
+  constructor(message?: string) {
+    super("UNAUTHORIZED", message ?? API_ERROR.UNAUTHORIZED, 403)
   }
 }
 export class ForbiddenError extends ApiError {
-  constructor() {
-    super("FORBIDDEN", API_ERROR.FORBIDDEN, 403)
+  constructor(message?: string) {
+    super("FORBIDDEN", message ?? API_ERROR.FORBIDDEN, 403)
   }
 }
 export class DisabledError extends ApiError {
-  constructor() {
-    super("DISABLED", API_ERROR.DISABLED, 403)
+  constructor(message?: string) {
+    super("DISABLED", message ?? API_ERROR.DISABLED, 403)
   }
 }
 export class ServerError extends ApiError {
-  constructor() {
-    super("SERVER_ERROR", API_ERROR.SERVER_ERROR, 500)
+  constructor(message?: string) {
+    super("SERVER_ERROR", message ?? API_ERROR.SERVER_ERROR, 500)
+  }
+}
+
+export class CommunityNameNotAvailableError extends ApiError {
+  constructor(message?: string) {
+    super("COMMUNITY_NAME_NOT_AVAILABLE", message ?? API_ERROR.COMMUNITY_NAME_NOT_AVAILABLE, 400)
   }
 }

@@ -46,9 +46,7 @@ export const CommunityCreator = () => {
     <Modal
       onclose={onModalClose}
       visible={communityCreatorModalOpen}
-      toggle={() =>
-        (communityCreatorModalOpen.value = !communityCreatorModalOpen.value)
-      }
+      toggle={() => (communityCreatorModalOpen.value = !communityCreatorModalOpen.value)}
     >
       <ModalHeader>
         <h2>Create Community</h2>
@@ -81,17 +79,11 @@ export const CommunityCreator = () => {
               watch={[loading, state]}
               bind:disabled={() =>
                 loading.value ||
-                !communityValidation.isCommunityValid(
-                  state.value.title,
-                  state.value.description
-                )
+                !communityValidation.isCommunityValid(state.value.title, state.value.description)
               }
             >
               Create
-              <EllipsisLoader
-                watch={loading}
-                bind:visible={() => loading.value}
-              />
+              <EllipsisLoader watch={loading} bind:visible={() => loading.value} />
             </Button>
           </div>
         </form>

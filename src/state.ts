@@ -23,9 +23,7 @@ const getUserDataFromCookie = (): PublicUser | null => {
   return parsed ?? null
 }
 
-export const userStore = createSignal<PublicUser | null>(
-  isClient ? getUserDataFromCookie() : null
-)
+export const userStore = createSignal<PublicUser | null>(isClient ? getUserDataFromCookie() : null)
 
 export const getUser = (self: Component) =>
   useRequestData<PublicUser | null>(self, "data.user", userStore.value)

@@ -30,10 +30,7 @@ import { configureUserRoutes } from "./api/users.js"
 import { ServerError } from "../errors.jsx"
 
 const _fetch = globalThis.fetch ?? fetch
-globalThis.fetch = async (
-  input: RequestInfo | URL,
-  init?: RequestInit | undefined
-) => {
+globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit | undefined) => {
   try {
     if (typeof input === "string" && input.startsWith("/")) {
       input = `${env.url}${input}`
@@ -71,10 +68,7 @@ const cookieSettings: Partial<CookieSerializeOptions> = {
 app.register(compress, { global: false })
 app.register(fStatic, {
   prefix: "/static/",
-  root: path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../../dist/static"
-  ),
+  root: path.join(path.dirname(fileURLToPath(import.meta.url)), "../../dist/static"),
 })
 app.register(websocket, {
   options: { maxPayload: 1024 },
@@ -120,29 +114,23 @@ app.register(oauthPlugin, {
 app.setErrorHandler(function (error, _, reply) {
   // Log error
   this.log.error(error)
+
+  console.log("errorHandler", error)
   // Send error response
-  reply
-    .status(error.statusCode ?? 500)
-    .send({ message: error.message ?? "Internal Server Error" })
+  reply.status(error.statusCode ?? 500).send({ message: error.message ?? "Internal Server Error" })
 })
 
 const loadUserInfo = async (reqOrToken: FastifyRequest | string) => {
-  const tkn =
-    typeof reqOrToken === "string"
-      ? reqOrToken
-      : reqOrToken.cookies["access_token"]
+  const tkn = typeof reqOrToken === "string" ? reqOrToken : reqOrToken.cookies["access_token"]
 
   if (!tkn) return null
 
-  const userDataRes = await fetch(
-    "https://www.googleapis.com/oauth2/v2/userinfo",
-    {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + tkn,
-      },
-    }
-  )
+  const userDataRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + tkn,
+    },
+  })
   return userDataRes.json()
 }
 
@@ -224,8 +212,7 @@ app.get("/favicon.ico", (_, res) => {
   res.status(404).send()
 })
 
-if (isDev)
-  await import("../../.cb/sse").then(({ configureSSE }) => configureSSE(app))
+if (isDev) await import("../../.cb/sse").then(({ configureSSE }) => configureSSE(app))
 
 configureUserRoutes(app)
 configureCommunityRoutes(app)

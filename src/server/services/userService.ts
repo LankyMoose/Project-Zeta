@@ -9,7 +9,7 @@ export const userService = {
       return await db
         .select()
         .from(users)
-        .where(eq(users.disabled, false))
+        .where(and(eq(users.disabled, false), eq(users.deleted, false)))
         .limit(this.pageSize)
         .offset(page * this.pageSize)
     } catch (error) {
@@ -23,7 +23,7 @@ export const userService = {
         await db
           .select()
           .from(users)
-          .where(and(eq(users.id, id), eq(users.disabled, false)))
+          .where(and(eq(users.id, id), eq(users.disabled, false), eq(users.deleted, false)))
           .limit(1)
       ).at(0)
     } catch (error) {
@@ -40,7 +40,7 @@ export const userService = {
         await db
           .update(users)
           .set(user)
-          .where(eq(users.id, user.id))
+          .where(and(eq(users.id, user.id), eq(users.disabled, false), eq(users.deleted, false)))
           .returning()
       ).at(0)
     } catch (error) {
