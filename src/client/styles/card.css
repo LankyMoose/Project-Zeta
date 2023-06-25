@@ -10,8 +10,8 @@ ul.card-list {
 
 
 .card {
-  --highlight: rgba(255, 255, 255, .075);
-  --border: rgba(255, 255, 255, .025);
+  --highlight: rgba(255, 255, 255, .035);
+  --border: rgba(255, 255, 255, .015);
   padding: 1rem;
   background-color: var(--highlight);
   display: flex;
@@ -25,7 +25,7 @@ ul.card-list {
 
 @media (prefers-color-scheme: light) {
   .card {
-    --highlight: rgba(0, 0, 0, .05);
+    --highlight: rgba(0, 0, 0, .025);
     --border: rgba(0, 0, 0, .025);
   }
 }

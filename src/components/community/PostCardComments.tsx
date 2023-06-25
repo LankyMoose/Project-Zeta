@@ -19,7 +19,7 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
           <span className="author">{comment.user.name}</span>
           <span>{formatUTCDate(comment.createdAt.toString())}</span>
         </div>
-        <p className="m-0">{comment.content}</p>
+        <p className="m-0 comment">{comment.content}</p>
       </div>
     </div>
   )

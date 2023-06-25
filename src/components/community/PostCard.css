@@ -28,19 +28,27 @@
 
 .post-card .comments-list {
   padding: 0.5rem 1rem;
-  background: rgba(0, 0, 0, .075);
+  background: rgba(0, 0, 0, .06);
 }
 @media (prefers-color-scheme: light) {
   .post-card .comments-list {
-    background: rgba(0, 0, 0, .035);
+    background: rgba(0, 0, 0, .025);
   }
 }
 
-
+.post-card .comment-item .comment {
+  color: #ddd;
+}
+@media (prefers-color-scheme: light) {
+  .post-card .comment-item .comment {
+    color: #555;
+  }
+}
 .post-card .comment-item {
   border-bottom: 1px solid rgba(0, 0, 0, .15);
   padding: 0.5rem 0;
 }
+
 @media (prefers-color-scheme: light) {
   .post-card .comment-item {
     border-bottom: 1px solid rgba(0, 0, 0, .05);

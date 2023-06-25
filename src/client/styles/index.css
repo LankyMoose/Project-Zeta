@@ -15,7 +15,9 @@
   --danger: #e34e4e;
   --text-muted: #aaaaaa;
   --content-area: #2e2e2e;
+  --content-area-dark: #2a2a2a;
   --border: rgba(255, 255, 255, .025);
+  --header-height: 66px;
 
   color-scheme: light dark;
   color: var(--light);
@@ -32,7 +34,8 @@
   :root {
     color: var(--dark);
     background-color: var(--light);
-    --content-area: #f4f4f4;
+    --content-area: #f4f4f9;
+    --content-area-dark: #f0f0f5;
     --border: rgba(0, 0, 0, .05);
     --text-muted: #666666;
   }
@@ -91,8 +94,13 @@ header {
   top: 0;
   background-color: var(--content-area);
   z-index: 100;
+  height: var(--header-height);
+  box-shadow: .25rem 0 1rem rgba(0, 0, 0, .05);
 }
 @media screen and (min-width: 480px) {
+  :root {
+    --header-height: 100px;
+  }
   header {
     padding: 2rem;
   }

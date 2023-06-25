@@ -18,6 +18,7 @@ import { Button } from "../../components/Button"
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"
 import { IconButton } from "../../components/IconButton"
 import { EditIcon } from "../../components/icons"
+import { SlideInOut } from "cinnabun-transitions"
 
 export default function CommunitiesPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -41,6 +42,20 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
     return res
   }
 
+  const hasScrolled = createSignal(false)
+
+  const onScroll = () => {
+    if (hasScrolled.value && window.scrollY > 100) return
+    hasScrolled.value = window.scrollY > 100
+  }
+
+  const onMounted = () => {
+    window.addEventListener("scroll", onScroll)
+  }
+  const onUnmounted = () => {
+    window.removeEventListener("scroll", onScroll)
+  }
+
   return (
     <Cinnabun.Suspense promise={loadCommunity} cache>
       {(loading: boolean, community: CommunityData | undefined) => {
@@ -59,10 +74,10 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
         }
 
         return (
-          <>
-            <div className="page-title flex-column">
+          <div onMounted={onMounted} onUnmounted={onUnmounted} className="page-wrapper">
+            <div className="page-title">
               <h2>
-                {community.title}{" "}
+                {community.title}
                 {community.owner.user.id === userStore.value?.userId ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
@@ -73,6 +88,33 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
               </h2>
               {community.description && <p className="text-muted">{community.description}</p>}
             </div>
+            <SlideInOut
+              className="community-page-fixed-title flex justify-content-between align-items-center"
+              settings={{ from: "top" }}
+              watch={hasScrolled}
+              bind:visible={() => hasScrolled.value}
+            >
+              <h2 className="m-0">{community.title}</h2>
+              <div className="flex gap">
+                {community.owner.user.id === userStore.value?.userId ? (
+                  <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
+                    <EditIcon color="var(--primary)" />
+                  </IconButton>
+                ) : (
+                  <></>
+                )}
+
+                <Button
+                  className="btn sm_btn-sm btn-primary hover-animate flex align-items-center nowrap"
+                  onclick={() => (postCreatorModalOpen.value = true)}
+                  watch={userStore}
+                  bind:disabled={isNotAuthenticated}
+                >
+                  Create post
+                </Button>
+              </div>
+            </SlideInOut>
+
             <div className="page-body">
               <div className="community-page-inner">
                 <section className="flex flex-column community-page-posts">
@@ -107,7 +149,7 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
                 </section>
               </div>
             </div>
-          </>
+          </div>
         )
       }}
     </Cinnabun.Suspense>

@@ -17,7 +17,25 @@
   }
 }
 
-
-/*
-    flex flex-row w-100 justify-content-between gap
-*/
+.community-page-fixed-title {
+  padding: 1rem;
+  position: fixed;
+  top: var(--header-height);
+  width: 100%;
+  left: 0;
+  background-color: var(--content-area-dark);
+  z-index: 99;
+  font-size: .8rem;
+  box-shadow: .25rem 0 1rem rgba(0, 0, 0, .3);
+}
+@media (prefers-color-scheme: light) {
+  .community-page-fixed-title {
+    box-shadow: .25rem 0 1rem rgba(0, 0, 0, .1);  
+  }
+}
+  
+@media screen and (min-width: 480px) {
+  .community-page-fixed-title {
+    padding: 1rem 2rem;
+  }
+}
