@@ -56,7 +56,7 @@ export const createCommunity = async (
   }
 }
 
-export const updateCommunity = async (community: NewCommunity) => {
+export const updateCommunity = async (community: NewCommunity): Promise<Community | void> => {
   try {
     const response = await fetch(`${API_URL}/communities/${community.id}`, {
       method: "PATCH",

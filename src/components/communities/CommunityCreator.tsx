@@ -63,6 +63,7 @@ export const CommunityCreator = () => {
               bind:value={() => state.value.title}
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="description">Description</label>
             <textarea

@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm"
 import { db } from "../../db"
 
 import { NewCommunity, categoryCommunities, communities, communityMembers } from "../../db/schema"
@@ -150,6 +151,24 @@ export const communityService = {
       return {
         id: newCommunity.url_title!,
       }
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async updateCommunity(community: Partial<NewCommunity>, communityId: string) {
+    try {
+      const updatedCommunity = (
+        await db
+          .update(communities)
+          .set(community)
+          .where(eq(communities.id, communityId))
+          .returning()
+      ).at(0)
+
+      if (!updatedCommunity) return new ServerError("Failed to update community")
+      return updatedCommunity
     } catch (error) {
       console.error(error)
       return

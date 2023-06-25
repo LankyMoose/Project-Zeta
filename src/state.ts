@@ -1,6 +1,7 @@
 import { Cinnabun, Component, createSignal } from "cinnabun"
 import { useRequestData } from "cinnabun/ssr"
 import { PublicUser } from "./types/user"
+import { Community } from "./db/schema"
 
 const isClient = Cinnabun.isClient
 
@@ -34,8 +35,5 @@ export const isNotAuthenticated = (self: Component) => !getUser(self)
 export const postCreatorModalOpen = createSignal(false)
 export const communityCreatorModalOpen = createSignal(false)
 export const communityEditorModalOpen = createSignal(false)
-export const selectedCommunity = createSignal<{
-  id: string
-  url_title: string
-} | null>(null)
+export const selectedCommunity = createSignal<Partial<Community> | null>(null)
 export const selectedCommunityPost = createSignal<string | null>(null)

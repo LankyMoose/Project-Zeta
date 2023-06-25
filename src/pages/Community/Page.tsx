@@ -31,7 +31,12 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
     state.value = res
     selectedCommunity.value = {
       id: res.id,
+      title: res.title,
       url_title: params.url_title!,
+      description: res.description,
+      disabled: res.disabled,
+      private: res.private,
+      createdAt: new Date(res.createdAt),
     }
     return res
   }

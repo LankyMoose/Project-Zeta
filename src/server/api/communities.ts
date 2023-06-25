@@ -2,7 +2,14 @@ import { FastifyInstance } from "fastify"
 import { communityService } from "../services/communityService"
 import { NewCommunity } from "../../db/schema"
 import { communityValidation } from "../../db/validation"
-import { ApiError, InvalidRequestError, NotAuthenticatedError, NotFoundError, ServerError } from "../../errors"
+import {
+  ApiError,
+  InvalidRequestError,
+  NotAuthenticatedError,
+  NotFoundError,
+  ServerError,
+  UnauthorizedError,
+} from "../../errors"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) => {
@@ -19,7 +26,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!res.private) return res
     if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
-    const error = await communityService.checkCommunityMemberValidity(req.params.id, req.cookies.user_id)
+    const error = await communityService.checkCommunityMemberValidity(res.id, req.cookies.user_id)
     if (error) throw error
 
     return res
@@ -45,4 +52,34 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!res) throw new ServerError("Failed to create community")
     return res
   })
+
+  app.patch<{ Body: Partial<NewCommunity>; Params: { id?: string } }>(
+    "/api/communities/:id",
+    async (req) => {
+      if (!req.cookies.user_id) throw new NotAuthenticatedError()
+      if (!req.params.id) throw new InvalidRequestError()
+      if (req.body.url_title) delete req.body.url_title
+
+      const communityId = req.params.id
+      const userId = req.cookies.user_id
+
+      const { title, description, private: _private } = req.body
+      if (!communityValidation.isCommunityValid(title, description)) throw new InvalidRequestError()
+
+      const communityMember = await communityService.getCommunityMember(communityId, userId)
+      if (!communityMember || communityMember.memberType !== "owner") return new UnauthorizedError()
+
+      const res = await communityService.updateCommunity(
+        {
+          title,
+          description,
+          private: _private,
+        },
+        communityId
+      )
+      if (res instanceof ApiError) throw res
+      if (!res) throw new ServerError("Failed to update community")
+      return res
+    }
+  )
 }

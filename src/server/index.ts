@@ -115,7 +115,6 @@ app.setErrorHandler(function (error, _, reply) {
   // Log error
   this.log.error(error)
 
-  console.log("errorHandler", error)
   // Send error response
   reply.status(error.statusCode ?? 500).send({ message: error.message ?? "Internal Server Error" })
 })

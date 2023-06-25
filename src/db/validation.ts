@@ -33,18 +33,23 @@ export const communityValidation = {
   maxCommunityNameLength: 128,
   minCommunityDescLength: 0,
   maxCommunityDescLength: 255,
-  isCommunityValid: (name: string, desc: string) => {
+  isCommunityNameValid: (name: string | undefined) => {
+    if (!name) return false
     if (
       name.length < communityValidation.minCommunityNameLength ||
       name.length > communityValidation.maxCommunityNameLength
     ) {
       return false
     }
-    // ensure name has no special characters (except hyphens and spaces)
+
     if (!/^[a-zA-Z0-9- ]*$/.test(name)) {
       return false
     }
-
+    return true
+  },
+  isCommunityValid: (name: string | undefined, desc: string | undefined) => {
+    if (!desc) return false
+    if (!communityValidation.isCommunityNameValid(name)) return false
     if (
       desc.length < communityValidation.minCommunityDescLength ||
       desc.length > communityValidation.maxCommunityDescLength
