@@ -10,6 +10,7 @@ import {
   ServerError,
   UnauthorizedError,
 } from "../../errors"
+import { PublicUser } from "../../types/user"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) => {
@@ -21,15 +22,17 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
     const res = await communityService.getCommunity(req.params.id)
-
     if (!res) throw new NotFoundError()
-    if (!res.private) return res
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
+    let member
+    if (req.cookies.user) {
+      const user = JSON.parse(req.cookies.user) as PublicUser
+      member = await communityService.getCommunityMember(res.id, user.userId)
+    }
 
-    const error = await communityService.checkCommunityMemberValidity(res.id, req.cookies.user_id)
-    if (error) throw error
+    if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
+    if (!member) throw new NotAuthenticatedError()
 
-    return res
+    return { ...res, memberType: member.memberType }
   })
 
   app.post<{ Body: NewCommunity }>("/api/communities", async (req) => {

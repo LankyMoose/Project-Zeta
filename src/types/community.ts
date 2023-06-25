@@ -27,5 +27,7 @@ export type CommunityData = {
   owner: CommunityMemberData
   posts: CommunityPostData[]
   title: string
+  url_title: string
   private: boolean
+  memberType: "member" | "moderator" | "owner" | "guest"
 }

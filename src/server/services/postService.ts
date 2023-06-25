@@ -1,16 +1,9 @@
 import { eq } from "drizzle-orm"
 import { db } from "../../db"
-import {
-  Post,
-  posts,
-  postReactions,
-  PostReaction,
-  NewPost,
-  postComments,
-  users,
-} from "../../db/schema"
+import { Post, posts, postReactions, PostReaction, NewPost, postComments } from "../../db/schema"
 import { CommunityPostComment } from "../../types/post"
 import { ServerError } from "../../errors"
+import { PublicUser } from "../../types/user"
 
 export const postService = {
   async getPost(postId: string): Promise<Post | undefined> {
@@ -24,7 +17,7 @@ export const postService = {
 
   async addPostComment(
     postId: string,
-    userId: string,
+    user: PublicUser,
     comment: string
   ): Promise<CommunityPostComment | undefined> {
     try {
@@ -33,7 +26,7 @@ export const postService = {
           .insert(postComments)
           .values({
             postId,
-            ownerId: userId,
+            ownerId: user.userId,
             content: comment,
           })
           .returning()
@@ -41,18 +34,14 @@ export const postService = {
       if (!newComment) {
         throw new ServerError("Comment not created")
       }
-      const user = (await db.select().from(users).where(eq(users.id, userId))).at(0)
-      if (!user) {
-        throw new ServerError("User not found")
-      }
       return {
         id: newComment.id,
         content: newComment.content,
         createdAt: newComment.createdAt,
         user: {
-          id: user.id,
+          id: user.userId,
           name: user.name,
-          avatarUrl: user.avatarUrl,
+          avatarUrl: user.picture,
         },
       }
     } catch (error) {

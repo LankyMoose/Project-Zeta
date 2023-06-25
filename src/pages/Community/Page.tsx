@@ -6,7 +6,7 @@ import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
 import {
   communityEditorModalOpen,
-  isNotAuthenticated,
+  isCommunityMember,
   pathStore,
   postCreatorModalOpen,
   selectedCommunity,
@@ -29,6 +29,7 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
       setPath(pathStore, "/communities")
       return
     }
+    console.log(res)
     state.value = res
     selectedCommunity.value = {
       id: res.id,
@@ -37,7 +38,8 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
       description: res.description,
       disabled: res.disabled,
       private: res.private,
-      createdAt: new Date(res.createdAt),
+      createdAt: res.createdAt,
+      memberType: res.memberType,
     }
     return res
   }
@@ -54,6 +56,14 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
   }
   const onUnmounted = () => {
     window.removeEventListener("scroll", onScroll)
+  }
+
+  const handleAddNewPost = () => {
+    if (!isCommunityMember()) {
+      //#TODO: show modal to join community
+      return
+    }
+    postCreatorModalOpen.value = true
   }
 
   return (
@@ -106,9 +116,7 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
 
                 <Button
                   className="btn sm_btn-sm btn-primary hover-animate flex align-items-center nowrap"
-                  onclick={() => (postCreatorModalOpen.value = true)}
-                  watch={userStore}
-                  bind:disabled={isNotAuthenticated}
+                  onclick={handleAddNewPost}
                 >
                   Create post
                 </Button>
@@ -122,9 +130,8 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
                     <h3>Posts</h3>
                     <Button
                       className="btn btn-primary hover-animate"
-                      onclick={() => (postCreatorModalOpen.value = true)}
+                      onclick={handleAddNewPost}
                       watch={userStore}
-                      bind:disabled={isNotAuthenticated}
                     >
                       Create post
                     </Button>

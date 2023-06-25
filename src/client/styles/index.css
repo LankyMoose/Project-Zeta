@@ -97,7 +97,7 @@ header {
   height: var(--header-height);
   box-shadow: .25rem 0 1rem rgba(0, 0, 0, .05);
 }
-@media screen and (min-width: 480px) {
+@media screen and (min-width: 768px) {
   :root {
     --header-height: 100px;
   }

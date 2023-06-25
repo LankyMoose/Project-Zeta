@@ -9,6 +9,7 @@ import {
   UnauthorizedError,
 } from "../../errors"
 import { communityService } from "../services/communityService"
+import { PublicUser } from "../../types/user"
 
 export function configurePostsRoutes(app: FastifyInstance) {
   app.post<{ Body: NewPost }>("/api/posts", async (req) => {
@@ -30,16 +31,19 @@ export function configurePostsRoutes(app: FastifyInstance) {
   app.post<{ Params: { postId: string }; Body: { comment: string } }>(
     "/api/posts/:postId/comments",
     async (req) => {
-      if (!req.cookies.user_id) throw new NotAuthenticatedError()
-      const userId = req.cookies.user_id
+      if (!req.cookies.user) throw new NotAuthenticatedError()
+      const user = JSON.parse(req.cookies.user) as PublicUser
 
       const post = await postService.getPost(req.params.postId)
       if (!post) throw new InvalidRequestError()
 
-      const error = await communityService.checkCommunityMemberValidity(post.communityId, userId)
+      const error = await communityService.checkCommunityMemberValidity(
+        post.communityId,
+        user.userId
+      )
       if (error) throw error
 
-      const res = await postService.addPostComment(req.params.postId, userId, req.body.comment)
+      const res = await postService.addPostComment(req.params.postId, user, req.body.comment)
       if (!res) throw new ServerError()
       return res
     }

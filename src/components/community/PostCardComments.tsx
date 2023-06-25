@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { For, computed, createSignal } from "cinnabun"
 import { CommunityPostComment, CommunityPostData } from "../../types/post"
-import { userStore } from "../../state"
+import { isCommunityMember, userStore } from "../../state"
 import { addPostComment } from "../../client/actions/posts"
 import { formatUTCDate } from "../../utils"
 import { Button } from "../Button"
@@ -57,6 +57,10 @@ const NewCommentForm = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) 
   const loading = createSignal(false)
 
   const handleSubmit = async (e: Event) => {
+    if (!isCommunityMember()) {
+      //#TODO: show prompt to join community
+      return
+    }
     e.preventDefault()
     loading.value = true
     const res = await addPostComment(post.value.id, newComment.value)
@@ -78,17 +82,19 @@ const NewCommentForm = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) 
       className="flex align-items-center gap flex-wrap justify-content-end"
       onsubmit={handleSubmit}
     >
-      <div className="avatar-wrapper sm">
-        <img className="avatar" src={userStore.value?.picture} alt={userStore.value?.name} />
-      </div>
-      <div className="flex-grow">
-        <textarea
-          className="form-control"
-          placeholder="Write a comment..."
-          watch={newComment}
-          bind:value={() => newComment.value}
-          oninput={handleInput}
-        />
+      <div className="flex align-items-center gap flex-wrap flex-grow">
+        <div className="avatar-wrapper sm">
+          <img className="avatar" src={userStore.value?.picture} alt={userStore.value?.name} />
+        </div>
+        <div className="flex-grow">
+          <textarea
+            className="form-control"
+            placeholder="Write a comment..."
+            watch={newComment}
+            bind:value={() => newComment.value}
+            oninput={handleInput}
+          />
+        </div>
       </div>
       <Button
         watch={[loading, newComment]}

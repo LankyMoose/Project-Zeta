@@ -9,7 +9,7 @@ import { userStore, isNotAuthenticated, communityCreatorModalOpen } from "../sta
 export default function Communities() {
   return (
     <>
-      <div className="page-title">
+      <div className="page-title flex align-items-center justify-content-between gap flex-wrap">
         <h2>Communities</h2>
         <Button
           watch={userStore}
