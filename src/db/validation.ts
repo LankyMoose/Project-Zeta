@@ -79,3 +79,18 @@ export const postValidation = {
     return true
   },
 }
+
+export const commentValidation = {
+  minCommentContentLength: 1,
+  maxCommentContentLength: 255,
+  isCommentValid: (content: string) => {
+    if (
+      content.length < commentValidation.minCommentContentLength ||
+      content.length > commentValidation.maxCommentContentLength
+    ) {
+      return false
+    }
+
+    return true
+  },
+}

@@ -27,6 +27,24 @@ export function configurePostsRoutes(app: FastifyInstance) {
     return res
   })
 
+  app.post<{ Params: { postId: string }; Body: { comment: string } }>(
+    "/api/posts/:postId/comments",
+    async (req) => {
+      if (!req.cookies.user_id) throw new NotAuthenticatedError()
+      const userId = req.cookies.user_id
+
+      const post = await postService.getPost(req.params.postId)
+      if (!post) throw new InvalidRequestError()
+
+      const error = await communityService.checkCommunityMemberValidity(post.communityId, userId)
+      if (error) throw error
+
+      const res = await postService.addPostComment(req.params.postId, userId, req.body.comment)
+      if (!res) throw new ServerError()
+      return res
+    }
+  )
+
   app.post<{ Params: { postId: string }; Body: { reaction: boolean } }>(
     "/api/posts/:postId/reactions",
     async (req) => {

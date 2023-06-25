@@ -48,6 +48,12 @@ a {
   text-decoration: none;
 }
 
+@media (prefers-color-scheme: light) {
+  a {
+    color: var(--primary);
+  }
+}
+
 input, textarea {
   border: 0;
   border-radius: 0;

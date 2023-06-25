@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal, computed } from "cinnabun"
 import { setPath } from "cinnabun/router"
-import { truncateText } from "../../utils"
+import { formatUTCDate, truncateText } from "../../utils"
 import { CommunityPostData } from "../../types/post"
 import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
@@ -9,6 +9,7 @@ import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../client/actions/posts"
 import { isNotAuthenticated, pathStore, selectedCommunity, userStore } from "../../state"
 import "./PostCard.css"
+import { PostCardComments } from "./PostCardComments"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
@@ -59,11 +60,11 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
         </h4>
         <small className="author text-muted">
           <span>{post.user.name}</span>
-          <span className="created-at">{new Date(post.createdAt).toLocaleString()}</span>
+          <span className="created-at">{formatUTCDate(post.createdAt.toString())}</span>
         </small>
       </div>
       <p className="post-card-content">{truncateText(post.content, 256)}</p>
-      <div className="flex gap">
+      <div className="flex gap post-reactions">
         <IconButton
           onclick={() => addReaction(true)}
           className="rounded-lg flex align-items-center gap-sm"
@@ -95,6 +96,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           </small>
         </IconButton>
       </div>
+      <PostCardComments post={state} />
     </div>
   )
 }

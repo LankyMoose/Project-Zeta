@@ -25,3 +25,30 @@
     color: #555;
   }
 }
+
+.post-card .comments-list {
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, .075);
+}
+@media (prefers-color-scheme: light) {
+  .post-card .comments-list {
+    background: rgba(0, 0, 0, .035);
+  }
+}
+
+
+.post-card .comment-item {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, .15);
+  padding: 0.5rem;
+}
+@media (prefers-color-scheme: light) {
+  .post-card .comment-item {
+    border-bottom: 1px solid rgba(0, 0, 0, .05);
+  }
+}
+
+.post-card .comment-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}

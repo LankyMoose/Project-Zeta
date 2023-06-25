@@ -1,13 +1,24 @@
 .avatar {
+  width: 100%; 
+  height: auto;
+}
+
+.avatar-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
   border-radius: 50%;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  min-width: 42px;
-  border: 2px solid rgba(255,255,255,.15);
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, .15);
+}
+
+.avatar-wrapper.sm {
+  max-width: 32px
 }
 
 @media (prefers-color-scheme: light) {
-  .avatar {
+  .avatar-wrapper {
     border-color: rgba(0,0,0,.15);
   }
 }
