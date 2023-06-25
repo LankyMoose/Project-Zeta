@@ -16,7 +16,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           <span className="created-at">{new Date(post.createdAt).toLocaleString()}</span>
         </small>
       </div>
-      <div>{truncateText(post.content, 256)}</div>
+      <p className="post-card-content">{truncateText(post.content, 256)}</p>
       <div>
         <IconButton className="rounded-lg">
           <ThumbsUpIcon

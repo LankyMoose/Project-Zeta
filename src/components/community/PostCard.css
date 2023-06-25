@@ -12,3 +12,15 @@
 .post-card .author .created-at {
   font-size: .65rem;
 }
+
+.post-card-content {
+  color: #ddd;
+  font-size: .95rem;
+  line-height: 1.35;
+}
+
+@media (prefers-color-scheme: light) {
+  .post-card-content {
+    color: #555;
+  }
+}
