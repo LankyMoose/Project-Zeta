@@ -1,7 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import "./Page.css"
 import { getCommunity } from "../../client/actions/communities"
-import { Community } from "../../db/schema"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
 import {
@@ -19,7 +18,7 @@ import { CommunityMemberCard } from "../../components/community/CommunityMemberC
 export default function CommunitiesPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
 
-  const loadCommunity = async (): Promise<Community | undefined> => {
+  const loadCommunity = async (): Promise<CommunityData | undefined> => {
     const res = await getCommunity(params.url_title!)
     if (!res) {
       setPath(pathStore, "/communities")

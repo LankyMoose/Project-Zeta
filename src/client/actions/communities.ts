@@ -1,6 +1,7 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
 import { Community, NewCommunity } from "../../db/schema"
+import { CommunityData } from "../../types/community"
 
 export const getCommunities = async (page = 0): Promise<Community[] | void> => {
   try {
@@ -17,7 +18,7 @@ export const getCommunities = async (page = 0): Promise<Community[] | void> => {
   }
 }
 
-export const getCommunity = async (id: string): Promise<Community | void> => {
+export const getCommunity = async (id: string): Promise<CommunityData | void> => {
   try {
     const response = await fetch(`${API_URL}/communities/${id}`)
     const data = await response.json()
