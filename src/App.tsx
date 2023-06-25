@@ -39,9 +39,9 @@ export const App = () => {
           <Route path="/" component={HomePage} />
           <Route path="/communities" component={CommunitiesPage} />
 
-          <Route path="/communities/:communityId" component={CommunityPage} />
-          <Route path="/communities/:communityId/:postId" component={CommunityPostPage} />
-          <Route path="/communities/:communityId/members" component={CommunityMembersPage} />
+          <Route path="/communities/:url_title" component={CommunityPage} />
+          <Route path="/communities/:url_title/:postId" component={CommunityPostPage} />
+          <Route path="/communities/:url_title/members" component={CommunityMembersPage} />
         </Router>
       </main>
       <Portal>

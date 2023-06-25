@@ -1,13 +1,14 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal, computed } from "cinnabun"
+import { setPath } from "cinnabun/router"
 import { truncateText } from "../../utils"
 import { CommunityPostData } from "../../types/post"
 import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
-import "./PostCard.css"
 import { addPostReaction } from "../../client/actions/posts"
-import { isNotAuthenticated, userStore } from "../../state"
+import { isNotAuthenticated, pathStore, selectedCommunity, userStore } from "../../state"
+import "./PostCard.css"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
@@ -45,7 +46,17 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
   return (
     <div className="card post-card flex flex-column" key={post.id}>
       <div className="flex justify-content-between gap">
-        <h4 className="m-0 title">{post.title}</h4>
+        <h4 className="m-0 title">
+          <a
+            href={`/communities/${selectedCommunity.value?.url_title}/${post.id}`}
+            onclick={(e: Event) => {
+              e.preventDefault()
+              setPath(pathStore, `/communities/${selectedCommunity.value?.url_title}/${post.id}`)
+            }}
+          >
+            {post.title}
+          </a>
+        </h4>
         <small className="author text-muted">
           <span>{post.user.name}</span>
           <span className="created-at">{new Date(post.createdAt).toLocaleString()}</span>

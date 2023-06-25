@@ -3,12 +3,13 @@ import * as Cinnabun from "cinnabun"
 export default function Communities({
   params,
 }: {
-  params?: { communityId?: string; postId?: string }
+  params?: { url_title?: string; postId?: string }
 }) {
+  console.log(params)
   return (
     <>
       <h2>
-        Community {params?.communityId} - Post {params?.postId}
+        Community {params?.url_title} - Post {params?.postId}
       </h2>
     </>
   )

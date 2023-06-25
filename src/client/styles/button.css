@@ -15,21 +15,37 @@
   line-height: 1.5;
 }
 @media screen and (max-width: 480px) {
-  .btn[sm="btn-sm"] {
+  .btn.sm_btn-sm {
     padding: .25rem .5rem !important;
     font-size: .65rem !important;
     line-height: 1.5;
   }
 }
 
+.btn.btn-md {
+  padding: .5rem 1rem;
+  font-size: .85rem;
+  line-height: 1.5;
+}
+
+@media screen and (min-width: 480px) and (max-width: 760px) {
+  .btn.md_btn-md {
+    padding: .5rem 1rem !important;
+    font-size: .85rem !important;
+    line-height: 1.5;
+  } 
+}
+
 .btn.btn-lg {
   padding: .75rem 1.5rem;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
+  line-height: 1;
 }
 @media screen and (min-width: 760px) {
-  .btn[lg="btn-lg"] {
+  .btn.lg_btn-lg {
     padding: .75rem 1.5rem !important;
-    font-size: 1.35rem !important;
+    font-size: 1.15rem !important;
+    line-height: 1;
   }
 }
 

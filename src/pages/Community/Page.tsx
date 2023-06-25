@@ -16,17 +16,19 @@ import { CommunityData } from "../../types/community"
 import { Button } from "../../components/Button"
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"
 
-export default function CommunitiesPage({ params }: { params?: { communityId?: string } }) {
-  if (!params?.communityId) return setPath(pathStore, "/communities")
+export default function CommunitiesPage({ params }: { params?: { url_title?: string } }) {
+  if (!params?.url_title) return setPath(pathStore, "/communities")
 
   const loadCommunity = async (): Promise<Community | undefined> => {
-    const res = await getCommunity(params.communityId!)
+    const res = await getCommunity(params.url_title!)
     if (!res) {
       setPath(pathStore, "/communities")
       return
     }
-    console.log(res)
-    selectedCommunity.value = res.id
+    selectedCommunity.value = {
+      id: res.id,
+      url_title: params.url_title!,
+    }
     return res
   }
 
@@ -51,11 +53,11 @@ export default function CommunitiesPage({ params }: { params?: { communityId?: s
           <>
             <div className="page-title flex-column">
               <h2>{community.title}</h2>
-              {community.description && <div>{community.description}</div>}
+              {community.description && <p className="text-muted">{community.description}</p>}
             </div>
             <div className="page-body">
               <div className="community-page-inner">
-                <section className="flex flex-column flex-grow">
+                <section className="flex flex-column community-page-posts">
                   <div className="section-title">
                     <h3>Posts</h3>
                     <Button

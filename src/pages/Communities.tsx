@@ -4,11 +4,7 @@ import { Community } from "../db/schema"
 import { CommunityList } from "../components/communities/CommunityList"
 import { DefaultLoader } from "../components/loaders/Default"
 import { Button } from "../components/Button"
-import {
-  userStore,
-  isNotAuthenticated,
-  communityCreatorModalOpen,
-} from "../state"
+import { userStore, isNotAuthenticated, communityCreatorModalOpen } from "../state"
 
 export default function Communities() {
   return (
@@ -18,11 +14,8 @@ export default function Communities() {
         <Button
           watch={userStore}
           bind:disabled={isNotAuthenticated}
-          bind:title={() =>
-            userStore.value ? "" : "Login to create a community"
-          }
-          className="btn btn-lg btn-primary hover-animate"
-          sm="btn-sm"
+          bind:title={() => (userStore.value ? "" : "Login to create a community")}
+          className="btn btn-primary hover-animate sm_btn-sm md_btn-md lg_btn-lg"
           onclick={() => (communityCreatorModalOpen.value = true)}
         >
           Create a Community
@@ -35,9 +28,7 @@ export default function Communities() {
             if (!res)
               return (
                 <div>
-                  <span className="text-danger">
-                    Oops! Something went wrong 😢
-                  </span>
+                  <span className="text-danger">Oops! Something went wrong 😢</span>
                 </div>
               )
             if (res.length === 0)
