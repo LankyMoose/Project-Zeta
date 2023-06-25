@@ -1,8 +1,9 @@
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
 
 import { NewCommunity, categoryCommunities, communities, communityMembers } from "../../db/schema"
 import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
+import { JoinResult, JoinResultType } from "../../types/community"
 
 export const communityService = {
   pageSize: 10,
@@ -68,13 +69,35 @@ export const communityService = {
               user: true,
             },
           },
-          owner: {
+          owners: {
+            limit: 1,
+            where: (members, { eq }) => eq(members.memberType, "owner"),
             with: {
               user: true,
             },
           },
         },
       })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async joinCommunity(communityId: string, userId: string): Promise<JoinResult | ApiError | void> {
+    try {
+      await db
+        .insert(communityMembers)
+        .values({
+          communityId,
+          userId,
+          memberType: "member",
+        })
+        .execute()
+
+      return {
+        type: JoinResultType.Success,
+      }
     } catch (error) {
       console.error(error)
       return
@@ -128,14 +151,18 @@ export const communityService = {
       ).at(0)
       if (!newCommunity) return new ServerError("Failed to create community - name must be unique")
 
-      await db
-        .insert(communityMembers)
-        .values({
-          communityId: newCommunity.id,
-          userId,
-          memberType: "owner",
-        })
-        .execute()
+      const ownerMember = (
+        await db
+          .insert(communityMembers)
+          .values({
+            communityId: newCommunity.id,
+            userId: userId,
+            memberType: "owner",
+          })
+          .returning()
+      ).at(0)
+
+      if (!ownerMember) return new ServerError("Failed to create community owner")
 
       if (categoryIds && categoryIds.length > 0) {
         await Promise.all(
@@ -163,7 +190,7 @@ export const communityService = {
         await db
           .update(communities)
           .set(community)
-          .where(eq(communities.id, communityId))
+          .where(and(eq(communities.id, communityId)))
           .returning()
       ).at(0)
 

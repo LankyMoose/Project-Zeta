@@ -24,10 +24,22 @@ export type CommunityData = {
   id: string
   members: CommunityMemberData[]
   moderators: CommunityMemberData[]
-  owner: CommunityMemberData
+  owners: CommunityMemberData[]
   posts: CommunityPostData[]
   title: string
   url_title: string
   private: boolean
   memberType: "member" | "moderator" | "owner" | "guest"
+}
+
+export enum JoinResultType {
+  Success,
+  Pending,
+  AlreadyJoined,
+  Error,
+}
+
+export type JoinResult = {
+  type: JoinResultType
+  message?: string
 }

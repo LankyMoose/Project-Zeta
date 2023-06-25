@@ -13,6 +13,7 @@ import CommunityMembersPage from "./pages/Community/Members"
 import { CommunityCreator } from "./components/communities/CommunityCreator"
 import { PostCreator } from "./components/community/PostCreator"
 import { CommunityEditor } from "./components/community/CommunityEditor"
+import { CommunityJoinPrompt } from "./components/community/CommunityJoinPrompt"
 
 const Header = () => {
   return (
@@ -50,6 +51,7 @@ export const App = () => {
         <PostCreator />
         <CommunityCreator />
         <CommunityEditor />
+        <CommunityJoinPrompt />
       </Portal>
     </>
   )

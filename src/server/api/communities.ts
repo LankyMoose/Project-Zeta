@@ -8,9 +8,9 @@ import {
   NotAuthenticatedError,
   NotFoundError,
   ServerError,
-  UnauthorizedError,
 } from "../../errors"
 import { PublicUser } from "../../types/user"
+import { JoinResultType } from "../../types/community"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) => {
@@ -33,6 +33,26 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!member) throw new NotAuthenticatedError()
 
     return { ...res, memberType: member.memberType }
+  })
+
+  app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
+    if (!req.params.id) throw new InvalidRequestError()
+
+    const community = await communityService.getCommunity(req.params.id)
+    if (!community) throw new NotFoundError()
+
+    if (!req.cookies.user_id) {
+      // TODO: redirect to oauth login, add state param for action + communityId
+      return new NotAuthenticatedError()
+    }
+
+    const member = await communityService.getCommunityMember(community.id, req.cookies.user_id)
+    if (member) return { type: JoinResultType.AlreadyJoined }
+
+    const res = await communityService.joinCommunity(community.id, req.cookies.user_id)
+    if (res instanceof ApiError) throw res
+    if (!res) throw new ServerError("Failed to join community")
+    return res
   })
 
   app.post<{ Body: NewCommunity }>("/api/communities", async (req) => {
@@ -69,8 +89,8 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       const { title, description, private: _private } = req.body
       if (!communityValidation.isCommunityValid(title, description)) throw new InvalidRequestError()
 
-      const communityMember = await communityService.getCommunityMember(communityId, userId)
-      if (!communityMember || communityMember.memberType !== "owner") return new UnauthorizedError()
+      const member = await communityService.getCommunityMember(communityId, userId)
+      if (!member || member.memberType !== "owner") throw new NotAuthenticatedError()
 
       const res = await communityService.updateCommunity(
         {

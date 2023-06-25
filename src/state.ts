@@ -40,5 +40,7 @@ export const isCommunityMember = () => {
 export const postCreatorModalOpen = createSignal(false)
 export const communityCreatorModalOpen = createSignal(false)
 export const communityEditorModalOpen = createSignal(false)
+export const communityJoinModalOpen = createSignal(false)
+
 export const selectedCommunity = createSignal<Partial<CommunityData> | null>(null)
 export const selectedCommunityPost = createSignal<string | null>(null)

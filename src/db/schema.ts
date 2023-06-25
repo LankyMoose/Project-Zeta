@@ -18,6 +18,15 @@ export const users = pgTable(
   }
 )
 
+export const userRelations = relations(users, ({ many }) => ({
+  communities: many(communityMembers),
+  ownedCommunities: many(communities),
+  posts: many(posts),
+  comments: many(postComments),
+  reactions: many(postReactions),
+  categories: many(categoryUsers),
+}))
+
 export type User = InferModel<typeof users>
 export type NewUser = InferModel<typeof users, "insert">
 
@@ -40,6 +49,13 @@ export const userAuths = pgTable(
     }
   }
 )
+
+export const userAuthRelations = relations(userAuths, ({ one }) => ({
+  user: one(users, {
+    fields: [userAuths.userId],
+    references: [users.id],
+  }),
+}))
 
 export type UserAuth = InferModel<typeof userAuths>
 export type NewUserAuth = InferModel<typeof userAuths, "insert">
@@ -64,11 +80,11 @@ export const communities = pgTable(
   }
 )
 
-export const communityRelations = relations(communities, ({ many, one }) => ({
+export const communityRelations = relations(communities, ({ many }) => ({
   posts: many(posts),
   members: many(communityMembers),
   moderators: many(communityMembers),
-  owner: one(communityMembers),
+  owners: many(communityMembers),
   categories: many(categoryCommunities),
 }))
 

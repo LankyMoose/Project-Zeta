@@ -6,6 +6,7 @@ import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
 import {
   communityEditorModalOpen,
+  communityJoinModalOpen,
   isCommunityMember,
   pathStore,
   postCreatorModalOpen,
@@ -20,7 +21,7 @@ import { IconButton } from "../../components/IconButton"
 import { EditIcon } from "../../components/icons"
 import { SlideInOut } from "cinnabun-transitions"
 
-export default function CommunitiesPage({ params }: { params?: { url_title?: string } }) {
+export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
   const state = createSignal<CommunityData | undefined>(undefined)
   const loadCommunity = async (): Promise<CommunityData | undefined> => {
@@ -60,7 +61,7 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
 
   const handleAddNewPost = () => {
     if (!isCommunityMember()) {
-      //#TODO: show modal to join community
+      communityJoinModalOpen.value = true
       return
     }
     postCreatorModalOpen.value = true
@@ -88,7 +89,7 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
             <div className="page-title">
               <h2>
                 {community.title}
-                {community.owner.user.id === userStore.value?.userId ? (
+                {community.owners[0].id === userStore.value?.userId ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
                   </IconButton>
@@ -106,7 +107,7 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
             >
               <h2 className="m-0">{community.title}</h2>
               <div className="flex gap">
-                {community.owner.user.id === userStore.value?.userId ? (
+                {community.owners[0].id === userStore.value?.userId ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
                   </IconButton>
@@ -143,7 +144,7 @@ export default function CommunitiesPage({ params }: { params?: { url_title?: str
                     <h3>Owner</h3>
                   </div>
                   <div className="flex flex-row">
-                    <CommunityMemberCard member={community.owner} />
+                    <CommunityMemberCard member={community.owners[0]} />
                   </div>
                   <div className="section-title">
                     <h3>Members</h3>

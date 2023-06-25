@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { For, computed, createSignal } from "cinnabun"
 import { CommunityPostComment, CommunityPostData } from "../../types/post"
-import { isCommunityMember, userStore } from "../../state"
+import { communityJoinModalOpen, isCommunityMember, userStore } from "../../state"
 import { addPostComment } from "../../client/actions/posts"
 import { formatUTCDate } from "../../utils"
 import { Button } from "../Button"
@@ -42,6 +42,7 @@ const CommentsList = ({ comments }: { comments: Cinnabun.Signal<CommunityPostCom
 }
 
 export const PostCardComments = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) => {
+  if (post.value.comments) post.value.comments = []
   const comments = computed(post, () => post.value.comments)
 
   return (
@@ -57,8 +58,9 @@ const NewCommentForm = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) 
   const loading = createSignal(false)
 
   const handleSubmit = async (e: Event) => {
+    e.preventDefault()
     if (!isCommunityMember()) {
-      //#TODO: show prompt to join community
+      communityJoinModalOpen.value = true
       return
     }
     e.preventDefault()
