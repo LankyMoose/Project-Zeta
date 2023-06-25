@@ -7,6 +7,12 @@
   cursor: pointer;
 }
 
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: .85;
+}
+
+
 .icon-button:hover {
   background-color: rgba(0, 0, 0, .1);
   border-color: transparent;

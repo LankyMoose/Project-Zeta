@@ -48,6 +48,7 @@ export const communityService = {
               reactions: {
                 columns: {
                   reaction: true,
+                  ownerId: true,
                 },
               },
             },

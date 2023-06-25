@@ -1,5 +1,10 @@
 import { Post } from "../db/schema"
 
+type CommunityPostReaction = {
+  reaction: boolean
+  ownerId: string
+}
+
 export type CommunityPostData = Post & {
   user: {
     id: string
@@ -16,7 +21,5 @@ export type CommunityPostData = Post & {
       avatarUrl: string
     }
   }[]
-  reactions: {
-    reaction: string
-  }[]
+  reactions: CommunityPostReaction[]
 }

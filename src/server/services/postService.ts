@@ -26,6 +26,12 @@ export const postService = {
             ownerId: userId,
             reaction,
           })
+          .onConflictDoUpdate({
+            target: [postReactions.postId, postReactions.ownerId],
+            set: {
+              reaction,
+            },
+          })
           .returning()
       ).at(0)
     } catch (error) {
