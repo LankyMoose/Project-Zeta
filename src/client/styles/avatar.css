@@ -1,0 +1,13 @@
+.avatar {
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  min-width: 42px;
+  border: 2px solid rgba(255,255,255,.15);
+}
+
+@media (prefers-color-scheme: light) {
+  .avatar {
+    border-color: rgba(0,0,0,.15);
+  }
+}

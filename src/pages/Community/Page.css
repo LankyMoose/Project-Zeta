@@ -6,14 +6,14 @@
   width: 100%;
 }
 .community-page-members {
-  flex-basis: 200px;
+  flex-grow: 1;
 }
 @media screen and (min-width: 768px) {
   .community-page-inner {
     flex-direction: row;
   }
   .community-page-members {
-    flex-basis: 300px;
+    flex-basis: 700px;
   }
 }
 

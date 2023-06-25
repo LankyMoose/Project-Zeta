@@ -2,6 +2,7 @@ import "./styles/page.css"
 import "./styles/utilities.css"
 import "./styles/index.css"
 import "./styles/button.css"
+import "./styles/avatar.css"
 
 import { Hydration } from "cinnabun/hydration"
 import { Document } from "../Document"

@@ -63,9 +63,14 @@
 .justify-content-center {
   justify-content: center;
 }
-
+.align-items-start {
+  align-items: flex-start;
+}
 .align-items-center {
   align-items: center;
+}
+.align-items-end {
+  align-items: flex-end;
 }
 
 .gap-sm {
@@ -87,6 +92,10 @@
 
 .w-100 {
   width: 100%;
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 .text-muted {
