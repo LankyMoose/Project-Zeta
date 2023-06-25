@@ -14,17 +14,15 @@ import "./PostCard.css"
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
   const reacting = createSignal(false)
+  const userReaction = computed(state, () => {
+    if (!userStore.value) return undefined
+    return state.value.reactions.find((r) => r.ownerId === userStore.value?.userId)
+  })
 
-  const hasReacted = (reaction: boolean) => {
-    if (!userStore.value) return false
-    return state.value.reactions.some(
-      (r) => r.ownerId === userStore.value?.userId && r.reaction === reaction
-    )
-  }
   const addReaction = async (reaction: boolean) => {
     if (reacting.value) return
     if (!userStore.value) return
-    if (hasReacted(reaction)) return
+    if (userReaction.value?.reaction === reaction) return
 
     reacting.value = true
     const res = await addPostReaction(post.id, reaction)
@@ -84,8 +82,12 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       <div className="flex gap post-reactions">
         <IconButton
           onclick={() => addReaction(true)}
-          className="rounded-lg flex align-items-center gap-sm"
-          watch={[userStore, reacting]}
+          bind:className={() =>
+            `icon-button flex align-items-center gap-sm ${
+              userReaction.value?.reaction === true ? "active" : ""
+            }`
+          }
+          watch={[userStore, reacting, userReaction]}
           bind:disabled={disableReaction}
         >
           <ThumbsUpIcon
@@ -99,8 +101,12 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
         </IconButton>
         <IconButton
           onclick={() => addReaction(false)}
-          className="rounded-lg flex align-items-center gap-sm"
-          watch={[userStore, reacting]}
+          bind:className={() =>
+            `icon-button flex align-items-center gap-sm ${
+              userReaction.value?.reaction === false ? "active" : ""
+            }`
+          }
+          watch={[userStore, reacting, userReaction]}
           bind:disabled={disableReaction}
         >
           <ThumbsDownIcon

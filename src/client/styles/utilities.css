@@ -60,9 +60,16 @@
   justify-content: space-between;
 }
 
+.justify-content-start {
+  justify-content: flex-start;
+}
 .justify-content-center {
   justify-content: center;
 }
+.justify-content-end {
+  justify-content: flex-end;
+}
+
 .align-items-start {
   align-items: flex-start;
 }

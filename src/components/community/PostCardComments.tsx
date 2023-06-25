@@ -14,7 +14,7 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
       <div className="avatar-wrapper sm">
         <img className="avatar" src={comment.user.avatarUrl} alt={comment.user.name} />
       </div>
-      <div className="flex flex-column gap flex-grow text-sm">
+      <div className="flex flex-column gap-sm flex-grow text-sm">
         <div className="text-muted flex align-items-center gap justify-content-between">
           <span className="author">{comment.user.name}</span>
           <span>{formatUTCDate(comment.createdAt.toString())}</span>
@@ -74,7 +74,10 @@ const NewCommentForm = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) 
   }
 
   return (
-    <form className="flex align-items-center gap" onsubmit={handleSubmit}>
+    <form
+      className="flex align-items-center gap flex-wrap justify-content-end"
+      onsubmit={handleSubmit}
+    >
       <div className="avatar-wrapper sm">
         <img className="avatar" src={userStore.value?.picture} alt={userStore.value?.name} />
       </div>
