@@ -14,6 +14,7 @@ import {
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
 import { Button } from "../../components/Button"
+import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"
 
 export default function CommunitiesPage({ params }: { params?: { communityId?: string } }) {
   if (!params?.communityId) return setPath(pathStore, "/communities")
@@ -24,6 +25,7 @@ export default function CommunitiesPage({ params }: { params?: { communityId?: s
       setPath(pathStore, "/communities")
       return
     }
+    console.log(res)
     selectedCommunity.value = res.id
     return res
   }
@@ -53,7 +55,7 @@ export default function CommunitiesPage({ params }: { params?: { communityId?: s
             </div>
             <div className="page-body">
               <div className="community-page-inner">
-                <div className="flex flex-column flex-grow">
+                <section className="flex flex-column flex-grow">
                   <div className="section-title">
                     <h3>Posts</h3>
                     <Button
@@ -66,18 +68,23 @@ export default function CommunitiesPage({ params }: { params?: { communityId?: s
                     </Button>
                   </div>
                   <CommunityPosts posts={community.posts} />
-                </div>
-                <div className="flex flex-column community-page-members">
-                  <h3>Members</h3>
-                  <div className="flex-row">
+                </section>
+                <section className="flex flex-column community-page-members">
+                  <div className="section-title">
+                    <h3>Owner</h3>
+                  </div>
+                  <div className="flex flex-row">
+                    <CommunityMemberCard member={community.owner} />
+                  </div>
+                  <div className="section-title">
+                    <h3>Members</h3>
+                  </div>
+                  <div className="flex flex-row">
                     {community.members.map((member) => (
-                      <div key={member.id} className="flex-column">
-                        <div>{member.user.name}</div>
-                        <div>{member.memberType}</div>
-                      </div>
+                      <CommunityMemberCard member={member} />
                     ))}
                   </div>
-                </div>
+                </section>
               </div>
             </div>
           </>
