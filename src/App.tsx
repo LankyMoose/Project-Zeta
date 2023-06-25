@@ -8,8 +8,6 @@ import { pathStore } from "./state"
 import HomePage from "./pages/Home"
 import CommunitiesPage from "./pages/Communities"
 import CommunityPage from "./pages/Community/Page"
-import CommunityPostPage from "./pages/Community/Post"
-import CommunityMembersPage from "./pages/Community/Members"
 import { CommunityCreator } from "./components/communities/CommunityCreator"
 import { PostCreator } from "./components/community/PostCreator"
 import { CommunityEditor } from "./components/community/CommunityEditor"
@@ -42,8 +40,6 @@ export const App = () => {
           <Route path="/communities" component={CommunitiesPage} />
 
           <Route path="/communities/:url_title" component={CommunityPage} />
-          <Route path="/communities/:url_title/:postId" component={CommunityPostPage} />
-          <Route path="/communities/:url_title/members" component={CommunityMembersPage} />
         </Router>
       </main>
       <Portal>

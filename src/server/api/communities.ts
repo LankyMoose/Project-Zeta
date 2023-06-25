@@ -43,6 +43,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
     if (!req.cookies.user_id) {
       // TODO: redirect to oauth login, add state param for action + communityId
+      console.log("redirect to oauth login")
       return new NotAuthenticatedError()
     }
 
