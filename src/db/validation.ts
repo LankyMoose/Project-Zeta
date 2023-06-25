@@ -42,7 +42,7 @@ export const communityValidation = {
       return false
     }
 
-    if (!/^[a-zA-Z0-9- ]*$/.test(name)) {
+    if (!/^[a-zA-Z0-9-_ ()]*$/.test(name)) {
       return false
     }
     return true

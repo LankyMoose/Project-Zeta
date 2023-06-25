@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS "category_user" (
 CREATE TABLE IF NOT EXISTS "community" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(128) NOT NULL,
-	"url_title" varchar(128) UNIQUE GENERATED ALWAYS AS (lower(replace(replace("title", '-', '_'), ' ', '-'))) STORED,
+	"url_title" varchar(128) UNIQUE GENERATED ALWAYS AS (lower(replace(replace(replace(replace("title", ' ', '-'), '_', ''), '(', ''), ')', ''))) STORED,
 	"description" varchar(255) NOT NULL,
 	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"disabled" boolean DEFAULT false,
