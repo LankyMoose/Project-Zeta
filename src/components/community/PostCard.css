@@ -41,7 +41,7 @@
 }
 @media (prefers-color-scheme: light) {
   .post-card .comment-item .comment {
-    color: #555;
+    color: #333;
   }
 }
 .post-card .comment-item {
