@@ -104,6 +104,12 @@
 .text-danger {
   color: var(--danger);
 }
+.text-primary {
+  color: var(--primary);
+}
+.text-primary-light {
+  color: var(--primary-light);
+}
 
 .text-sm {
   font-size: .75rem;
