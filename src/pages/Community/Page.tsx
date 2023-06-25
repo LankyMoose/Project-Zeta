@@ -5,6 +5,8 @@ import { getCommunity } from "../../client/actions/communities"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
 import {
+  authModalOpen,
+  authModalState,
   communityEditorModalOpen,
   communityJoinModalOpen,
   isCommunityMember,
@@ -20,6 +22,7 @@ import { CommunityMemberCard } from "../../components/community/CommunityMemberC
 import { IconButton } from "../../components/IconButton"
 import { EditIcon } from "../../components/icons"
 import { SlideInOut } from "cinnabun-transitions"
+import { AuthModalCallback } from "../../types/auth"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -60,6 +63,15 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
   }
 
   const handleAddNewPost = () => {
+    if (!userStore.value) {
+      authModalState.value = {
+        title: "Log in to create a Post",
+        message: "You must be logged in to create a Post.",
+        callbackAction: AuthModalCallback.CreatePost,
+      }
+      authModalOpen.value = true
+      return
+    }
     if (!isCommunityMember()) {
       communityJoinModalOpen.value = true
       return

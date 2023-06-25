@@ -12,6 +12,7 @@ import { CommunityCreator } from "./components/communities/CommunityCreator"
 import { PostCreator } from "./components/community/PostCreator"
 import { CommunityEditor } from "./components/community/CommunityEditor"
 import { CommunityJoinPrompt } from "./components/community/CommunityJoinPrompt"
+import { AuthModal } from "./components/auth/AuthModal"
 
 const Header = () => {
   return (
@@ -47,6 +48,7 @@ export const App = () => {
         <CommunityCreator />
         <CommunityEditor />
         <CommunityJoinPrompt />
+        <AuthModal />
       </Portal>
     </>
   )

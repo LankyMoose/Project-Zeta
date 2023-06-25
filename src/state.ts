@@ -2,6 +2,7 @@ import { Cinnabun, Component, createSignal } from "cinnabun"
 import { useRequestData } from "cinnabun/ssr"
 import { PublicUser } from "./types/user"
 import { CommunityData } from "./types/community"
+import { AuthModalCallback } from "./types/auth"
 
 const isClient = Cinnabun.isClient
 
@@ -36,7 +37,12 @@ export const isCommunityMember = () => {
   if (!selectedCommunity.value) return true
   return selectedCommunity.value.memberType !== "guest"
 }
-
+export const authModalOpen = createSignal(false)
+export const authModalState = createSignal({
+  title: "",
+  message: "",
+  callbackAction: undefined as AuthModalCallback | undefined,
+})
 export const postCreatorModalOpen = createSignal(false)
 export const communityCreatorModalOpen = createSignal(false)
 export const communityEditorModalOpen = createSignal(false)
