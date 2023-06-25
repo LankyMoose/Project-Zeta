@@ -1,7 +1,7 @@
-import "./page.css"
-import "./utilities.css"
-import "./index.css"
-import "./button.css"
+import "./styles/page.css"
+import "./styles/utilities.css"
+import "./styles/index.css"
+import "./styles/button.css"
 
 import { Hydration } from "cinnabun/hydration"
 import { Document } from "../Document"
