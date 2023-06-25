@@ -14,9 +14,8 @@ export const AuthLinks = () => {
       title: "Log in",
       message: `Welcome (back?) to Zetabase - a place for
        people, apache helicopters and anyone (or anything) 
-       else who is sick of other communities but for some reason
-        thinks it might be different here.
-        
+       else that's looking for someplace better.
+
         Try not to be a ****! Unless, of course, you
         join one of the various '****' communities.`,
       callbackAction: undefined,
