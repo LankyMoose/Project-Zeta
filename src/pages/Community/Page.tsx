@@ -4,16 +4,18 @@ import { getCommunity } from "../../client/actions/communities"
 import { Community } from "../../db/schema"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
-import { pathStore, postCreatorModalOpen, selectedCommunity } from "../../state"
+import {
+  isNotAuthenticated,
+  pathStore,
+  postCreatorModalOpen,
+  selectedCommunity,
+  userStore,
+} from "../../state"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
 import { Button } from "../../components/Button"
 
-export default function CommunitiesPage({
-  params,
-}: {
-  params?: { communityId?: string }
-}) {
+export default function CommunitiesPage({ params }: { params?: { communityId?: string } }) {
   if (!params?.communityId) return setPath(pathStore, "/communities")
 
   const loadCommunity = async (): Promise<Community | undefined> => {
@@ -57,6 +59,8 @@ export default function CommunitiesPage({
                     <Button
                       className="btn btn-primary hover-animate"
                       onclick={() => (postCreatorModalOpen.value = true)}
+                      watch={userStore}
+                      bind:disabled={isNotAuthenticated}
                     >
                       Create post
                     </Button>

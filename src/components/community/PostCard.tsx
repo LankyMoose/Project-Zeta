@@ -8,7 +8,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       <div className="flex justify-content-between gap">
         <h4 className="m-0">{post.title}</h4>
         <small className="text-muted">
-          {post.user.name} | {post.createdAt}
+          {post.user.name} | {new Date(post.createdAt).toLocaleString()}
         </small>
       </div>
       <div>{truncateText(post.content, 256)}</div>
