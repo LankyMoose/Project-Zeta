@@ -1,12 +1,4 @@
-import {
-  boolean,
-  index,
-  pgTable,
-  varchar,
-  uuid,
-  timestamp,
-  pgEnum,
-} from "drizzle-orm/pg-core"
+import { boolean, index, pgTable, varchar, uuid, timestamp, pgEnum } from "drizzle-orm/pg-core"
 import { InferModel, relations } from "drizzle-orm"
 
 export const users = pgTable(
@@ -77,7 +69,7 @@ export const communityRelations = relations(communities, ({ many, one }) => ({
   members: many(communityMembers),
   moderators: many(communityMembers),
   owner: one(communityMembers),
-  categories: many(categories),
+  categories: many(categoryCommunities),
 }))
 
 export type Community = InferModel<typeof communities>
@@ -118,9 +110,7 @@ export const categoryUsers = pgTable(
   (table) => {
     return {
       userIdIdx: index("category_user_user_id_idx").on(table.userId),
-      categoryIdIdx: index("category_user_category_id_idx").on(
-        table.categoryId
-      ),
+      categoryIdIdx: index("category_user_category_id_idx").on(table.categoryId),
     }
   }
 )
@@ -154,35 +144,25 @@ export const categoryCommunities = pgTable(
   },
   (table) => {
     return {
-      communityIdIdx: index("category_community_community_id_idx").on(
-        table.communityId
-      ),
-      categoryIdIdx: index("category_community_category_id_idx").on(
-        table.categoryId
-      ),
+      communityIdIdx: index("category_community_community_id_idx").on(table.communityId),
+      categoryIdIdx: index("category_community_category_id_idx").on(table.categoryId),
     }
   }
 )
 
-export const categoryCommunityRelations = relations(
-  categoryCommunities,
-  ({ one }) => ({
-    community: one(communities, {
-      fields: [categoryCommunities.communityId],
-      references: [communities.id],
-    }),
-    category: one(categories, {
-      fields: [categoryCommunities.categoryId],
-      references: [categories.id],
-    }),
-  })
-)
+export const categoryCommunityRelations = relations(categoryCommunities, ({ one }) => ({
+  community: one(communities, {
+    fields: [categoryCommunities.communityId],
+    references: [communities.id],
+  }),
+  category: one(categories, {
+    fields: [categoryCommunities.categoryId],
+    references: [categories.id],
+  }),
+}))
 
 export type CategoryCommunity = InferModel<typeof categoryCommunities>
-export type NewCategoryCommunity = InferModel<
-  typeof categoryCommunities,
-  "insert"
->
+export type NewCategoryCommunity = InferModel<typeof categoryCommunities, "insert">
 
 export const communityMemberTypeEnum = pgEnum("community_member_type", [
   "member",
@@ -204,33 +184,26 @@ export const communityMembers = pgTable(
       .references(() => users.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     disabled: boolean("disabled").default(false),
-    memberType: communityMemberTypeEnum("member_types")
-      .notNull()
-      .default("member"),
+    memberType: communityMemberTypeEnum("member_types").notNull().default("member"),
   },
   (table) => {
     return {
-      communityIdIdx: index("community_member_community_id_idx").on(
-        table.communityId
-      ),
+      communityIdIdx: index("community_member_community_id_idx").on(table.communityId),
       userIdIdx: index("community_member_user_id_idx").on(table.userId),
     }
   }
 )
 
-export const communityMemberRelations = relations(
-  communityMembers,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [communityMembers.userId],
-      references: [users.id],
-    }),
-    community: one(communities, {
-      fields: [communityMembers.communityId],
-      references: [communities.id],
-    }),
-  })
-)
+export const communityMemberRelations = relations(communityMembers, ({ one }) => ({
+  user: one(users, {
+    fields: [communityMembers.userId],
+    references: [users.id],
+  }),
+  community: one(communities, {
+    fields: [communityMembers.communityId],
+    references: [communities.id],
+  }),
+}))
 
 export type CommunityMember = InferModel<typeof communityMembers>
 export type NewCommunityMember = InferModel<typeof communityMembers, "insert">
@@ -357,11 +330,7 @@ export const postReactionsRelations = relations(postReactions, ({ one }) => ({
 export type PostReaction = InferModel<typeof postReactions>
 export type NewPostReaction = InferModel<typeof postReactions, "insert">
 
-export const postContentTypeEnum = pgEnum("post_content_type", [
-  "poll",
-  "image",
-  "video",
-])
+export const postContentTypeEnum = pgEnum("post_content_type", ["poll", "image", "video"])
 
 export const postContent = pgTable(
   "post_content",

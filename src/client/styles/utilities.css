@@ -142,3 +142,11 @@
 .text-4xl {
   font-size: 5rem;
 }
+
+.rounded {
+  border-radius: .25rem !important;
+}
+
+.rounded-lg {
+  border-radius: .5rem !important;
+}

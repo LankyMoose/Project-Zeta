@@ -10,8 +10,12 @@ export const communityService = {
     try {
       return await db.query.communities.findFirst({
         where: (community, { eq, and }) =>
-          and(eq(useId ? community.id : community.url_title, titleOrId), eq(community.disabled, false)),
+          and(
+            eq(useId ? community.id : community.url_title, titleOrId),
+            eq(community.disabled, false)
+          ),
         with: {
+          categories: { with: { category: true } },
           posts: {
             limit: 10,
             orderBy: (posts, { desc }) => [desc(posts.createdAt)],
@@ -79,7 +83,11 @@ export const communityService = {
     try {
       return await db.query.communityMembers.findFirst({
         where: (member, { and, eq }) =>
-          and(eq(member.communityId, communityId), eq(member.userId, userId), eq(member.disabled, false)),
+          and(
+            eq(member.communityId, communityId),
+            eq(member.userId, userId),
+            eq(member.disabled, false)
+          ),
       })
     } catch (error) {
       console.error(error)
@@ -113,7 +121,9 @@ export const communityService = {
     categoryIds?: string[]
   ): Promise<{ id: string } | ApiError | undefined> {
     try {
-      const newCommunity = (await db.insert(communities).values(community).onConflictDoNothing().returning()).at(0)
+      const newCommunity = (
+        await db.insert(communities).values(community).onConflictDoNothing().returning()
+      ).at(0)
       if (!newCommunity) return new ServerError("Failed to create community - name must be unique")
 
       await db

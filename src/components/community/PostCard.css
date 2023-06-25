@@ -1,0 +1,14 @@
+
+.post-card .title {
+  flex-basis: 100%;
+}
+
+.post-card .author {
+  display:flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.post-card .author .created-at {
+  font-size: .65rem;
+}
