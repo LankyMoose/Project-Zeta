@@ -12,8 +12,27 @@ export const env = {
   url: process.env.URL || "http://localhost:3000",
   domain: process.env.DOMAIN || "localhost",
   auth0: {
-    domain: process.env.AUTH0_DOMAIN,
-    clientId: process.env.AUTH0_CLIENT_ID,
-    clientSecret: process.env.AUTH0_CLIENT_SECRET,
+    google: {
+      clientId: process.env.GOOGLE_AUTH0_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_AUTH0_CLIENT_SECRET,
+    },
+    github: {
+      clientId: process.env.GITHUB_AUTH0_CLIENT_ID,
+      clientSecret: process.env.GITHUB_AUTH0_CLIENT_SECRET,
+    },
   },
 }
+
+// recursively ensure that all keys in the object are defined
+function ensureKeys<T>(obj: T): T {
+  for (const key in obj) {
+    if (typeof obj[key] === "object") {
+      ensureKeys(obj[key])
+    } else if (obj[key] === undefined) {
+      throw new Error(`Missing environment variable: ${key}`)
+    }
+  }
+  return obj
+}
+
+ensureKeys(env)

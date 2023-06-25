@@ -27,7 +27,8 @@ import { configureCommunityRoutes } from "./api/communities.js"
 import { configurePostsRoutes } from "./api/posts.js"
 import { configureUserRoutes } from "./api/users.js"
 
-import { ServerError } from "../errors.jsx"
+import { InvalidRequestError, ServerError } from "../errors.jsx"
+import { AuthProvider } from "../types/auth.js"
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit | undefined) => {
@@ -51,6 +52,7 @@ declare module "fastify" {
       (request: FastifyRequest, reply: FastifyReply): Promise<void>
     }
     googleOAuth2: OAuth2Namespace
+    githubOAuth2: OAuth2Namespace
   }
 }
 
@@ -99,8 +101,8 @@ app.register(oauthPlugin, {
   name: "googleOAuth2",
   credentials: {
     client: {
-      id: env.auth0.clientId!,
-      secret: env.auth0.clientSecret!,
+      id: env.auth0.google.clientId!,
+      secret: env.auth0.google.clientSecret!,
     },
     auth: oauthPlugin.GOOGLE_CONFIGURATION,
   },
@@ -111,6 +113,22 @@ app.register(oauthPlugin, {
   callbackUri: `${env.url}/login/google/callback`,
 })
 
+app.register(oauthPlugin, {
+  name: "githubOAuth2",
+  credentials: {
+    client: {
+      id: env.auth0.github.clientId!,
+      secret: env.auth0.github.clientSecret!,
+    },
+    auth: oauthPlugin.GITHUB_CONFIGURATION,
+  },
+  scope: ["read:user", "user:email"],
+  // register a fastify url to start the redirect flow
+  startRedirectPath: "/login/github",
+  // facebook redirect here after the user login
+  callbackUri: `${env.url}/login/github/callback`,
+})
+
 app.setErrorHandler(function (error, _, reply) {
   // Log error
   this.log.error(error)
@@ -119,73 +137,104 @@ app.setErrorHandler(function (error, _, reply) {
   reply.status(error.statusCode ?? 500).send({ message: error.message ?? "Internal Server Error" })
 })
 
-const loadUserInfo = async (reqOrToken: FastifyRequest | string) => {
+const loadUserInfo = async (provider: AuthProvider, reqOrToken: FastifyRequest | string) => {
   const tkn = typeof reqOrToken === "string" ? reqOrToken : reqOrToken.cookies["access_token"]
 
   if (!tkn) return null
 
-  const userDataRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + tkn,
-    },
-  })
-  return userDataRes.json()
+  switch (provider) {
+    case AuthProvider.Google: {
+      const userDataRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + tkn,
+        },
+      })
+      if (!userDataRes.ok) throw new ServerError("Failed to load user data")
+      return userDataRes.json()
+    }
+    case AuthProvider.Github: {
+      throw new Error("Not implemented")
+    }
+    default:
+      throw new ServerError("Invalid provider")
+  }
 }
 
-app.get("/login/google/callback", async function (request, reply) {
-  const {
-    token: { access_token },
-  } = await app.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
+app.get<{ Querystring: { provider: AuthProvider } }>(
+  "/login/:provider/callback",
+  async function (request, reply) {
+    const { provider } = request.query
+    if (!provider) throw new InvalidRequestError("Missing provider")
 
-  const { name, picture, id, email } = (await loadUserInfo(access_token)) as any
+    let access_token
 
-  let userId
-  const userAuth = await authService.getByProviderId(id)
+    switch (provider) {
+      case AuthProvider.Google: {
+        const res = await app.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
+        access_token = res.token.access_token
+        break
+      }
+      case AuthProvider.Github: {
+        const res = await app.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
+        access_token = res.token.access_token
+        console.log("GITHUB TOKEN", access_token, res)
+        throw new ServerError("Invalid provider")
+        break
+      }
+      default:
+        throw new ServerError("Invalid provider")
+    }
 
-  if (userAuth) {
-    const user = await userService.save({
-      id: userAuth.userId,
-      name,
-      avatarUrl: picture,
+    const { name, picture, id, email } = (await loadUserInfo(provider, access_token)) as any
+
+    let userId
+    const userAuth = await authService.getByProviderId(provider, id)
+
+    if (userAuth) {
+      const user = await userService.save({
+        id: userAuth.userId,
+        name,
+        avatarUrl: picture,
+      })
+      if (!user) throw new ServerError()
+      userId = user.id
+    } else {
+      const user = await userService.save({
+        name,
+        avatarUrl: picture,
+      })
+      if (!user) throw new ServerError()
+      userId = user.id
+      const res = await authService.save({
+        email,
+        provider,
+        providerId: id,
+        userId: user.id,
+      })
+      if (!res) throw new ServerError()
+    }
+
+    if (!userId) throw new ServerError()
+
+    reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
+      ...cookieSettings,
+      httpOnly: false,
     })
-    if (!user) throw new ServerError()
-    userId = user.id
-  } else {
-    const user = await userService.save({
-      name,
-      avatarUrl: picture,
+    reply.setCookie("user_id", userId, {
+      ...cookieSettings,
+      httpOnly: true,
     })
-    if (!user) throw new ServerError()
-    userId = user.id
-    const res = await authService.save({
-      email,
-      provider: "google",
-      providerId: id,
-      userId: user.id,
+    // if later you need to refresh the token you can use
+    // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
+    reply.setCookie("access_token", access_token, {
+      ...cookieSettings,
+      httpOnly: true,
     })
-    if (!res) throw new ServerError()
+
+    reply.redirect("/")
   }
-
-  if (!userId) throw new ServerError()
-
-  reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
-    ...cookieSettings,
-    httpOnly: false,
-  })
-  reply.setCookie("user_id", userId, {
-    ...cookieSettings,
-    httpOnly: true,
-  })
-  // if later you need to refresh the token you can use
-  // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
-  reply.setCookie("access_token", access_token, {
-    ...cookieSettings,
-    httpOnly: true,
-  })
-
-  reply.redirect("/")
-})
+)
 
 function clearAuthCookies(reply: FastifyReply) {
   reply.clearCookie("user", {

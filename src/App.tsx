@@ -38,7 +38,6 @@ export const App = () => {
         <Router store={pathStore}>
           <Route path="/" component={HomePage} />
           <Route path="/communities" component={CommunitiesPage} />
-
           <Route path="/communities/:url_title" component={CommunityPage} />
         </Router>
       </main>

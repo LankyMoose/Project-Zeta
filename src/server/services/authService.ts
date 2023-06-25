@@ -1,20 +1,29 @@
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
 import { NewUserAuth, UserAuth, userAuths } from "../../db/schema"
+import { AuthProvider } from "../../types/auth"
 
 export const authService = {
   async getByEmail(email: string): Promise<UserAuth | undefined> {
     return (await db.select().from(userAuths).where(eq(userAuths.email, email)).limit(1)).at(0)
   },
 
-  async getByProviderId(providerId: string): Promise<UserAuth | undefined> {
-    return (await db.select().from(userAuths).where(eq(userAuths.providerId, providerId)).limit(1)).at(0)
+  async getByProviderId(provider: AuthProvider, providerId: string): Promise<UserAuth | undefined> {
+    return (
+      await db
+        .select()
+        .from(userAuths)
+        .where(and(eq(userAuths.provider, provider), eq(userAuths.providerId, providerId)))
+        .limit(1)
+    ).at(0)
   },
 
   async save(userAuth: UserAuth | NewUserAuth): Promise<UserAuth | undefined> {
     if (!userAuth.id) {
       return (await db.insert(userAuths).values(userAuth).returning()).at(0)
     }
-    return (await db.update(userAuths).set(userAuth).where(eq(userAuths.id, userAuth.id)).returning()).at(0)
+    return (
+      await db.update(userAuths).set(userAuth).where(eq(userAuths.id, userAuth.id)).returning()
+    ).at(0)
   },
 }
