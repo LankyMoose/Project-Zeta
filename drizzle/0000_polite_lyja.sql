@@ -14,26 +14,6 @@ create function now_utc() returns timestamp as $$
   select now() at time zone 'utc';
 $$ language sql;
 
-CREATE TABLE IF NOT EXISTS "category" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"name" varchar(80) NOT NULL,
-	UNIQUE ("name")
-);
-
-CREATE TABLE IF NOT EXISTS "category_community" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"community_id" uuid NOT NULL,
-	"category_id" uuid NOT NULL,
-	UNIQUE ("community_id", "category_id")
-);
-
-CREATE TABLE IF NOT EXISTS "category_user" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"category_id" uuid NOT NULL,
-	UNIQUE ("user_id", "category_id")
-);
-
 CREATE TABLE IF NOT EXISTS "community" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(128) NOT NULL,
@@ -109,7 +89,7 @@ CREATE TABLE IF NOT EXISTS "post" (
 	"community_id" uuid NOT NULL,
 	"owner_id" uuid NOT NULL,
 	"title" varchar(128) NOT NULL,
-	"content" varchar(1024) NOT NULL,
+	"content" varchar(2048) NOT NULL,
 	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
 	"disabled" boolean DEFAULT false,
 	"deleted" boolean DEFAULT false
@@ -117,7 +97,7 @@ CREATE TABLE IF NOT EXISTS "post" (
 
 CREATE TABLE IF NOT EXISTS "user_auth" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"email" varchar(80) NOT NULL,
+	"email" varchar(80) NULL,
 	"user_id" uuid NOT NULL,
 	"provider" varchar(80) NOT NULL,
 	"provider_id" varchar(80) NOT NULL
@@ -132,11 +112,6 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"deleted" boolean DEFAULT false
 );
 
-CREATE INDEX IF NOT EXISTS "category_name_idx" ON "category" ("name");
-CREATE INDEX IF NOT EXISTS "category_community_community_id_idx" ON "category_community" ("community_id");
-CREATE INDEX IF NOT EXISTS "category_community_category_id_idx" ON "category_community" ("category_id");
-CREATE INDEX IF NOT EXISTS "category_user_user_id_idx" ON "category_user" ("user_id");
-CREATE INDEX IF NOT EXISTS "category_user_category_id_idx" ON "category_user" ("category_id");
 CREATE INDEX IF NOT EXISTS "community_created_at_idx" ON "community" ("created_at");
 CREATE INDEX IF NOT EXISTS "community_title_idx" ON "community" ("title");
 CREATE INDEX IF NOT EXISTS "community_url_title_idx" ON "community" ("title");
@@ -161,29 +136,8 @@ CREATE INDEX IF NOT EXISTS "user_auth_email_idx" ON "user_auth" ("email");
 CREATE INDEX IF NOT EXISTS "user_auth_user_id_idx" ON "user_auth" ("user_id");
 CREATE INDEX IF NOT EXISTS "user_auth_provider_id_idx" ON "user_auth" ("provider_id");
 CREATE INDEX IF NOT EXISTS "user_name_idx" ON "user" ("username");
-DO $$ BEGIN
- ALTER TABLE "category_community" ADD CONSTRAINT "category_community_community_id_community_id_fk" FOREIGN KEY ("community_id") REFERENCES "community"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
 
-DO $$ BEGIN
- ALTER TABLE "category_community" ADD CONSTRAINT "category_community_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
 
-DO $$ BEGIN
- ALTER TABLE "category_user" ADD CONSTRAINT "category_user_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
- ALTER TABLE "category_user" ADD CONSTRAINT "category_user_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
 
 DO $$ BEGIN
  ALTER TABLE "community_member" ADD CONSTRAINT "community_member_community_id_community_id_fk" FOREIGN KEY ("community_id") REFERENCES "community"("id") ON DELETE cascade ON UPDATE no action;

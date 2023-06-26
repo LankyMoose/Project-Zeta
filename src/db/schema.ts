@@ -24,7 +24,6 @@ export const userRelations = relations(users, ({ many }) => ({
   posts: many(posts),
   comments: many(postComments),
   reactions: many(postReactions),
-  categories: many(categoryUsers),
 }))
 
 export type User = InferModel<typeof users>
@@ -85,100 +84,10 @@ export const communityRelations = relations(communities, ({ many }) => ({
   members: many(communityMembers),
   moderators: many(communityMembers),
   owners: many(communityMembers),
-  categories: many(categoryCommunities),
 }))
 
 export type Community = InferModel<typeof communities>
 export type NewCommunity = InferModel<typeof communities, "insert">
-
-export const categories = pgTable(
-  "category",
-  {
-    id: uuid("id").primaryKey().defaultRandom().notNull(),
-    name: varchar("name", { length: 80 }).notNull(),
-  },
-  (table) => {
-    return {
-      nameIdx: index("category_name_idx").on(table.name),
-    }
-  }
-)
-
-export const categoryRelations = relations(categories, ({ many }) => ({
-  communities: many(categoryCommunities),
-  users: many(categoryUsers),
-}))
-
-export type Category = InferModel<typeof categories>
-export type NewCategory = InferModel<typeof categories, "insert">
-
-export const categoryUsers = pgTable(
-  "category_user",
-  {
-    id: uuid("id").primaryKey().defaultRandom().notNull(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id),
-    categoryId: uuid("category_id")
-      .notNull()
-      .references(() => categories.id),
-  },
-  (table) => {
-    return {
-      userIdIdx: index("category_user_user_id_idx").on(table.userId),
-      categoryIdIdx: index("category_user_category_id_idx").on(table.categoryId),
-    }
-  }
-)
-
-export const categoryUserRelations = relations(categoryUsers, ({ one }) => ({
-  user: one(users, {
-    fields: [categoryUsers.userId],
-    references: [users.id],
-  }),
-  category: one(categories, {
-    fields: [categoryUsers.categoryId],
-    references: [categories.id],
-  }),
-}))
-
-export type CategoryUser = InferModel<typeof categoryUsers>
-export type NewCategoryUser = InferModel<typeof categoryUsers, "insert">
-
-export const categoryCommunities = pgTable(
-  "category_community",
-  {
-    id: uuid("id").primaryKey().defaultRandom().notNull(),
-    communityId: uuid("community_id")
-      .notNull()
-      .references(() => communities.id, {
-        onDelete: "cascade",
-      }),
-    categoryId: uuid("category_id")
-      .notNull()
-      .references(() => categories.id),
-  },
-  (table) => {
-    return {
-      communityIdIdx: index("category_community_community_id_idx").on(table.communityId),
-      categoryIdIdx: index("category_community_category_id_idx").on(table.categoryId),
-    }
-  }
-)
-
-export const categoryCommunityRelations = relations(categoryCommunities, ({ one }) => ({
-  community: one(communities, {
-    fields: [categoryCommunities.communityId],
-    references: [communities.id],
-  }),
-  category: one(categories, {
-    fields: [categoryCommunities.categoryId],
-    references: [categories.id],
-  }),
-}))
-
-export type CategoryCommunity = InferModel<typeof categoryCommunities>
-export type NewCategoryCommunity = InferModel<typeof categoryCommunities, "insert">
 
 export const communityMemberTypeEnum = pgEnum("community_member_type", [
   "member",

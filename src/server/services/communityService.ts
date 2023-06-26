@@ -1,7 +1,7 @@
 import { and, eq, sql } from "drizzle-orm"
 import { db } from "../../db"
 
-import { NewCommunity, categoryCommunities, communities, communityMembers } from "../../db/schema"
+import { NewCommunity, communities, communityMembers } from "../../db/schema"
 import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
 import { CommunityListData, JoinResult, JoinResultType } from "../../types/community"
 
@@ -17,7 +17,6 @@ export const communityService = {
             eq(community.disabled, false)
           ),
         with: {
-          categories: { with: { category: true } },
           posts: {
             limit: 10,
             orderBy: (posts, { desc }) => [desc(posts.createdAt)],
@@ -149,8 +148,7 @@ export const communityService = {
 
   async createCommunity(
     community: Omit<NewCommunity, "url_title">,
-    userId: string,
-    categoryIds?: string[]
+    userId: string
   ): Promise<{ id: string } | ApiError | undefined> {
     try {
       const newCommunity = (
@@ -170,17 +168,6 @@ export const communityService = {
       ).at(0)
 
       if (!ownerMember) return new ServerError("Failed to create community owner")
-
-      if (categoryIds && categoryIds.length > 0) {
-        await Promise.all(
-          categoryIds.map(async (categoryId) => {
-            await db.insert(categoryCommunities).values({
-              communityId: newCommunity.id,
-              categoryId,
-            })
-          })
-        )
-      }
 
       return {
         id: newCommunity.url_title!,

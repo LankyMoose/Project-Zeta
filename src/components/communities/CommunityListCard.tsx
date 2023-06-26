@@ -8,7 +8,7 @@ import type { CommunityListData } from "../../types/community"
 export const CommunityListCard = (props: CommunityListData) => {
   const { members, community } = props
 
-  const nMembers = parseInt(members)
+  const nMembers = parseInt(members.toString())
 
   return (
     <div className="card community-card" key={community.id}>

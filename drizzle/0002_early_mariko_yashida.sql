@@ -1,1 +1,0 @@
-ALTER TABLE "user_auth" ALTER COLUMN "email" DROP NOT NULL;
