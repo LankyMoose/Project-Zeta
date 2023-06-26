@@ -3,7 +3,7 @@ import * as Cinnabun from "cinnabun"
 export default function Home() {
   return (
     <>
-      <h2>Home</h2>
+      <h1>Home</h1>
     </>
   )
 }

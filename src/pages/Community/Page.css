@@ -16,7 +16,7 @@
     flex-direction: row;
   }
 }
-@media screen and (min-width: 1280px) {
+@media screen and (min-width: 1680px) {
   .community-page-inner {
     gap: 2rem;
   }

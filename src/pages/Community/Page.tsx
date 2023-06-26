@@ -63,7 +63,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
           <div className="page-wrapper">
             <div className="page-title">
               <div className="flex gap align-items-center">
-                <h2>{community.title}</h2>
+                <h1>{community.title}</h1>
                 {isCommunityOwner() ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
@@ -80,20 +80,20 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
               <div className="community-page-inner">
                 <section className="flex flex-column community-page-posts">
                   <div className="section-title">
-                    <h3>Posts</h3>
+                    <h2>Posts</h2>
                     <AddPostButton />
                   </div>
                   <CommunityPosts posts={community.posts} />
                 </section>
                 <section className="flex flex-column community-page-members">
                   <div className="section-title">
-                    <h3>Owner</h3>
+                    <h2>Owner</h2>
                   </div>
                   <div className="flex flex-column">
                     <CommunityMemberCard member={community.owners[0]} />
                   </div>
                   <div className="section-title">
-                    <h3>Members</h3>
+                    <h2>Members</h2>
                   </div>
                   <div className="flex flex-column">
                     {community.members.map((member) => (

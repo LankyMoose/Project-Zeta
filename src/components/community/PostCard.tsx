@@ -63,7 +63,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
   return (
     <div className="card post-card flex flex-column" key={post.id}>
       <div className="flex justify-content-between gap">
-        <h4 className="m-0 title">
+        <h3 className="m-0 title">
           <a
             href={`/communities/${selectedCommunity.value?.url_title}/${post.id}`}
             onclick={(e: Event) => {
@@ -73,7 +73,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           >
             {post.title}
           </a>
-        </h4>
+        </h3>
         <AuthorTag user={post.user} date={post.createdAt.toString()} />
       </div>
       <p className="post-card-content">{truncateText(post.content, 256)}</p>

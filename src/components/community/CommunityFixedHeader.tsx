@@ -29,7 +29,7 @@ export const CommunityFixedHeader = () => {
         bind:visible={() => hasScrolled.value}
       >
         <div className="flex gap align-items-center">
-          <h2 className="m-0">{() => selectedCommunity.value?.title}</h2>
+          <h1 className="m-0">{() => selectedCommunity.value?.title}</h1>
           {isCommunityOwner() ? (
             <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
               <EditIcon color="var(--primary)" />

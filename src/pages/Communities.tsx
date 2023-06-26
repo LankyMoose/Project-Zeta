@@ -23,7 +23,7 @@ export default function Communities() {
   return (
     <>
       <div className="page-title flex align-items-center justify-content-between gap flex-wrap">
-        <h2>Communities</h2>
+        <h1>Communities</h1>
         <Button
           className="btn btn-primary hover-animate sm_btn-sm md_btn-md lg_btn-lg"
           onclick={handleCreateCommunityClick}
