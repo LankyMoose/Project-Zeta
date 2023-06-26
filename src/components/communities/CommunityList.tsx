@@ -1,9 +1,9 @@
 import * as Cinnabun from "cinnabun"
 import { For } from "cinnabun"
-import type { Community } from "../../db/schema"
 import { CommunityListCard } from "./CommunityListCard"
+import type { CommunityListData } from "../../types/community"
 
-export const CommunityList = ({ communities }: { communities: Community[] }) => {
+export const CommunityList = ({ communities }: { communities: CommunityListData[] }) => {
   console.log("CommunityList", communities)
   return (
     <ul className="card-list w-100">

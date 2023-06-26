@@ -1,4 +1,10 @@
+import { Community } from "../db/schema"
 import { CommunityPostData } from "./post"
+
+export type CommunityListData = {
+  members: number
+  community: Community
+}
 
 export type CommunityMemberUserData = {
   avatarUrl?: string

@@ -1,9 +1,9 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
 import { Community, NewCommunity } from "../../db/schema"
-import { CommunityData, JoinResult } from "../../types/community"
+import { CommunityData, CommunityListData, JoinResult } from "../../types/community"
 
-export const getCommunities = async (page = 0): Promise<Community[] | void> => {
+export const getCommunities = async (page = 0): Promise<CommunityListData[] | void> => {
   try {
     const response = await fetch(`${API_URL}/communities?page=${page}`)
     const data = await response.json()

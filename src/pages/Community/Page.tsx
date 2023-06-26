@@ -109,6 +109,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <></>
                 )}
               </div>
+              <p className="text-muted">{community.description}</p>
             </div>
             <SlideInOut
               className="community-page-fixed-title flex justify-content-between align-items-center"

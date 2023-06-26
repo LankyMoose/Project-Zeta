@@ -1,9 +1,9 @@
-import { and, eq } from "drizzle-orm"
+import { and, eq, sql } from "drizzle-orm"
 import { db } from "../../db"
 
 import { NewCommunity, categoryCommunities, communities, communityMembers } from "../../db/schema"
 import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
-import { JoinResult, JoinResultType } from "../../types/community"
+import { CommunityListData, JoinResult, JoinResultType } from "../../types/community"
 
 export const communityService = {
   pageSize: 10,
@@ -126,14 +126,21 @@ export const communityService = {
     if (member.disabled) return new ForbiddenError()
   },
 
-  async getPage(page = 0) {
+  async getPage(page = 0): Promise<CommunityListData[] | void> {
     const _page = page < 0 ? 0 : page
     try {
-      return await db.query.communities.findMany({
-        limit: this.pageSize,
-        offset: _page * this.pageSize,
-        where: (community, { eq }) => eq(community.disabled, false),
-      })
+      return await db
+        .select({
+          members: sql<number>`count(${communityMembers.id})`,
+          community: communities,
+        })
+        .from(communities)
+        .where(eq(communities.disabled, false))
+        .limit(this.pageSize)
+        .offset(_page * this.pageSize)
+        .leftJoin(communityMembers, eq(communityMembers.communityId, communities.id))
+        .groupBy(communities.id)
+        .execute()
     } catch (error) {
       console.error(error)
       return

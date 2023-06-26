@@ -1,11 +1,11 @@
 import * as Cinnabun from "cinnabun"
 import { getCommunities } from "../client/actions/communities"
-import { Community } from "../db/schema"
 import { CommunityList } from "../components/communities/CommunityList"
 import { DefaultLoader } from "../components/loaders/Default"
 import { Button } from "../components/Button"
 import { userStore, communityCreatorModalOpen, authModalOpen, authModalState } from "../state"
 import { AuthModalCallback } from "../types/auth"
+import { CommunityListData } from "../types/community"
 
 export default function Communities() {
   const handleCreateCommunityClick = () => {
@@ -33,7 +33,7 @@ export default function Communities() {
       </div>
       <div className="page-body">
         <Cinnabun.Suspense promise={getCommunities} cache>
-          {(loading: boolean, res: Community[] | undefined) => {
+          {(loading: boolean, res: CommunityListData[] | undefined) => {
             if (loading) return <DefaultLoader />
             if (!res)
               return (

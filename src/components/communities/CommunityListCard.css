@@ -2,6 +2,11 @@
   margin:0
 }
 
+.community-card .card-title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
 .community-card .card-description {
   margin: 0
 }
