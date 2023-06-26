@@ -6,19 +6,36 @@ import { CommunitySearchData, CommunityLinkData } from "../../types/community"
 import { Link } from "cinnabun/router"
 import { pathStore } from "../../state"
 import { EllipsisLoader } from "../loaders/Ellipsis"
+import { KeyboardListener } from "cinnabun/listeners"
 
 const inputState = createSignal("")
 const loading = createSignal(false)
 const results = createSignal<CommunitySearchData | null>(null)
 
 export const CommunitySearch = () => {
+  let inputEl: HTMLInputElement | null = null
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement
     inputState.value = target.value
   }
 
+  const onMounted = (self: Cinnabun.Component) => {
+    inputEl = self.element as HTMLInputElement
+  }
+
+  const handleShortcut = (e: Event) => {
+    e.preventDefault()
+    const kbEvnt = e as KeyboardEvent
+    if (kbEvnt.ctrlKey) {
+      e.preventDefault()
+      if (inputEl) inputEl.focus()
+    }
+  }
+
   return (
     <div className="community-search">
+      <KeyboardListener keys={["k"]} onCapture={(_, e) => handleShortcut(e)} />
+      <KeyboardListener keys={["Escape"]} onCapture={() => inputEl?.blur()} />
       <div className="input-wrapper">
         <input
           type="text"
@@ -26,6 +43,7 @@ export const CommunitySearch = () => {
           bind:value={() => inputState.value}
           oninput={handleChange}
           placeholder="Search for a community"
+          onMounted={onMounted}
         />
         <EllipsisLoader className="loader" watch={loading} bind:visible={() => loading.value} />
       </div>
