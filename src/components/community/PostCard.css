@@ -4,10 +4,11 @@
 }
 
 .post-card .author {
-  display:flex;
-  flex-direction: column;
+  display: flex;
+  align-items: center;
   text-align: right;
   white-space: nowrap;
+  gap: .5rem;
 }
 
 .post-card .author .created-at {

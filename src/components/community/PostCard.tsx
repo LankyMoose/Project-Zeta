@@ -10,6 +10,7 @@ import { addPostReaction } from "../../client/actions/posts"
 import { pathStore, selectedCommunity, userStore } from "../../state"
 import { PostCardComments } from "./PostCardComments"
 import "./PostCard.css"
+import { AuthorTag } from "../AuthorTag"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
@@ -73,10 +74,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
             {post.title}
           </a>
         </h4>
-        <small className="author text-muted">
-          <span>{post.user.name}</span>
-          <span className="created-at">{formatUTCDate(post.createdAt.toString())}</span>
-        </small>
+        <AuthorTag user={post.user} date={post.createdAt.toString()} />
       </div>
       <p className="post-card-content">{truncateText(post.content, 256)}</p>
       <div className="flex gap post-reactions">
