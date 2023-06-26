@@ -1,7 +1,27 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
 import { Community, NewCommunity } from "../../db/schema"
-import { CommunityData, CommunityListData, JoinResult } from "../../types/community"
+import {
+  CommunityData,
+  CommunityListData,
+  CommunitySearchData,
+  JoinResult,
+} from "../../types/community"
+
+export const getCommunitySearch = async (title: string): Promise<CommunitySearchData | void> => {
+  try {
+    const response = await fetch(`${API_URL}/communities/search?title=${title}`)
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+
+    return data
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
+  }
+}
 
 export const getCommunities = async (page = 0): Promise<CommunityListData[] | void> => {
   try {

@@ -19,6 +19,13 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     return res
   })
 
+  app.get<{ Querystring: { title?: string } }>("/api/communities/search", async (req) => {
+    if (!req.query.title) throw new InvalidRequestError()
+    const res = await communityService.fuzzySearchCommunity(req.query.title)
+    if (!res) throw new ServerError()
+    return res
+  })
+
   app.get<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
     const res = await communityService.getCommunity(req.params.id)

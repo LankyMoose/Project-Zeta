@@ -3,10 +3,59 @@ import { db } from "../../db"
 
 import { NewCommunity, communities, communityMembers } from "../../db/schema"
 import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
-import { CommunityListData, JoinResult, JoinResultType } from "../../types/community"
+import {
+  CommunityLinkData,
+  CommunityListData,
+  CommunitySearchData,
+  JoinResult,
+  JoinResultType,
+} from "../../types/community"
 
 export const communityService = {
   pageSize: 10,
+  fuzzySearchCache: [] as CommunitySearchData[],
+  maxFuzzySearchCacheSize: 100,
+
+  async fuzzySearchCommunity(title: string): Promise<CommunitySearchData | void> {
+    //https://www.freecodecamp.org/news/fuzzy-string-matching-with-postgresql/
+    //https://www.postgresql.org/docs/current/pgtrgm.html
+    try {
+      let cached = this.fuzzySearchCache.find((item) => item.search === title)
+      if (cached) return cached
+
+      const res = await db
+        .select({
+          title: communities.title,
+          url_title: communities.url_title,
+        })
+        .from(communities)
+        .where(and(eq(communities.disabled, false), sql`SIMILARITY(title,${`%${title}%`}) > 0.2`))
+        .limit(this.pageSize)
+        .execute()
+
+      if (!res) return
+
+      cached = this.fuzzySearchCache.find((item) => item.search === title)
+      if (cached) {
+        cached.communities = res as CommunityLinkData[]
+        return cached
+      }
+
+      const newCacheItem = {
+        search: title,
+        communities: res,
+      } as CommunitySearchData
+
+      if (this.fuzzySearchCache.length >= this.maxFuzzySearchCacheSize) {
+        this.fuzzySearchCache.pop()
+      }
+      this.fuzzySearchCache.unshift(newCacheItem)
+      return newCacheItem
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
 
   async getCommunity(titleOrId: string, useId: boolean = false) {
     try {

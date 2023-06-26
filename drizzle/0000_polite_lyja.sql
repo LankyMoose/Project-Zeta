@@ -14,6 +14,8 @@ create function now_utc() returns timestamp as $$
   select now() at time zone 'utc';
 $$ language sql;
 
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE TABLE IF NOT EXISTS "community" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(128) NOT NULL,

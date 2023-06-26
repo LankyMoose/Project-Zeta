@@ -3,8 +3,9 @@ import { ComponentProps } from "cinnabun/types"
 import "./Ellipsis.css"
 
 export const EllipsisLoader = (props: ComponentProps) => {
+  const { className, ...rest } = props
   return (
-    <div className="lds-ellipsis" {...props}>
+    <div className={`lds-ellipsis ${className}`} {...rest}>
       <div></div>
       <div></div>
       <div></div>

@@ -1,0 +1,45 @@
+.community-search {
+  position: relative;
+  flex-grow: 1;
+  max-width: 350px;
+  margin-right: auto;
+}
+
+.community-search input {
+  width: 100%;
+}
+
+.community-search .loader {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.community-search:focus-within ul {
+  max-height: 100vh;
+  overflow: auto;
+}
+
+.community-search ul {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 0;
+  transition: max-height 0.2s ease-out;
+  overflow: hidden;
+  background-color: var(--content-area);
+  padding: .25rem;
+}
+.community-search ul li {
+  display: flex;
+}
+
+.community-search ul li a {
+  flex-grow: 1;
+  padding: .5rem 1rem;
+}

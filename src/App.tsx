@@ -13,6 +13,7 @@ import { PostCreator } from "./components/community/PostCreator"
 import { CommunityEditor } from "./components/community/CommunityEditor"
 import { CommunityJoinPrompt } from "./components/community/CommunityJoinPrompt"
 import { AuthModal } from "./components/auth/AuthModal"
+import { CommunitySearch } from "./components/communities/CommunitySearch"
 
 const Header = () => {
   return (
@@ -20,6 +21,8 @@ const Header = () => {
       <Link to="/" store={pathStore}>
         <div id="logo">Zetabase</div>
       </Link>
+
+      <CommunitySearch />
 
       <div className="flex gap align-items-center">
         <Link to="/communities" store={pathStore}>

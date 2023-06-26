@@ -1,6 +1,12 @@
 import { Community } from "../db/schema"
 import { CommunityPostData } from "./post"
 
+export type CommunityLinkData = { title: string; url_title: string }
+export type CommunitySearchData = {
+  search: string
+  communities: CommunityLinkData[]
+}
+
 export type CommunityListData = {
   members: string | number
   community: Community
