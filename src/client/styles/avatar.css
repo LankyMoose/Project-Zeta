@@ -8,13 +8,15 @@
   align-items: center;
   justify-content: center;
   width: 46px;
+  height: 46px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, .15);
 }
 
 .avatar-wrapper.sm {
-  max-width: 32px
+  max-width: 32px;
+  max-height: 32px;
 }
 
 @media (prefers-color-scheme: light) {

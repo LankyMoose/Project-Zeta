@@ -155,13 +155,13 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <div className="section-title">
                     <h3>Owner</h3>
                   </div>
-                  <div className="flex flex-row">
+                  <div className="flex flex-column">
                     <CommunityMemberCard member={community.owners[0]} />
                   </div>
                   <div className="section-title">
                     <h3>Members</h3>
                   </div>
-                  <div className="flex flex-row">
+                  <div className="flex flex-column">
                     {community.members.map((member) => (
                       <CommunityMemberCard member={member} />
                     ))}
