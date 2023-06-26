@@ -9,7 +9,7 @@
   flex-basis: 100%;
 }
 .community-page-members {
-  flex-basis: 480px;
+  min-width: 320px;
 }
 @media screen and (min-width: 768px) {
   .community-page-inner {

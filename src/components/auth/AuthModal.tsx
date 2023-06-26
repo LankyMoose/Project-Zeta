@@ -26,14 +26,14 @@ const AuthModalProviderList = () => {
       {options.map((option) => (
         <a
           href={`/login/${option.title.toLowerCase()}`}
-          className="btn flex gap-sm p-3"
+          className="btn flex gap-sm p-3 auth-provider"
           onclick={(e: Event) => {
             e.preventDefault()
             handleOptionClick(option)
           }}
         >
           <option.icon />
-          <span>Continue with {option.title}</span>
+          <small>Continue with {option.title}</small>
         </a>
       ))}
     </div>
