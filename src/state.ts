@@ -52,7 +52,5 @@ export const selectedCommunity = createSignal<Partial<CommunityData> | null>(nul
 export const selectedCommunityPost = createSignal<string | null>(null)
 
 export const isCommunityOwner = () => {
-  if (!selectedCommunity.value) return false
-  const owner = selectedCommunity.value.owners?.[0]
-  return selectedCommunity.value.memberType === "owner" || owner?.userId === userStore.value?.userId
+  return selectedCommunity.value?.memberType === "owner"
 }

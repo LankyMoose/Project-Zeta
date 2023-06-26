@@ -98,39 +98,33 @@ app.register(async function () {
   })
 })
 
-app.register(
-  { ...(oauthPlugin as any), name: "googleOAuth2" },
-  {
-    name: "googleOAuth2",
-    credentials: {
-      client: {
-        id: env.auth0.google.clientId!,
-        secret: env.auth0.google.clientSecret!,
-      },
-      auth: oauthPlugin.GOOGLE_CONFIGURATION,
+app.register(oauthPlugin, {
+  name: "googleOAuth2",
+  credentials: {
+    client: {
+      id: env.auth0.google.clientId!,
+      secret: env.auth0.google.clientSecret!,
     },
-    scope: ["profile", "email", "openid"],
-    startRedirectPath: "/login/google",
-    callbackUri: `${env.url}/login/google/callback`,
-  }
-)
+    auth: oauthPlugin.GOOGLE_CONFIGURATION,
+  },
+  scope: ["profile", "email", "openid"],
+  startRedirectPath: "/login/google",
+  callbackUri: `${env.url}/login/google/callback`,
+})
 
-app.register(
-  { ...(oauthPlugin as any), name: "githubOAuth2" },
-  {
-    name: "githubOAuth2",
-    credentials: {
-      client: {
-        id: env.auth0.github.clientId!,
-        secret: env.auth0.github.clientSecret!,
-      },
-      auth: oauthPlugin.GITHUB_CONFIGURATION,
+app.register(oauthPlugin, {
+  name: "githubOAuth2",
+  credentials: {
+    client: {
+      id: env.auth0.github.clientId!,
+      secret: env.auth0.github.clientSecret!,
     },
-    scope: [],
-    startRedirectPath: "/login/github",
-    callbackUri: `${env.url}/login/github/callback`,
-  }
-)
+    auth: oauthPlugin.GITHUB_CONFIGURATION,
+  },
+  scope: [],
+  startRedirectPath: "/login/github",
+  callbackUri: `${env.url}/login/github/callback`,
+})
 
 app.setErrorHandler(function (error, _, reply) {
   // Log error

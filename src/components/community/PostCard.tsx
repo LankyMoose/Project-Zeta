@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal, computed } from "cinnabun"
 import { setPath } from "cinnabun/router"
-import { formatUTCDate, truncateText } from "../../utils"
+import { truncateText } from "../../utils"
 import { CommunityPostData } from "../../types/post"
 import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
@@ -9,8 +9,8 @@ import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../client/actions/posts"
 import { pathStore, selectedCommunity, userStore } from "../../state"
 import { PostCardComments } from "./PostCardComments"
-import "./PostCard.css"
 import { AuthorTag } from "../AuthorTag"
+import "./PostCard.css"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
