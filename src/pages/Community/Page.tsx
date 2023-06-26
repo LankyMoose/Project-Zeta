@@ -89,7 +89,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <div className="section-title">
                     <h2>Owner</h2>
                   </div>
-                  <div className="flex flex-column">
+                  <div className="flex flex-column mb-3">
                     <CommunityMemberCard member={community.owners[0]} />
                   </div>
                   <div className="section-title">

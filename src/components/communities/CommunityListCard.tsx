@@ -13,7 +13,7 @@ export const CommunityListCard = (props: CommunityListData) => {
   return (
     <div className="card community-card" key={community.id}>
       <div className="card-title flex justify-content-between">
-        <h3 className="m-0">
+        <h2 className="m-0">
           <a
             href={`/communities/${community.url_title}`}
             onclick={(e: Event) => {
@@ -23,7 +23,7 @@ export const CommunityListCard = (props: CommunityListData) => {
           >
             {community.title}
           </a>
-        </h3>
+        </h2>
         <small className="text-muted">
           {nMembers} {nMembers > 1 ? "members" : "member"}
         </small>
