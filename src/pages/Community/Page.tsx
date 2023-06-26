@@ -5,25 +5,19 @@ import { getCommunity } from "../../client/actions/communities"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
 import {
-  authModalOpen,
-  authModalState,
   communityEditorModalOpen,
-  communityJoinModalOpen,
-  isCommunityMember,
   isCommunityOwner,
   pathStore,
-  postCreatorModalOpen,
   selectedCommunity,
-  userStore,
 } from "../../state"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
-import { Button } from "../../components/Button"
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"
 import { IconButton } from "../../components/IconButton"
 import { EditIcon } from "../../components/icons"
-import { SlideInOut } from "cinnabun-transitions"
-import { AuthModalCallback } from "../../types/auth"
+
+import { CommunityFixedHeader } from "../../components/community/CommunityFixedHeader"
+import { AddPostButton } from "../../components/community/AddPostButton"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -48,37 +42,6 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
     return res
   }
 
-  const hasScrolled = createSignal(false)
-
-  const onScroll = () => {
-    if (hasScrolled.value && window.scrollY > 100) return
-    hasScrolled.value = window.scrollY > 100
-  }
-
-  const onMounted = () => {
-    window.addEventListener("scroll", onScroll)
-  }
-  const onUnmounted = () => {
-    window.removeEventListener("scroll", onScroll)
-  }
-
-  const handleAddNewPost = () => {
-    if (!userStore.value) {
-      authModalState.value = {
-        title: "Log in to create a Post",
-        message: "You must be logged in to create a Post.",
-        callbackAction: AuthModalCallback.CreatePost,
-      }
-      authModalOpen.value = true
-      return
-    }
-    if (!isCommunityMember()) {
-      communityJoinModalOpen.value = true
-      return
-    }
-    postCreatorModalOpen.value = true
-  }
-
   return (
     <Cinnabun.Suspense promise={loadCommunity} cache>
       {(loading: boolean, community: CommunityData | undefined) => {
@@ -97,7 +60,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
         }
 
         return (
-          <div onMounted={onMounted} onUnmounted={onUnmounted} className="page-wrapper">
+          <div className="page-wrapper">
             <div className="page-title">
               <div className="flex gap align-items-center">
                 <h2>{community.title}</h2>
@@ -111,42 +74,14 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
               </div>
               <p className="text-muted">{community.description}</p>
             </div>
-            <SlideInOut
-              className="community-page-fixed-title flex justify-content-between align-items-center"
-              settings={{ from: "top" }}
-              watch={hasScrolled}
-              bind:visible={() => hasScrolled.value}
-            >
-              <div className="flex gap align-items-center">
-                <h2 className="m-0">{() => selectedCommunity.value?.title}</h2>
-                {isCommunityOwner() ? (
-                  <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
-                    <EditIcon color="var(--primary)" />
-                  </IconButton>
-                ) : (
-                  <></>
-                )}
-              </div>
-              <Button
-                className="btn sm_btn-sm btn-primary hover-animate flex align-items-center nowrap"
-                onclick={handleAddNewPost}
-              >
-                Create post
-              </Button>
-            </SlideInOut>
+            <CommunityFixedHeader />
 
             <div className="page-body">
               <div className="community-page-inner">
                 <section className="flex flex-column community-page-posts">
                   <div className="section-title">
                     <h3>Posts</h3>
-                    <Button
-                      className="btn btn-primary hover-animate"
-                      onclick={handleAddNewPost}
-                      watch={userStore}
-                    >
-                      Create post
-                    </Button>
+                    <AddPostButton />
                   </div>
                   <CommunityPosts posts={community.posts} />
                 </section>
