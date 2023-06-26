@@ -10,6 +10,7 @@ import {
   communityEditorModalOpen,
   communityJoinModalOpen,
   isCommunityMember,
+  isCommunityOwner,
   pathStore,
   postCreatorModalOpen,
   selectedCommunity,
@@ -33,7 +34,6 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       setPath(pathStore, "/communities")
       return
     }
-    console.log(res)
     state.value = res
     selectedCommunity.value = {
       id: res.id,
@@ -99,17 +99,16 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
         return (
           <div onMounted={onMounted} onUnmounted={onUnmounted} className="page-wrapper">
             <div className="page-title">
-              <h2>
-                {community.title}
-                {community.owners[0].id === userStore.value?.userId ? (
+              <div className="flex gap align-items-center">
+                <h2>{community.title}</h2>
+                {isCommunityOwner() ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
                   </IconButton>
                 ) : (
                   <></>
                 )}
-              </h2>
-              {community.description && <p className="text-muted">{community.description}</p>}
+              </div>
             </div>
             <SlideInOut
               className="community-page-fixed-title flex justify-content-between align-items-center"
@@ -117,23 +116,22 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
               watch={hasScrolled}
               bind:visible={() => hasScrolled.value}
             >
-              <h2 className="m-0">{community.title}</h2>
               <div className="flex gap">
-                {community.owners[0].id === userStore.value?.userId ? (
+                <h2 className="m-0">{community.title}</h2>
+                {isCommunityOwner() ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
                   </IconButton>
                 ) : (
                   <></>
                 )}
-
-                <Button
-                  className="btn sm_btn-sm btn-primary hover-animate flex align-items-center nowrap"
-                  onclick={handleAddNewPost}
-                >
-                  Create post
-                </Button>
               </div>
+              <Button
+                className="btn sm_btn-sm btn-primary hover-animate flex align-items-center nowrap"
+                onclick={handleAddNewPost}
+              >
+                Create post
+              </Button>
             </SlideInOut>
 
             <div className="page-body">

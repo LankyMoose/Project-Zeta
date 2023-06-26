@@ -231,12 +231,12 @@ async function handleProviderLogin(
   switch (provider) {
     case AuthProvider.Google: {
       const { name, picture, id, email } = info
-      const userId = await saveUser(userAuth, name, picture, id, email)
+      const userId = await saveUser(provider, userAuth, name, picture, id, email)
       return { userId, name, picture }
     }
     case AuthProvider.Github: {
       const { login, avatar_url, id, email } = info
-      const userId = await saveUser(userAuth, login, avatar_url, id, email)
+      const userId = await saveUser(provider, userAuth, login, avatar_url, id, email)
       return { userId, name: login, picture: avatar_url }
     }
     default:
@@ -245,38 +245,30 @@ async function handleProviderLogin(
 }
 
 async function saveUser(
+  provider: AuthProvider,
   auth: UserAuth | undefined,
   name: string,
   picture: string,
   id: string,
   email: string
 ) {
-  let userId
+  const user = await userService.save({
+    id: auth?.userId,
+    name,
+    avatarUrl: picture,
+  })
 
-  if (auth) {
-    const user = await userService.save({
-      name,
-      avatarUrl: picture,
-    })
-    if (!user) throw new ServerError()
-    userId = user.id
-  } else {
-    const user = await userService.save({
-      name,
-      avatarUrl: picture,
-    })
-    if (!user) throw new ServerError()
-    userId = user.id
+  if (!user) throw new ServerError()
+  if (!auth) {
     const res = await authService.save({
       email,
-      provider: AuthProvider.Google,
+      provider,
       providerId: id,
       userId: user.id,
     })
     if (!res) throw new ServerError()
   }
-
-  return userId
+  return user.id
 }
 
 function clearAuthCookies(reply: FastifyReply) {
