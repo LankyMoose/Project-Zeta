@@ -2,7 +2,7 @@ import { Community } from "../db/schema"
 import { CommunityPostData } from "./post"
 
 export type CommunityListData = {
-  members: number
+  members: string
   community: Community
 }
 

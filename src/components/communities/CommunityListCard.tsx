@@ -8,6 +8,8 @@ import type { CommunityListData } from "../../types/community"
 export const CommunityListCard = (props: CommunityListData) => {
   const { members, community } = props
 
+  const nMembers = parseInt(members)
+
   return (
     <div className="card community-card" key={community.id}>
       <div className="card-title flex justify-content-between">
@@ -22,7 +24,9 @@ export const CommunityListCard = (props: CommunityListData) => {
             {community.title}
           </a>
         </h3>
-        <small className="text-muted">{members} members</small>
+        <small className="text-muted">
+          {nMembers} {nMembers > 1 ? "members" : "member"}
+        </small>
       </div>
       <p className="card-description text-muted">{truncateText(community.description, 128)}</p>
     </div>

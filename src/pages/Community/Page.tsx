@@ -117,8 +117,8 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
               watch={hasScrolled}
               bind:visible={() => hasScrolled.value}
             >
-              <div className="flex gap">
-                <h2 className="m-0">{community.title}</h2>
+              <div className="flex gap align-items-center">
+                <h2 className="m-0">{() => selectedCommunity.value?.title}</h2>
                 {isCommunityOwner() ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
