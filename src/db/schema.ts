@@ -34,7 +34,7 @@ export const userAuths = pgTable(
   "user_auth",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    email: varchar("email", { length: 80 }).notNull(),
+    email: varchar("email", { length: 80 }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id),

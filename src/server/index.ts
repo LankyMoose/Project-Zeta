@@ -29,6 +29,7 @@ import { configureUserRoutes } from "./api/users.js"
 
 import { InvalidRequestError, ServerError } from "../errors.jsx"
 import { AuthProvider } from "../types/auth.js"
+import { UserAuth } from "../db/schema.js"
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit | undefined) => {
@@ -97,37 +98,39 @@ app.register(async function () {
   })
 })
 
-app.register(oauthPlugin, {
-  name: "googleOAuth2",
-  credentials: {
-    client: {
-      id: env.auth0.google.clientId!,
-      secret: env.auth0.google.clientSecret!,
+app.register(
+  { ...(oauthPlugin as any), name: "googleOAuth2" },
+  {
+    name: "googleOAuth2",
+    credentials: {
+      client: {
+        id: env.auth0.google.clientId!,
+        secret: env.auth0.google.clientSecret!,
+      },
+      auth: oauthPlugin.GOOGLE_CONFIGURATION,
     },
-    auth: oauthPlugin.GOOGLE_CONFIGURATION,
-  },
-  scope: ["profile", "email", "openid"],
-  // register a fastify url to start the redirect flow
-  startRedirectPath: "/login/google",
-  // facebook redirect here after the user login
-  callbackUri: `${env.url}/login/google/callback`,
-})
+    scope: ["profile", "email", "openid"],
+    startRedirectPath: "/login/google",
+    callbackUri: `${env.url}/login/google/callback`,
+  }
+)
 
-app.register(oauthPlugin, {
-  name: "githubOAuth2",
-  credentials: {
-    client: {
-      id: env.auth0.github.clientId!,
-      secret: env.auth0.github.clientSecret!,
+app.register(
+  { ...(oauthPlugin as any), name: "githubOAuth2" },
+  {
+    name: "githubOAuth2",
+    credentials: {
+      client: {
+        id: env.auth0.github.clientId!,
+        secret: env.auth0.github.clientSecret!,
+      },
+      auth: oauthPlugin.GITHUB_CONFIGURATION,
     },
-    auth: oauthPlugin.GITHUB_CONFIGURATION,
-  },
-  scope: ["read:user", "user:email"],
-  // register a fastify url to start the redirect flow
-  startRedirectPath: "/login/github",
-  // facebook redirect here after the user login
-  callbackUri: `${env.url}/login/github/callback`,
-})
+    scope: [],
+    startRedirectPath: "/login/github",
+    callbackUri: `${env.url}/login/github/callback`,
+  }
+)
 
 app.setErrorHandler(function (error, _, reply) {
   // Log error
@@ -154,17 +157,24 @@ const loadUserInfo = async (provider: AuthProvider, reqOrToken: FastifyRequest |
       return userDataRes.json()
     }
     case AuthProvider.Github: {
-      throw new Error("Not implemented")
+      const userDataRes = await fetch("https://api.github.com/user", {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + tkn,
+        },
+      })
+      if (!userDataRes.ok) throw new ServerError("Failed to load user data")
+      return userDataRes.json()
     }
     default:
       throw new ServerError("Invalid provider")
   }
 }
 
-app.get<{ Querystring: { provider: AuthProvider } }>(
+app.get<{ Params: { provider: AuthProvider } }>(
   "/login/:provider/callback",
   async function (request, reply) {
-    const { provider } = request.query
+    const { provider } = request.params
     if (!provider) throw new InvalidRequestError("Missing provider")
 
     let access_token
@@ -178,43 +188,16 @@ app.get<{ Querystring: { provider: AuthProvider } }>(
       case AuthProvider.Github: {
         const res = await app.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
         access_token = res.token.access_token
-        console.log("GITHUB TOKEN", access_token, res)
-        throw new ServerError("Invalid provider")
         break
       }
       default:
         throw new ServerError("Invalid provider")
     }
 
-    const { name, picture, id, email } = (await loadUserInfo(provider, access_token)) as any
+    const userInfo = (await loadUserInfo(provider, access_token)) as any
+    if (!userInfo) throw new ServerError("Failed to load user data")
 
-    let userId
-    const userAuth = await authService.getByProviderId(provider, id)
-
-    if (userAuth) {
-      const user = await userService.save({
-        id: userAuth.userId,
-        name,
-        avatarUrl: picture,
-      })
-      if (!user) throw new ServerError()
-      userId = user.id
-    } else {
-      const user = await userService.save({
-        name,
-        avatarUrl: picture,
-      })
-      if (!user) throw new ServerError()
-      userId = user.id
-      const res = await authService.save({
-        email,
-        provider,
-        providerId: id,
-        userId: user.id,
-      })
-      if (!res) throw new ServerError()
-    }
-
+    const { userId, name, picture } = await handleProviderLogin(provider, userInfo)
     if (!userId) throw new ServerError()
 
     reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
@@ -235,6 +218,66 @@ app.get<{ Querystring: { provider: AuthProvider } }>(
     reply.redirect("/")
   }
 )
+
+async function handleProviderLogin(
+  provider: AuthProvider,
+  info: any
+): Promise<{
+  userId: string
+  name: string
+  picture: string
+}> {
+  const userAuth = await authService.getByProviderId(provider, info.id)
+  switch (provider) {
+    case AuthProvider.Google: {
+      const { name, picture, id, email } = info
+      const userId = await saveUser(userAuth, name, picture, id, email)
+      return { userId, name, picture }
+    }
+    case AuthProvider.Github: {
+      const { login, avatar_url, id, email } = info
+      const userId = await saveUser(userAuth, login, avatar_url, id, email)
+      return { userId, name: login, picture: avatar_url }
+    }
+    default:
+      throw new ServerError("Invalid provider")
+  }
+}
+
+async function saveUser(
+  auth: UserAuth | undefined,
+  name: string,
+  picture: string,
+  id: string,
+  email: string
+) {
+  let userId
+
+  if (auth) {
+    const user = await userService.save({
+      name,
+      avatarUrl: picture,
+    })
+    if (!user) throw new ServerError()
+    userId = user.id
+  } else {
+    const user = await userService.save({
+      name,
+      avatarUrl: picture,
+    })
+    if (!user) throw new ServerError()
+    userId = user.id
+    const res = await authService.save({
+      email,
+      provider: AuthProvider.Google,
+      providerId: id,
+      userId: user.id,
+    })
+    if (!res) throw new ServerError()
+  }
+
+  return userId
+}
 
 function clearAuthCookies(reply: FastifyReply) {
   reply.clearCookie("user", {

@@ -16,16 +16,25 @@ const AuthModalProviderList = () => {
       icon: GithubIcon,
     },
   ]
+
+  const handleOptionClick = (option: (typeof options)[0]) => {
+    window.location.href = `/login/${option.title.toLowerCase()}`
+  }
+
   return (
     <div className="flex gap flex-column text-center">
       {options.map((option) => (
-        <button
+        <a
+          href={`/login/${option.title.toLowerCase()}`}
           className="btn flex gap-sm p-3"
-          onclick={() => console.log("clicked", option.title)}
+          onclick={(e: Event) => {
+            e.preventDefault()
+            handleOptionClick(option)
+          }}
         >
           <option.icon />
           <span>Continue with {option.title}</span>
-        </button>
+        </a>
       ))}
     </div>
   )
