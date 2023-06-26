@@ -7,6 +7,17 @@
 
 .community-search input {
   width: 100%;
+  color: #ddd;
+}
+@media (prefers-color-scheme: dark) {
+  .community-search input {
+    background-color: rgba(0, 0, 0, .15);
+  }
+}
+@media (prefers-color-scheme: light) {
+  .community-search input {
+    color: #555;
+  }
 }
 
 .community-search .loader {
@@ -33,10 +44,25 @@
   transition: max-height 0.2s ease-out;
   overflow: hidden;
   background-color: var(--content-area);
-  padding: .25rem;
+  box-shadow: 0 .15rem 0.3rem rgba(0, 0, 0, .15);
 }
+@media (prefers-color-scheme: light) {
+  .community-search ul {
+    background-color: var(--content-area-dark);
+  }
+}
+
 .community-search ul li {
   display: flex;
+  padding: .25rem;
+}
+.community-search ul li:focus-within {
+  background-color: rgba(255, 255, 255, .15);
+}
+@media (prefers-color-scheme: light) {
+  .community-search ul li:focus-within {
+    background-color: rgba(255, 255, 255, .35);
+  }
 }
 
 .community-search ul li a {
