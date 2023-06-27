@@ -30,7 +30,7 @@ export const communityService = {
           similarity: sql<number>`SIMILARITY(title,${`%${title}%`})`.as("similarity"),
         })
         .from(communities)
-        .where(({ similarity }) => and(eq(communities.disabled, false), gte(similarity, 0.2)))
+        .where(({ similarity }) => and(eq(communities.disabled, false), gte(similarity, 0.15)))
         .orderBy(({ similarity }) => desc(similarity))
         .limit(this.pageSize)
         .execute()

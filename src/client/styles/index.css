@@ -16,6 +16,7 @@
   --text-muted: #aaaaaa;
   --content-area: #2e2e2e;
   --content-area-dark: #2a2a2a;
+  --content-area-light: #333333;
   --border: rgba(255, 255, 255, .025);
   --header-height: 66px;
 
@@ -36,6 +37,7 @@
     background-color: var(--light);
     --content-area: #f4f4f9;
     --content-area-dark: #f0f0f5;
+    --content-area-light: #f8f8fa;
     --border: rgba(0, 0, 0, .05);
     --text-muted: #666666;
   }
@@ -97,6 +99,7 @@ header {
   z-index: 100;
   height: var(--header-height);
   box-shadow: .25rem 0 1rem rgba(0, 0, 0, .05);
+  transition: all .15s ease;
 }
 @media screen and (min-width: 768px) {
   :root {

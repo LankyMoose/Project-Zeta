@@ -43,7 +43,7 @@
   max-height: 0;
   transition: max-height 0.2s ease-out;
   overflow: hidden;
-  background-color: var(--content-area);
+  background-color: var(--content-area-light);
   box-shadow: 0 .15rem 0.3rem rgba(0, 0, 0, .15);
 }
 @media (prefers-color-scheme: light) {
@@ -54,7 +54,8 @@
 
 .community-search ul li {
   display: flex;
-  padding: .25rem;
+  padding: 1px;
+  border: 1px solid rgba(0, 0, 0, .15);
 }
 .community-search ul li:focus-within {
   background-color: rgba(255, 255, 255, .15);

@@ -23,18 +23,18 @@ export const CommunitySearch = () => {
     inputEl = self.element as HTMLInputElement
   }
 
-  const handleShortcut = (e: Event) => {
+  const focusSearchInput = (e: Event) => {
     e.preventDefault()
     const kbEvnt = e as KeyboardEvent
     if (kbEvnt.ctrlKey) {
       e.preventDefault()
-      if (inputEl) inputEl.focus()
+      inputEl?.focus()
     }
   }
 
   return (
     <div className="community-search">
-      <KeyboardListener keys={["k"]} onCapture={(_, e) => handleShortcut(e)} />
+      <KeyboardListener keys={["k"]} onCapture={(_, e) => focusSearchInput(e)} />
       <KeyboardListener keys={["Escape"]} onCapture={() => inputEl?.blur()} />
       <div className="input-wrapper">
         <input
@@ -54,6 +54,7 @@ export const CommunitySearch = () => {
 
 const ResultsList = () => {
   let unsub: { (): void } | undefined = undefined
+  let timeout: number | undefined = undefined
 
   const onMounted = () => {
     unsub = inputState.subscribe(async (val) => {
@@ -61,13 +62,20 @@ const ResultsList = () => {
         results.value = null
         return
       }
-      loading.value = true
-      const res = await getCommunitySearch(val)
-      loading.value = false
-      if (!res) return
-      if (res.search !== val) return
 
-      results.value = res
+      if (val.length < 3) return
+      if (val === results.value?.search) return
+
+      // queue up a search action using setTimeout - if we type again before it resolves, it will cancel the previous one
+      if (timeout) window.clearTimeout(timeout)
+      loading.value = true
+      timeout = window.setTimeout(async () => {
+        const data = await getCommunitySearch(val)
+        if (!data) return
+
+        results.value = data
+        loading.value = false
+      }, 250)
     })
   }
   const onUnmounted = () => {
@@ -75,7 +83,13 @@ const ResultsList = () => {
   }
   return (
     <ul onMounted={onMounted} onUnmounted={onUnmounted} watch={results} bind:children>
-      {() => results.value?.communities.map((community) => <ResultItem community={community} />)}
+      {() =>
+        results.value ? (
+          results.value.communities.map((community) => <ResultItem community={community} />)
+        ) : (
+          <></>
+        )
+      }
     </ul>
   )
 }
