@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm"
+import { and, desc, eq, gte, sql } from "drizzle-orm"
 import { db } from "../../db"
 
 import { NewCommunity, communities, communityMembers } from "../../db/schema"
@@ -27,9 +27,11 @@ export const communityService = {
         .select({
           title: communities.title,
           url_title: communities.url_title,
+          similarity: sql<number>`SIMILARITY(title,${`%${title}%`})`.as("similarity"),
         })
         .from(communities)
-        .where(and(eq(communities.disabled, false), sql`SIMILARITY(title,${`%${title}%`}) > 0.2`))
+        .where(({ similarity }) => and(eq(communities.disabled, false), gte(similarity, 0.2)))
+        .orderBy(({ similarity }) => desc(similarity))
         .limit(this.pageSize)
         .execute()
 
