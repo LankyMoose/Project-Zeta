@@ -26,7 +26,7 @@ export const CommunitySearch = () => {
   const focusSearchInput = (e: Event) => {
     e.preventDefault()
     const kbEvnt = e as KeyboardEvent
-    if (kbEvnt.ctrlKey) {
+    if (kbEvnt.metaKey || kbEvnt.ctrlKey) {
       e.preventDefault()
       inputEl?.focus()
     }
