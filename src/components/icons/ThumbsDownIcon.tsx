@@ -7,28 +7,21 @@ export const ThumbsDownIcon = (props: ComponentProps & IconColorProps) => {
   const hoverColor = props["color:hover"] ?? color
 
   return (
-    <svg width="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
-      <path
-        d="M15.65 6.5L18.5 6.5C19.0523 6.5 19.5 6.94772 19.5 7.5L19.5 12.5C19.5 13.0523 19.0523 13.5 18.5 13.5L15.65 13.5C15.5672 13.5 15.5 13.4328 15.5 13.35L15.5 6.65C15.5 6.56716 15.5672 6.5 15.65 6.5Z"
-        stroke={color}
-        className="stroke"
-        style={`--hover-stroke: ${hoverColor}`}
-        stroke-linecap="round"
-      />
-      <path
-        d="M15.5 12.5L13.6056 16.2889C13.5361 16.4277 13.5 16.5808 13.5 16.7361L13.5 18.5C13.5 19.0523 13.0523 19.5 12.5 19.5V19.5C11.3954 19.5 10.5 18.6046 10.5 17.5L10.5 13.5"
-        stroke={color}
-        className="stroke"
-        style={`--hover-stroke: ${hoverColor}`}
-        stroke-linecap="round"
-      />
-      <path
-        d="M12.5 13.5L6.5028 13.5C5.83629 13.5 5.35632 12.8603 5.54269 12.2204L7.29019 6.22037C7.41451 5.79352 7.80571 5.5 8.2503 5.5L12.0858 5.5C12.351 5.5 12.6054 5.60536 12.7929 5.79289L13.2071 6.20711C13.3946 6.39464 13.649 6.5 13.9142 6.5L15.5 6.5"
-        stroke={color}
-        className="stroke"
-        style={`--hover-stroke: ${hoverColor}`}
-        stroke-linecap="round"
-      />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      className="stroke"
+      style={`--hover-stroke: ${hoverColor}`}
+      {...rest}
+    >
+      <path d="M17 14V2" />
+      <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
     </svg>
   )
 }

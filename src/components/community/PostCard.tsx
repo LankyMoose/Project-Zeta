@@ -91,7 +91,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           <ThumbsUpIcon
             color="var(--primary)"
             color:hover="var(--primary-light)"
-            className="text-lg"
+            className="text-rg"
           />
           <small className="text-muted" watch={totalReactions} bind:children>
             {() => totalReactions.value.positive}
@@ -110,7 +110,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           <ThumbsDownIcon
             color="var(--primary)"
             color:hover="var(--primary-light)"
-            className="text-lg"
+            className="text-rg"
           />
           <small className="text-muted" watch={totalReactions} bind:children>
             {() => totalReactions.value.negative}
