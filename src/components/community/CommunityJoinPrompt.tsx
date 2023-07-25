@@ -40,6 +40,9 @@ export const CommunityJoinPrompt = ({ communityUrlTitle }: { communityUrlTitle?:
         addNotification({ type: "success", text: "You have joined the community." })
         reloadCommmunity()
         break
+      case JoinResultType.Banned:
+        addNotification({ type: "error", text: "You are banned from this community." })
+        break
       case JoinResultType.Pending:
         addNotification({
           type: "success",

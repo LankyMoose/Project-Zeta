@@ -9,7 +9,6 @@ import {
   NotFoundError,
   ServerError,
 } from "../../errors"
-import { PublicUser } from "../../types/user"
 import { JoinResultType } from "../../types/community"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
@@ -31,9 +30,8 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     const res = await communityService.getCommunity(req.params.id)
     if (!res) throw new NotFoundError()
     let member
-    if (req.cookies.user) {
-      const user = JSON.parse(req.cookies.user) as PublicUser
-      member = await communityService.getCommunityMember(res.id, user.userId)
+    if (req.cookies.user_id) {
+      member = await communityService.getCommunityMember(res.id, req.cookies.user_id)
     }
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
@@ -53,18 +51,16 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
     const community = await communityService.getCommunity(req.params.id)
     if (!community) throw new NotFoundError()
-
-    if (!req.cookies.user_id) {
-      // TODO: redirect to oauth login, add state param for action + communityId
-      console.log("redirect to oauth login")
-      return new NotAuthenticatedError()
-    }
+    if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
     const member = await communityService.getCommunityMember(community.id, req.cookies.user_id)
-    if (member) return { type: JoinResultType.AlreadyJoined }
+    if (member)
+      return { type: member.disabled ? JoinResultType.Banned : JoinResultType.AlreadyJoined }
 
-    const res = await communityService.joinCommunity(community.id, req.cookies.user_id)
-    if (res instanceof ApiError) throw res
+    const res = community.private
+      ? await communityService.submitJoinRequest(community.id, req.cookies.user_id)
+      : await communityService.joinCommunity(community.id, req.cookies.user_id)
+
     if (!res) throw new ServerError("Failed to join community")
     return res
   })

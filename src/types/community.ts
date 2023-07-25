@@ -49,6 +49,7 @@ export enum JoinResultType {
   Pending,
   AlreadyJoined,
   Error,
+  Banned,
 }
 
 export type JoinResult = {

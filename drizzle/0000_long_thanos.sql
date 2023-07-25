@@ -10,66 +10,52 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
-create or replace function now_utc() returns timestamp as $$
-  select now() at time zone 'utc';
-$$ language sql;
-
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
 CREATE TABLE IF NOT EXISTS "community" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" varchar(128) NOT NULL,
-	"url_title" varchar(128) UNIQUE GENERATED ALWAYS AS (lower(replace(replace(replace(replace("title", ' ', '-'), '_', ''), '(', ''), ')', ''))) STORED,
+	"url_title" varchar(128),
 	"description" varchar(255) NOT NULL,
-	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"disabled" boolean DEFAULT false,
-	"private" boolean DEFAULT false,
-	UNIQUE ("url_title"),
-	UNIQUE ("title")
+	"private" boolean DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS "community_join_request" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"community_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
-	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"response" boolean,
-	"responded_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
-	"responded_by" uuid,
-	UNIQUE ("community_id", "user_id")
+	"responded_at" timestamp
 );
-
 
 CREATE TABLE IF NOT EXISTS "community_member" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"community_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
-	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"disabled" boolean DEFAULT false,
-	"member_types" community_member_type DEFAULT 'member' NOT NULL,
-	UNIQUE ("community_id", "user_id")
+	"member_types" community_member_type DEFAULT 'member' NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "poll_option" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"poll_id" uuid NOT NULL,
-	"desc" varchar(32) NOT NULL,
-	UNIQUE ("poll_id", "desc")
+	"desc" varchar(32) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "poll_vote" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"poll_id" uuid NOT NULL,
 	"option_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
-	UNIQUE ("poll_id", "user_id")
+	"user_id" uuid NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "poll" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"post_id" uuid NOT NULL,
 	"desc" varchar(255) NOT NULL,
-	"started_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
+	"started_at" timestamp DEFAULT now() NOT NULL,
 	"ended_at" timestamp,
 	"disabled" boolean DEFAULT false
 );
@@ -79,23 +65,21 @@ CREATE TABLE IF NOT EXISTS "post_comment" (
 	"post_id" uuid NOT NULL,
 	"owner_id" uuid NOT NULL,
 	"content" varchar(255) NOT NULL,
-	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"deleted" boolean DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS "post_content" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"post_id" uuid NOT NULL,
-	"type" post_content_type NOT NULL,
-	UNIQUE ("post_id")
+	"type" post_content_type NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "post_reaction" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"post_id" uuid NOT NULL,
 	"owner_id" uuid NOT NULL,
-	"reaction" boolean NOT NULL,
-	UNIQUE ("post_id", "owner_id")
+	"reaction" boolean NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "post" (
@@ -104,14 +88,14 @@ CREATE TABLE IF NOT EXISTS "post" (
 	"owner_id" uuid NOT NULL,
 	"title" varchar(128) NOT NULL,
 	"content" varchar(2048) NOT NULL,
-	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"disabled" boolean DEFAULT false,
 	"deleted" boolean DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS "user_auth" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"email" varchar(80) NULL,
+	"email" varchar(80),
 	"user_id" uuid NOT NULL,
 	"provider" varchar(80) NOT NULL,
 	"provider_id" varchar(80) NOT NULL
@@ -120,7 +104,7 @@ CREATE TABLE IF NOT EXISTS "user_auth" (
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" varchar(80) NOT NULL,
-	"created_at" timestamp WITHOUT TIME ZONE DEFAULT now_utc() NOT NULL,
+	"created_at" timestamp DEFAULT now(),
 	"disabled" boolean DEFAULT false,
 	"avatar_url" varchar(255),
 	"deleted" boolean DEFAULT false
@@ -131,7 +115,6 @@ CREATE INDEX IF NOT EXISTS "community_title_idx" ON "community" ("title");
 CREATE INDEX IF NOT EXISTS "community_url_title_idx" ON "community" ("title");
 CREATE INDEX IF NOT EXISTS "community_join_request_community_id_idx" ON "community_join_request" ("community_id");
 CREATE INDEX IF NOT EXISTS "community_join_request_user_id_idx" ON "community_join_request" ("user_id");
-CREATE INDEX IF NOT EXISTS "community_join_request_responded_by_idx" ON "community_join_request" ("responded_by");
 CREATE INDEX IF NOT EXISTS "community_member_community_id_idx" ON "community_member" ("community_id");
 CREATE INDEX IF NOT EXISTS "community_member_user_id_idx" ON "community_member" ("user_id");
 CREATE INDEX IF NOT EXISTS "poll_option_poll_id_idx" ON "poll_option" ("poll_id");
@@ -153,9 +136,14 @@ CREATE INDEX IF NOT EXISTS "user_auth_email_idx" ON "user_auth" ("email");
 CREATE INDEX IF NOT EXISTS "user_auth_user_id_idx" ON "user_auth" ("user_id");
 CREATE INDEX IF NOT EXISTS "user_auth_provider_id_idx" ON "user_auth" ("provider_id");
 CREATE INDEX IF NOT EXISTS "user_name_idx" ON "user" ("username");
-
 DO $$ BEGIN
  ALTER TABLE "community_join_request" ADD CONSTRAINT "community_join_request_community_id_community_id_fk" FOREIGN KEY ("community_id") REFERENCES "community"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "community_join_request" ADD CONSTRAINT "community_join_request_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

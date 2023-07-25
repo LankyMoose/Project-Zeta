@@ -1,7 +1,7 @@
 import { and, desc, eq, gte, sql } from "drizzle-orm"
 import { db } from "../../db"
 
-import { NewCommunity, communities, communityMembers } from "../../db/schema"
+import { NewCommunity, communities, communityJoinRequests, communityMembers } from "../../db/schema"
 import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
 import {
   CommunityLinkData,
@@ -134,7 +134,7 @@ export const communityService = {
     }
   },
 
-  async joinCommunity(communityId: string, userId: string): Promise<JoinResult | ApiError | void> {
+  async joinCommunity(communityId: string, userId: string): Promise<JoinResult | void> {
     try {
       await db
         .insert(communityMembers)
@@ -145,9 +145,22 @@ export const communityService = {
         })
         .execute()
 
-      return {
-        type: JoinResultType.Success,
-      }
+      return { type: JoinResultType.Success }
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async submitJoinRequest(communityId: string, userId: string): Promise<JoinResult | void> {
+    try {
+      await db
+        .insert(communityJoinRequests)
+        .values({ communityId, userId })
+        .onConflictDoNothing()
+        .execute()
+
+      return { type: JoinResultType.Pending }
     } catch (error) {
       console.error(error)
       return
