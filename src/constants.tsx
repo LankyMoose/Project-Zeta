@@ -1,10 +1,7 @@
-const isDev = process.env.NODE_ENV === "development"
-
-export const API_URL = isDev
-  ? "http://localhost:3000/api"
-  : isDev
-  ? "https://project-zeta.up.railway.app/api"
-  : "https://zetabase.xyz/api"
+export const API_URL =
+  "window" in globalThis
+    ? `${window.location.protocol}${window.location.host}/api`
+    : "http://localhost:3000/api"
 
 export enum API_ERROR {
   NOT_FOUND = "Not found",
