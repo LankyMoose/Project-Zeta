@@ -1,7 +1,4 @@
-export const API_URL =
-  "window" in globalThis
-    ? `${window.location.protocol}${window.location.host}/api`
-    : "http://localhost:3000/api"
+export const API_URL = "/api"
 
 export enum API_ERROR {
   NOT_FOUND = "Not found",
