@@ -2,7 +2,6 @@ import { and, desc, eq, gte, isNull, sql } from "drizzle-orm"
 import { db } from "../../db"
 
 import {
-  CommunityJoinRequest,
   CommunityMember,
   NewCommunity,
   communities,
@@ -174,12 +173,21 @@ export const communityService = {
     }
   },
 
-  async getJoinRequests(communityId: string): Promise<CommunityJoinRequest[] | void> {
+  async getJoinRequests(communityId: string) {
     try {
-      return await db.query.communityJoinRequests.findMany({
-        where: (joinReq, { and, eq }) =>
-          and(eq(joinReq.communityId, communityId), isNull(joinReq.response)),
-      })
+      return await db.query.communityJoinRequests
+        .findMany({
+          where: (joinReq, { and, eq }) =>
+            and(eq(joinReq.communityId, communityId), isNull(joinReq.response)),
+          columns: {
+            id: true,
+            createdAt: true,
+          },
+          with: {
+            user: true,
+          },
+        })
+        .execute()
     } catch (error) {
       console.error(error)
       return

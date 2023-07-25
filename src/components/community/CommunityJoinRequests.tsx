@@ -7,7 +7,6 @@ import { EllipsisLoader } from "../loaders/Ellipsis"
 
 const loadJoinRequests = async (): Promise<CommunityJoinRequest[] | void> => {
   if (!selectedCommunity.value || !selectedCommunity.value.id) return []
-  console.log("loading join requests", selectedCommunity.value)
   return await getCommunityJoinRequests(selectedCommunity.value!.id)
 }
 
@@ -22,11 +21,11 @@ export const CommunityJoinRequests = () => {
               <EllipsisLoader />
             </Button>
           )
-        if (!data || !data.length) return <></>
+        console.log(data)
         return (
           <Button className="btn btn-primary hover-animate">
             Join Requests
-            <span className="badge bg-light text-dark ml-2">{data.length}</span>
+            <span className="badge bg-light text-dark ml-2">{data ? data.length : 0}</span>
           </Button>
         )
       }}

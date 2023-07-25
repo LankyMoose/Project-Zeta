@@ -1,4 +1,4 @@
-import { Community } from "../db/schema"
+import { Community, User } from "../db/schema"
 import { CommunityPostData } from "./post"
 
 export type CommunityLinkData = { title: string; url_title: string }
@@ -11,6 +11,8 @@ export type CommunityListData = {
   members: string | number
   community: Community
 }
+
+export type CommunityJoinRequestData = { id: string; createdAt: Date; user: User }[]
 
 export type CommunityMemberUserData = {
   avatarUrl?: string

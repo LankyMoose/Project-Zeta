@@ -6,8 +6,8 @@ export const users = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: varchar("username", { length: 80 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
-    disabled: boolean("disabled").default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    disabled: boolean("disabled").default(false).notNull(),
     avatarUrl: varchar("avatar_url", { length: 255 }),
     deleted: boolean("deleted").default(false),
   },
