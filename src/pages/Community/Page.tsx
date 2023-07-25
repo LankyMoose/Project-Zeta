@@ -25,7 +25,7 @@ import { AddPostButton } from "../../components/community/AddPostButton"
 import { addNotification } from "../../components/Notifications"
 import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../../components/Button"
-import { JoinRequestsButton } from "../../components/community/JoinRequestsButton"
+import { PendingJoinRequestsButton } from "../../components/community/PendingJoinRequestsButton"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -102,7 +102,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                 )}
                 {isCommunityAdmin() ? (
                   <div className="ml-auto">
-                    <JoinRequestsButton />
+                    <PendingJoinRequestsButton />
                   </div>
                 ) : (
                   <></>

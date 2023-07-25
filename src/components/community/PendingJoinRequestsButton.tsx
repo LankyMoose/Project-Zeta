@@ -9,7 +9,6 @@ import {
 import { getCommunityJoinRequests } from "../../client/actions/communities"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { PendingJoinRequests } from "./PendingJoinRequests"
-import { CommunityJoinRequestData } from "../../types/community"
 
 const loadRequests = async () => {
   const res = selectedCommunity.value?.id
@@ -27,10 +26,10 @@ const handleClick = () => {
   communityDrawerOpen.value = true
 }
 
-export const JoinRequestsButton = () => {
+export const PendingJoinRequestsButton = () => {
   return (
     <Cinnabun.Suspense promise={loadRequests}>
-      {(loading: boolean, data?: CommunityJoinRequestData[]) => {
+      {(loading: boolean) => {
         if (loading)
           return (
             <Button disabled className="btn btn-primary hover-animate">
@@ -38,16 +37,21 @@ export const JoinRequestsButton = () => {
               <EllipsisLoader />
             </Button>
           )
-        console.log(data)
         return (
           <Button
             type="button"
             onclick={handleClick}
-            disabled={!data || data.length === 0}
+            disabled={pendingCommunityJoinRequests.value.length === 0}
             className="btn btn-primary hover-animate"
           >
             Join Requests
-            <span className="badge bg-light text-dark ml-2">{data ? data.length : 0}</span>
+            <span
+              watch={pendingCommunityJoinRequests}
+              bind:children
+              className="badge bg-light text-dark ml-2"
+            >
+              {() => pendingCommunityJoinRequests.value.length}
+            </span>
           </Button>
         )
       }}

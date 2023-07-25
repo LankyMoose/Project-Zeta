@@ -46,7 +46,7 @@ export const Drawer = (
       }}
     >
       <SlideInOut
-        className={`drawer drawer-${side}`}
+        className={`drawer drawer-${side} flex flex-column`}
         watch={visible}
         bind:visible={() => visible.value}
         settings={{ from: side }}
@@ -69,7 +69,7 @@ export const DrawerHeader = (props: ComponentProps, children: ComponentChildren)
 
 export const DrawerBody = (props: ComponentProps, children: ComponentChildren) => {
   return (
-    <div className="drawer-body" {...props}>
+    <div className="drawer-body flex-grow" {...props}>
       {children}
     </div>
   )

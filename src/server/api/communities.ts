@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify"
 import { communityService } from "../services/communityService"
-import { NewCommunity } from "../../db/schema"
+import { CommunityMember, NewCommunity } from "../../db/schema"
 import { communityValidation } from "../../db/validation"
 import {
   ApiError,
@@ -51,17 +51,31 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!req.params.id) throw new InvalidRequestError()
     if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
-    const community = await communityService.getCommunity(req.params.id, true)
-    if (!community) throw new NotFoundError()
-
-    const member = await communityService.getCommunityMember(community.id, req.cookies.user_id)
+    const member = await communityService.getCommunityMember(req.params.id, req.cookies.user_id)
     if (!member || ["owner", "moderator"].indexOf(member.memberType) === -1)
       throw new UnauthorizedError()
 
-    const res = await communityService.getJoinRequests(community.id)
+    const res = await communityService.getJoinRequests(req.params.id)
     if (!res) throw new ServerError()
     return res
   })
+
+  app.post<{ Params: { id?: string }; Body: { requestId: string; accepted: boolean } }>(
+    "/api/communities/:id/join-requests",
+    async (req) => {
+      if (!req.params.id) throw new InvalidRequestError()
+      if (!req.cookies.user_id) throw new NotAuthenticatedError()
+
+      const member = await communityService.getCommunityMember(req.params.id, req.cookies.user_id)
+      if (!member || ["owner", "moderator"].indexOf(member.memberType) === -1)
+        throw new UnauthorizedError()
+
+      const res = await communityService.respondToJoinRequest(req.body.requestId, req.body.accepted)
+      if (!res) throw new ServerError()
+      if (res instanceof ApiError) throw res
+      return res as CommunityMember
+    }
+  )
 
   app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()

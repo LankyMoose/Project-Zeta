@@ -12,7 +12,12 @@ export type CommunityListData = {
   community: Community
 }
 
-export type CommunityJoinRequestData = { id: string; createdAt: Date; user: User }
+export type CommunityJoinRequestData = {
+  id: string
+  createdAt: Date
+  user: User
+  communityId: string
+}
 
 export type CommunityMemberUserData = {
   avatarUrl?: string

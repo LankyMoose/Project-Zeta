@@ -8,6 +8,7 @@
   transition: opacity .15s ease-in-out;
   color: var(--light);
   line-height: 1rem;
+  border: 1px solid #252525
 }
 
 .menu-button svg {
@@ -19,6 +20,7 @@
   .btn {
     background-color: #f9f9f9;
     color: var(--primary);
+    border: 1px solid #f9f9f9;
   }
 }
 
@@ -106,6 +108,18 @@
   border: 1px solid #aaa;
 }
 
+.btn.btn-success {
+  background-color: var(--success);
+  color: var(--light);
+  border: 1px solid var(--success);
+}
+
+.btn.btn-danger {
+  background-color: var(--danger);
+  color: var(--light);
+  border: 1px solid var(--danger);
+}
+
 .btn:not(:disabled).btn-secondary:hover,
 .btn:not(:disabled).btn-secondary:focus,
 .btn:not(:disabled).btn-secondary:active {
@@ -118,12 +132,7 @@
   }
 }
 
-.btn.btn-success {
-  background-color: var(--success);
-}
-.btn.btn-danger {
-  background-color: var(--danger);
-}
+
 
 .btn.hover-animate:after {
   content: '';

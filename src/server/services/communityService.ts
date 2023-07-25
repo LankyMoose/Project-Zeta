@@ -8,7 +8,13 @@ import {
   communityJoinRequests,
   communityMembers,
 } from "../../db/schema"
-import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
+import {
+  ApiError,
+  ForbiddenError,
+  NotFoundError,
+  ServerError,
+  UnauthorizedError,
+} from "../../errors"
 import {
   CommunityJoinRequestData,
   CommunityLinkData,
@@ -183,12 +189,47 @@ export const communityService = {
           columns: {
             id: true,
             createdAt: true,
+            communityId: true,
           },
           with: {
             user: true,
           },
         })
         .execute()
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async respondToJoinRequest(
+    requestId: string,
+    response: boolean
+  ): Promise<CommunityMember | ApiError | undefined> {
+    try {
+      const res = await db
+        .update(communityJoinRequests)
+        .set({ response })
+        .where(eq(communityJoinRequests.id, requestId))
+        .returning()
+        .execute()
+
+      if (res.length === 0) return new NotFoundError()
+      if (!response) return
+
+      const { communityId, userId } = res[0]
+
+      return (
+        await db
+          .insert(communityMembers)
+          .values({
+            communityId,
+            userId,
+            memberType: "member",
+          })
+          .returning()
+          .execute()
+      ).at(0) as CommunityMember
     } catch (error) {
       console.error(error)
       return
