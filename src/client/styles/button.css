@@ -9,11 +9,7 @@
   color: var(--light);
   line-height: 1rem;
 }
-@media screen and (min-width:640px) {
-  .menu-button {
-    display: none;
-  }
-}
+
 .menu-button svg {
   width: 1.5rem;
   stroke: #eee;

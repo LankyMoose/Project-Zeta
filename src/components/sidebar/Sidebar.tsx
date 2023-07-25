@@ -24,7 +24,7 @@ export const Sidebar = () => {
         watch={sidebarOpen}
         bind:visible={() => sidebarOpen.value}
       >
-        <NavigationListener watch={pathStore} onCapture={() => (sidebarOpen.value = false)} />
+        <NavigationListener onCapture={() => (sidebarOpen.value = false)} />
         <header className="sidebar-header">
           <div className="sidebar-header-item">
             <MenuButton />

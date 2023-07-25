@@ -40,6 +40,17 @@
   .hide-sm {
     display: none !important;
   }
+  .show-sm {
+    display: block !important;
+  }
+}
+@media screen and (max-width:980px) {
+  .hide-md {
+    display: none;
+  }
+  .show-md {
+    display: block !important;
+  }
 }
 
 

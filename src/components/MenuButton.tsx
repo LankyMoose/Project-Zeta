@@ -3,10 +3,10 @@ import { sidebarOpen } from "../state"
 import { Button } from "./Button"
 import { MenuIcon } from "./icons/MenuIcon"
 
-export const MenuButton = () => {
+export const MenuButton = ({ className }: { className?: string }) => {
   return (
     <Button
-      className="icon-button menu-button"
+      className={`icon-button menu-button ${className}`}
       onclick={() => (sidebarOpen.value = !sidebarOpen.value)}
     >
       <MenuIcon />

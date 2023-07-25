@@ -19,7 +19,7 @@ import { MenuButton } from "./components/MenuButton"
 
 const Header = () => (
   <header>
-    <MenuButton />
+    <MenuButton className="hide-md show-sm" />
     <Link to="/" store={pathStore}>
       <div id="logo">Zetabase</div>
     </Link>
