@@ -38,18 +38,12 @@ export const getCommunities = async (page = 0): Promise<CommunityListData[] | vo
   }
 }
 
-export const getCommunity = async (id: string): Promise<CommunityData | void> => {
+export const getCommunity = async (id: string): Promise<Partial<CommunityData> | Error> => {
   try {
     const response = await fetch(`${API_URL}/communities/${id}`)
-    const data = await response.json()
-    if (!response.ok) throw new Error(data?.message ?? response.statusText)
-
-    return data
+    return await response.json()
   } catch (error: any) {
-    addNotification({
-      type: "error",
-      text: error.message,
-    })
+    return new Error(error.message)
   }
 }
 

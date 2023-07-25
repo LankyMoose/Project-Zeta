@@ -6,4 +6,5 @@ export enum AuthProvider {
 export enum AuthModalCallback {
   CreateCommunity = "create-community",
   CreatePost = "create-post",
+  ViewCommunity = "view-community",
 }

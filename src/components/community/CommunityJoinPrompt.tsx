@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { Modal, ModalHeader, ModalBody } from "../Modal"
-import { communityJoinModalOpen, selectedCommunity } from "../../state"
+import { communityJoinModalOpen, pathStore, selectedCommunity } from "../../state"
 import { Button } from "../Button"
 import { joinCommunity } from "../../client/actions/communities"
 import { addNotification } from "../Notifications"
@@ -10,6 +10,15 @@ import { EllipsisLoader } from "../loaders/Ellipsis"
 
 export const CommunityJoinPrompt = ({ communityUrlTitle }: { communityUrlTitle?: string }) => {
   const loading = createSignal(false)
+
+  const isPrivate = () => selectedCommunity.value?.private ?? false
+
+  const reloadCommmunity = () => {
+    const communityTitle = communityUrlTitle ?? selectedCommunity.value?.url_title
+    window.history.pushState({}, "", `/communities/${communityTitle}`)
+    pathStore.value = `/communities/${communityTitle}`
+    communityJoinModalOpen.value = false
+  }
 
   const join = async () => {
     const communityTitle = communityUrlTitle ?? selectedCommunity.value?.url_title
@@ -22,12 +31,14 @@ export const CommunityJoinPrompt = ({ communityUrlTitle }: { communityUrlTitle?:
     switch (res.type) {
       case JoinResultType.AlreadyJoined:
         addNotification({ type: "error", text: "You are already a member of this community." })
+        reloadCommmunity()
         break
       case JoinResultType.Error:
         addNotification({ type: "error", text: "An error occurred while joining the community." })
         break
       case JoinResultType.Success:
         addNotification({ type: "success", text: "You have joined the community." })
+        reloadCommmunity()
         break
       case JoinResultType.Pending:
         addNotification({
@@ -43,13 +54,19 @@ export const CommunityJoinPrompt = ({ communityUrlTitle }: { communityUrlTitle?:
   return (
     <Modal toggle={() => (communityJoinModalOpen.value = false)} visible={communityJoinModalOpen}>
       <ModalHeader>
-        <h3>Join Community</h3>
+        <h2>Join Community</h2>
       </ModalHeader>
       <ModalBody>
         <div className="flex flex-column gap">
           <p className="text-muted m-0">
-            <small>
-              <i>Joining a community will allow you to post and comment.</i>
+            <small watch={selectedCommunity} bind:children>
+              {() =>
+                isPrivate() ? (
+                  <i>This community requires membership to view information.</i>
+                ) : (
+                  <i>Joining a community will allow you to post and comment.</i>
+                )
+              }
             </small>
           </p>
           <div className="flex gap justify-content-between">

@@ -211,6 +211,10 @@
 .text-lg {
   font-size: 1.5rem;
 }
+.line-height-1 {
+  line-height: 1;
+}
+
 @media screen and (max-width: 760px) {
   [lg="text-lg"] {
     font-size: 1.5rem;

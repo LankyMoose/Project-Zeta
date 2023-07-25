@@ -37,7 +37,13 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
-    if (!member) throw new NotAuthenticatedError()
+    if (!member)
+      return {
+        private: true,
+        id: res.id,
+        title: res.title,
+        description: res.description,
+      }
 
     return { ...res, memberType: member.memberType }
   })

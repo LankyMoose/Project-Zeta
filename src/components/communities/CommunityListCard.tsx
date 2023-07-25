@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { truncateText } from "../../utils"
 import { setPath } from "cinnabun/router"
-import { pathStore } from "../../state"
+import { pathStore, selectedCommunity } from "../../state"
 import "./CommunityListCard.css"
 import type { CommunityListData } from "../../types/community"
 
@@ -13,17 +13,32 @@ export const CommunityListCard = (props: CommunityListData) => {
   return (
     <div className="card community-card" key={community.id}>
       <div className="card-title flex justify-content-between">
-        <h2 className="m-0">
-          <a
-            href={`/communities/${community.url_title}`}
-            onclick={(e: Event) => {
-              e.preventDefault()
-              setPath(pathStore, `/communities/${community.url_title}`)
-            }}
-          >
-            {community.title}
-          </a>
-        </h2>
+        <div className="flex gap align-items-center">
+          <h2 className="m-0 line-height-1">
+            <a
+              href={`/communities/${community.url_title}`}
+              onclick={(e: Event) => {
+                e.preventDefault()
+                selectedCommunity.value = {
+                  id: community.id,
+                  title: community.title,
+                  url_title: community.url_title!,
+                  description: community.description,
+                  private: !!community.private,
+                  disabled: !!community.disabled,
+                }
+                setPath(pathStore, `/communities/${community.url_title}`)
+              }}
+            >
+              {community.title}
+            </a>
+          </h2>
+          {community.private ? (
+            <span className="badge bg-primary-light text-light">Private</span>
+          ) : (
+            <></>
+          )}
+        </div>
         <small className="text-muted">
           {nMembers} {nMembers > 1 ? "members" : "member"}
         </small>
