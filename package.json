@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node .cb/build",
-    "dev": "pnpm build --debug",
+    "dev": "pnpm build --debug --watch",
     "prod": "pnpm build --prod && node dist/server",
     "test": "echo \"Error: no test specified\"",
     "db:migrate": "tsc && node ./dist/src/db/migrate.js",

@@ -13,9 +13,11 @@ function getArgs() {
   return {
     prod: !!process.argv.find((arg) => arg === "--prod"),
     debug: !!process.argv.find((arg) => arg === "--debug"),
+    watch: !!process.argv.find((arg) => arg === "--watch"),
   }
 }
-const { prod, debug } = getArgs()
+const { prod, debug, watch } = getArgs()
+console.log({ prod, debug, watch })
 
 const envVars = {
   "process.env.NODE_ENV": prod ? '"production"' : '"development"',
@@ -57,7 +59,7 @@ emitter.on("build-finished", () => {
   if (!clientBuilt || !serverBuilt) return
 
   log("FgBlue", "build finished")
-  if (!prod) restartServer()
+  if (watch) restartServer()
 })
 
 /** @type {esbuild.BuildOptions} */
@@ -74,7 +76,7 @@ const sharedSettings = {
   sourcemap: "linked",
   splitting: false,
   define: { ...envVars },
-  metafile: !prod,
+  metafile: !watch,
   plugins: [
     {
       name: "cleanup",
@@ -157,15 +159,15 @@ const serverCfg = {
 
 const build = async () => {
   log("FgBlue", "building...")
-  if (prod) {
-    await Promise.all([esbuild.build(clientCfg), esbuild.build(serverCfg)])
-  } else {
+  if (watch) {
     esbuild.context(clientCfg).then((ctx) => {
       ctx.watch()
     })
     esbuild.context(serverCfg).then((ctx) => {
       ctx.watch()
     })
+  } else {
+    await Promise.all([esbuild.build(clientCfg), esbuild.build(serverCfg)])
   }
 }
 
