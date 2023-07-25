@@ -26,7 +26,7 @@ const AuthModalProviderList = () => {
       {options.map((option) => (
         <a
           href={`/login/${option.title.toLowerCase()}`}
-          className="btn flex gap-sm p-3 auth-provider"
+          className="btn flex gap-sm p-3 auth-provider shadow"
           onclick={(e: Event) => {
             e.preventDefault()
             handleOptionClick(option)

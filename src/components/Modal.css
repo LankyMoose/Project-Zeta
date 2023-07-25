@@ -25,7 +25,7 @@
 }
 @media (prefers-color-scheme: light) {
   .modal {
-    background-color: #fefefe;
+    background-color: #fafafa;
   }
 }
 .modal-header {
@@ -46,7 +46,7 @@
 }
 @media (prefers-color-scheme: light) {
   .modal-body {
-    background-color: rgba(0, 0, 0, .025);
+    background-color: rgba(0, 0, 0, .0275);
   }
 }
 

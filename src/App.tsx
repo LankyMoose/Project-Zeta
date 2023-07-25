@@ -19,14 +19,14 @@ import { MenuButton } from "./components/MenuButton"
 
 const Header = () => (
   <header>
-    <MenuButton className="hide-md show-sm" />
+    <MenuButton className="hide-sm" />
     <Link to="/" store={pathStore}>
       <div id="logo">Zetabase</div>
     </Link>
 
     <CommunitySearch />
     <>
-      <ul id="main-header-menu" className="hide-sm">
+      <ul id="main-header-menu" className="none flex-sm">
         <li>
           <Link to="/communities" store={pathStore}>
             <small>Communities</small>

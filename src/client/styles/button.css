@@ -4,7 +4,7 @@
   border: 0;
   cursor: pointer;
   position: relative;
-  background-color: #2e2e2e;
+  background-color: #252525;
   transition: opacity .15s ease-in-out;
   color: var(--light);
   line-height: 1rem;
@@ -17,7 +17,7 @@
 
 @media (prefers-color-scheme: light) {
   .btn {
-    background-color: #fff;
+    background-color: #f9f9f9;
     color: var(--primary);
   }
 }
@@ -25,13 +25,13 @@
 .btn.auth-provider:hover, 
 .btn.auth-provider:focus,
 .btn.auth-provider:active {
-  background-color: #333;
+  background-color: #2a2a2a;
 }
 @media (prefers-color-scheme: light) {
   .btn.auth-provider:hover,
   .btn.auth-provider:focus,
   .btn.auth-provider:active {
-    background-color: #ededed;
+    background-color: #fff;
   }
 }
 

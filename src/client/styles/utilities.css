@@ -34,22 +34,28 @@
 }
 
 .none {
-  display: none;
+  display: none !important;
 }
-@media screen and (max-width: 640px) {
+@media screen and (min-width: 640px) {
   .hide-sm {
     display: none !important;
   }
-  .show-sm {
+  .block-sm {
     display: block !important;
   }
+  .flex-sm {
+    display: flex !important;
+  }
 }
-@media screen and (max-width:980px) {
+@media screen and (min-width:980px) {
   .hide-md {
-    display: none;
+    display: none !important;
   }
   .show-md {
     display: block !important;
+  }
+  .flex-md {
+    display: flex !important;
   }
 }
 
@@ -129,6 +135,44 @@
 
 .nowrap {
   white-space: nowrap;
+}
+
+.bg-danger {
+  background-color: var(--danger);
+}
+.bg-dark {
+  background-color: var(--dark);
+}
+.bg-light {
+  background-color: var(--light);
+}
+.bg-primary {
+  background-color: var(--primary);
+}
+.bg-primary-light {
+  background-color: var(--primary-light);
+}
+.bg-primary-dark {
+  background-color: var(--primary-dark);
+}
+.bg-primary-darken {
+  background-color: var(--primary-darken);
+}
+.bg-primary-darker {
+  background-color: var(--primary-darker);
+}
+.bg-primary-darkest {
+  background-color: var(--primary-darkest);
+}
+.bg-secondary {
+  background-color: var(--secondary);
+}
+
+.shadow-none {
+  box-shadow: none !important;
+}
+.shadow {
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, .075);
 }
 
 .text-dark {

@@ -29,10 +29,10 @@ export const UserAvatar = () => {
     authModalOpen.value = true
   }
   return (
-    <div className="user-area">
+    <div className="user-area flex">
       <button
         type="button"
-        className="avatar-wrapper sm rounded-full border-none p-0"
+        className="avatar-wrapper sm rounded-full border-none p-0 bg-primary-darkest"
         onclick={handleLoginClick}
       >
         <UserIcon className="avatar" watch={userStore} bind:visible={isNotAuthenticated} />

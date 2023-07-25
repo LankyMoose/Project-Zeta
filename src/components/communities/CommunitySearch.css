@@ -8,7 +8,7 @@
 .community-search input {
   width: 100%;
   color: #eee;
-  background-color: rgba(0, 0, 0, .15);
+  background-color: rgba(0, 0, 0, .25);
 }
 .community-search input::placeholder {
   color: #bbb;
