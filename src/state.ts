@@ -61,3 +61,11 @@ export const communityRole = () => {
 export const isCommunityOwner = () => {
   return selectedCommunity.value?.memberType === "owner"
 }
+
+export const isCommunityModerator = () => {
+  return selectedCommunity.value?.memberType === "moderator"
+}
+
+export const isCommunityAdmin = () => {
+  return isCommunityModerator() || isCommunityOwner()
+}

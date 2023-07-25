@@ -8,6 +8,7 @@ import {
   authModalState,
   communityEditorModalOpen,
   communityJoinModalOpen,
+  isCommunityAdmin,
   isCommunityOwner,
   pathStore,
   selectedCommunity,
@@ -24,6 +25,7 @@ import { AddPostButton } from "../../components/community/AddPostButton"
 import { addNotification } from "../../components/Notifications"
 import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../../components/Button"
+import { CommunityJoinRequests } from "../../components/community/CommunityJoinRequests"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -95,6 +97,13 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
                   </IconButton>
+                ) : (
+                  <></>
+                )}
+                {isCommunityAdmin() ? (
+                  <div className="ml-auto">
+                    <CommunityJoinRequests />
+                  </div>
                 ) : (
                   <></>
                 )}

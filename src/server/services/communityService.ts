@@ -1,7 +1,14 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm"
+import { and, desc, eq, gte, isNull, sql } from "drizzle-orm"
 import { db } from "../../db"
 
-import { NewCommunity, communities, communityJoinRequests, communityMembers } from "../../db/schema"
+import {
+  CommunityJoinRequest,
+  CommunityMember,
+  NewCommunity,
+  communities,
+  communityJoinRequests,
+  communityMembers,
+} from "../../db/schema"
 import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
 import {
   CommunityLinkData,
@@ -167,7 +174,19 @@ export const communityService = {
     }
   },
 
-  async getCommunityMember(communityId: string, userId: string) {
+  async getJoinRequests(communityId: string): Promise<CommunityJoinRequest[] | void> {
+    try {
+      return await db.query.communityJoinRequests.findMany({
+        where: (joinReq, { and, eq }) =>
+          and(eq(joinReq.communityId, communityId), isNull(joinReq.response)),
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getCommunityMember(communityId: string, userId: string): Promise<CommunityMember | void> {
     try {
       return await db.query.communityMembers.findFirst({
         where: (member, { and, eq }) =>

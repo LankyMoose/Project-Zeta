@@ -1,6 +1,6 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
-import { Community, NewCommunity } from "../../db/schema"
+import { Community, CommunityJoinRequest, NewCommunity } from "../../db/schema"
 import {
   CommunityData,
   CommunityListData,
@@ -44,6 +44,23 @@ export const getCommunity = async (id: string): Promise<Partial<CommunityData> |
     return await response.json()
   } catch (error: any) {
     return new Error(error.message)
+  }
+}
+
+export const getCommunityJoinRequests = async (
+  id: string
+): Promise<CommunityJoinRequest[] | void> => {
+  try {
+    const response = await fetch(`${API_URL}/communities/${id}/join-requests`)
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+
+    return data
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
   }
 }
 

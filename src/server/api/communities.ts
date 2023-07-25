@@ -8,6 +8,7 @@ import {
   NotAuthenticatedError,
   NotFoundError,
   ServerError,
+  UnauthorizedError,
 } from "../../errors"
 import { JoinResultType } from "../../types/community"
 
@@ -44,6 +45,22 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       }
 
     return { ...res, memberType: member.memberType }
+  })
+
+  app.get<{ Params: { id?: string } }>("/api/communities/:id/join-requests", async (req) => {
+    if (!req.params.id) throw new InvalidRequestError()
+    if (!req.cookies.user_id) throw new NotAuthenticatedError()
+
+    const community = await communityService.getCommunity(req.params.id, true)
+    if (!community) throw new NotFoundError()
+
+    const member = await communityService.getCommunityMember(community.id, req.cookies.user_id)
+    if (!member || ["owner", "moderator"].indexOf(member.memberType) === -1)
+      throw new UnauthorizedError()
+
+    const res = await communityService.getJoinRequests(community.id)
+    if (!res) throw new ServerError()
+    return res
   })
 
   app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
