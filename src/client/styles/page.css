@@ -3,6 +3,16 @@
   width: 100%;
 }
 
+.page-description {
+  font-size: 1.25rem;
+  color: #ddd;
+}
+@media screen and (prefers-color-scheme:light) {
+  .page-description {
+    color: #454545;
+  }
+}
+
 .page-body {
   display: flex;
   justify-content: center;

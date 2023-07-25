@@ -11,7 +11,9 @@ export const CommunityPosts = ({ posts }: { posts: CommunityPostData[] }) => {
           <For each={posts} template={(post) => <PostCard post={post} />} />
         </div>
       ) : (
-        <div>No posts yet 😢</div>
+        <div>
+          <i className="text-muted">No posts yet 😢</i>
+        </div>
       )}
     </div>
   )

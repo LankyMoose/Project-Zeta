@@ -12,7 +12,7 @@
   --primary-dark: #0366d6;
   --primary-darken: #0544a5;
   --primary-darker: #073b8c;
-  --primary-darkest: #0f336d;
+  --primary-darkest: #063277;
   --secondary: #8600f3;
   --dark: #1e1e1e;
   --light: #fafaff;
@@ -67,17 +67,23 @@ a {
   }
 }
 
-input, textarea {
+input[type="text"],[type="password"], textarea {
   border: 0;
   border-radius: 0;
   min-height: 2rem;
   padding: .5rem;
   background-color: rgba(0,0,0,.035);
+  min-width:100%;
 }
 @media (prefers-color-scheme: dark) {
-  input, textarea {
+  input[type="text"],
+    [type="password"], textarea {
     background-color: rgba(255,255,255,.035);
   }
+}
+
+input[type="checkbox"] {
+  margin:0;
 }
 
 textarea {

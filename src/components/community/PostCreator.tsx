@@ -67,10 +67,10 @@ export const PostCreator = () => {
     <>
       <Modal visible={postCreatorModalOpen} toggle={() => (postCreatorModalOpen.value = false)}>
         <ModalHeader>
-          <h3>Create post</h3>
+          <h2>Create post</h2>
         </ModalHeader>
         <ModalBody>
-          <div className="flex flex-column">
+          <div className="form-group">
             <label htmlFor="title">Title</label>
             <input
               id="title"
@@ -79,8 +79,8 @@ export const PostCreator = () => {
               oninput={handleChange}
             />
           </div>
-          <div className="flex flex-column">
-            <label htmlFor="body">Content</label>
+          <div className="form-group">
+            <label htmlFor="content">Content</label>
             <textarea id="content" bind:value={() => state.value.content} oninput={handleChange} />
           </div>
         </ModalBody>

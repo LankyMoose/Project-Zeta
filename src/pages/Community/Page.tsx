@@ -72,7 +72,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <></>
                 )}
               </div>
-              <p className="text-muted">{community.description}</p>
+              <p className="page-description">{community.description}</p>
             </div>
             <CommunityFixedHeader />
 

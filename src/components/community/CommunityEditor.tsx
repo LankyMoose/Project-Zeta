@@ -78,7 +78,9 @@ export const CommunityEditor = () => {
       onclose={reset}
     >
       <form onsubmit={saveCommunity}>
-        <ModalHeader>Edit Community</ModalHeader>
+        <ModalHeader>
+          <h2>Edit Community</h2>
+        </ModalHeader>
         <ModalBody>
           <div className="form-group">
             <label htmlFor="title">Title</label>
@@ -101,7 +103,7 @@ export const CommunityEditor = () => {
               oninput={handleChange}
             />
           </div>
-          <div className="form-group">
+          <div className="form-group flex-row">
             <label htmlFor="private">Private</label>
             <input
               id="private"

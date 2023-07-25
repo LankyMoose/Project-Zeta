@@ -30,6 +30,7 @@ export const Modal = (
 
   return (
     <FadeInOut
+      properties={[{ name: "opacity", from: 0, to: 1, ms: 350 }]}
       className="modal-outer"
       tabIndex={-1}
       watch={visible}
@@ -45,27 +46,19 @@ export const Modal = (
     >
       <Transition
         className="modal"
-        properties={[
-          { name: "translate", from: "0 -5rem", to: "0 0", ms: 350 },
-        ]}
+        properties={[{ name: "translate", from: "0 -5rem", to: "0 0", ms: 350 }]}
         watch={visible}
         bind:visible={() => visible.value}
       >
         <NavigationListener onCapture={() => closeOnNavigate && toggle()} />
-        <KeyboardListener
-          keys={["Escape"]}
-          onCapture={() => closeOnEscape && toggle()}
-        />
+        <KeyboardListener keys={["Escape"]} onCapture={() => closeOnEscape && toggle()} />
         {children}
       </Transition>
     </FadeInOut>
   )
 }
 
-export const ModalHeader = (
-  props: ComponentProps,
-  children: ComponentChildren
-) => {
+export const ModalHeader = (props: ComponentProps, children: ComponentChildren) => {
   return (
     <div className="modal-header" {...props}>
       {children}
@@ -73,10 +66,7 @@ export const ModalHeader = (
   )
 }
 
-export const ModalBody = (
-  props: ComponentProps,
-  children: ComponentChildren
-) => {
+export const ModalBody = (props: ComponentProps, children: ComponentChildren) => {
   return (
     <div className="modal-body" {...props}>
       {children}
@@ -84,10 +74,7 @@ export const ModalBody = (
   )
 }
 
-export const ModalFooter = (
-  props: ComponentProps,
-  children: ComponentChildren
-) => {
+export const ModalFooter = (props: ComponentProps, children: ComponentChildren) => {
   return (
     <div className="modal-footer" {...props}>
       {children}

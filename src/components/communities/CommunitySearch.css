@@ -8,19 +8,10 @@
 .community-search input {
   width: 100%;
   color: #eee;
+  background-color: rgba(0, 0, 0, .15);
 }
 .community-search input::placeholder {
   color: #bbb;
-}
-@media (prefers-color-scheme: dark) {
-  .community-search input {
-    background-color: rgba(0, 0, 0, .15);
-  }
-}
-@media (prefers-color-scheme: light) {
-  .community-search input {
-    color: #555;
-  }
 }
 
 .community-search .loader {

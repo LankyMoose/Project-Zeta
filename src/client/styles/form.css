@@ -1,0 +1,22 @@
+.form-group {
+  display:flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom:.5rem;
+}
+.form-group.flex-row {
+  flex-direction: row;
+  align-items: center;
+}
+.form-group:last-child {
+  margin-bottom:0;
+}
+
+.form-group label {
+  font-size: .85rem;
+  margin-bottom:.25rem;
+}
+.form-group.flex-row label {
+  margin-right:.5rem;
+  margin-bottom:0;
+}
