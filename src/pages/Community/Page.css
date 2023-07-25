@@ -9,7 +9,7 @@
   flex-basis: 100%;
 }
 .community-page-members {
-  min-width: 320px;
+  min-width: 280px;
 }
 @media screen and (min-width: 768px) {
   .community-page-inner {
@@ -28,7 +28,7 @@
   top: var(--header-height);
   width: 100%;
   left: 0;
-  background-color: var(--content-area-dark);
+  background-color: var(--primary-darkest);
   z-index: 99;
   font-size: .8rem;
   box-shadow: .25rem 0 1rem rgba(0, 0, 0, .3);

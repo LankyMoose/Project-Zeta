@@ -36,6 +36,12 @@
 .none {
   display: none;
 }
+@media screen and (max-width: 640px) {
+  .hide-sm {
+    display: none !important;
+  }
+}
+
 
 .inline {
   display: inline;
@@ -114,6 +120,13 @@
   white-space: nowrap;
 }
 
+.text-dark {
+  color: var(--dark);
+}
+.text-light {
+  color: var(--light);
+}
+
 .text-muted {
   color: var(--text-muted);
 }
@@ -165,10 +178,22 @@
   font-size: 5rem;
 }
 
+.border-none {
+  border: none;
+}
+
 .rounded {
   border-radius: .25rem !important;
 }
 
 .rounded-lg {
   border-radius: .5rem !important;
+}
+
+.rounded-full {
+  border-radius: 50% !important;
+}
+
+.rounded-none {
+  border-radius: 0 !important;
 }

@@ -65,8 +65,9 @@ export const CommunityEditor = () => {
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement
     const value = target.type === "checkbox" ? target.checked : target.value
-    // @ts-ignore
-    state.value[target.id] = value
+
+    //@ts-ignore
+    state.value[target.id as keyof typeof state.value] = value
     state.notify()
   }
 
@@ -93,7 +94,7 @@ export const CommunityEditor = () => {
           <div className="form-group">
             <label htmlFor="desc">Description</label>
             <textarea
-              id="desc"
+              id="description"
               className="form-control"
               watch={state}
               bind:value={() => state.value?.description ?? ""}

@@ -1,0 +1,11 @@
+.user-dropdown-wrapper {
+  position: relative;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #1e1e1e;
+  z-index: -1;
+}

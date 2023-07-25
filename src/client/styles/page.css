@@ -11,7 +11,8 @@
 
 .section-title {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 1rem;
+  min-height: 2.25rem;
 }

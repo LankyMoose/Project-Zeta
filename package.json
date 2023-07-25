@@ -18,23 +18,23 @@
   "dependencies": {
     "@fastify/compress": "^6.4.0",
     "@fastify/cookie": "^8.3.0",
-    "@fastify/jwt": "^7.0.0",
-    "@fastify/oauth2": "^7.1.0",
+    "@fastify/jwt": "^7.2.0",
+    "@fastify/oauth2": "^7.2.1",
     "@fastify/static": "^6.10.2",
-    "@fastify/websocket": "^8.1.0",
-    "cinnabun": "^0.1.43",
-    "cinnabun-transitions": "^1.0.3",
-    "dotenv": "^16.3.0",
+    "@fastify/websocket": "^8.2.0",
+    "cinnabun": "^0.1.48",
+    "cinnabun-transitions": "^1.0.6",
+    "dotenv": "^16.3.1",
     "drizzle-orm": "^0.26.5",
     "esbuild": "^0.17.19",
-    "fastify": "^4.18.0",
-    "glob": "^10.3.0",
+    "fastify": "^4.20.0",
+    "glob": "^10.3.3",
     "node-fetch": "^3.3.1",
     "postgres": "^3.3.5",
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {
-    "@types/node": "^18.16.18",
+    "@types/node": "^18.16.19",
     "drizzle-kit": "^0.18.1"
   }
 }

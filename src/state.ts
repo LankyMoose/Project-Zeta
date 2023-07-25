@@ -1,5 +1,4 @@
 import { Cinnabun, Component, createSignal } from "cinnabun"
-import { useRequestData } from "cinnabun/ssr"
 import { PublicUser } from "./types/user"
 import { CommunityData } from "./types/community"
 import { AuthModalCallback } from "./types/auth"
@@ -28,7 +27,7 @@ const getUserDataFromCookie = (): PublicUser | null => {
 export const userStore = createSignal<PublicUser | null>(isClient ? getUserDataFromCookie() : null)
 
 export const getUser = (self: Component) =>
-  useRequestData<PublicUser | null>(self, "data.user", userStore.value)
+  self.useRequestData<PublicUser | null>("data.user", userStore.value)
 
 export const isAuthenticated = (self: Component) => !!getUser(self)
 export const isNotAuthenticated = (self: Component) => !getUser(self)
@@ -50,6 +49,14 @@ export const communityJoinModalOpen = createSignal(false)
 
 export const selectedCommunity = createSignal<Partial<CommunityData> | null>(null)
 export const selectedCommunityPost = createSignal<string | null>(null)
+
+export const sidebarOpen = createSignal(false)
+export const userDropdownOpen = createSignal(false)
+
+export const communityRole = () => {
+  if (!selectedCommunity.value) return null
+  return selectedCommunity.value.memberType
+}
 
 export const isCommunityOwner = () => {
   return selectedCommunity.value?.memberType === "owner"

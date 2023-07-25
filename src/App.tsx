@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { Router, Route, Link } from "cinnabun/router"
-import { AuthLinks } from "./components/AuthLinks"
+import { UserAvatar } from "./components/UserAvatar"
 import { Portal } from "./components/Portal"
 import { NotificationTray } from "./components/Notifications"
 import { pathStore } from "./state"
@@ -14,37 +14,50 @@ import { CommunityEditor } from "./components/community/CommunityEditor"
 import { CommunityJoinPrompt } from "./components/community/CommunityJoinPrompt"
 import { AuthModal } from "./components/auth/AuthModal"
 import { CommunitySearch } from "./components/communities/CommunitySearch"
+import { Sidebar } from "./components/sidebar/Sidebar"
+import { MenuButton } from "./components/MenuButton"
 
-const Header = () => {
-  return (
-    <header>
-      <Link to="/" store={pathStore}>
-        <div id="logo">Zetabase</div>
-      </Link>
+const Header = () => (
+  <header>
+    <MenuButton />
+    <Link to="/" store={pathStore}>
+      <div id="logo">Zetabase</div>
+    </Link>
 
-      <CommunitySearch />
+    <CommunitySearch />
+    <>
+      <ul id="main-header-menu" className="hide-sm">
+        <li>
+          <Link to="/communities" store={pathStore}>
+            <small>Communities</small>
+          </Link>
+        </li>
+        <li>
+          <Link to="/people" store={pathStore}>
+            <small>People</small>
+          </Link>
+        </li>
+      </ul>
+    </>
 
-      <div className="flex gap align-items-center">
-        <Link to="/communities" store={pathStore}>
-          Communities
-        </Link>
-        <AuthLinks />
-      </div>
-    </header>
-  )
-}
+    <UserAvatar />
+  </header>
+)
 
 export const App = () => {
   return (
     <>
       <Header />
-      <main className="container">
-        <Router store={pathStore}>
-          <Route path="/" component={HomePage} />
-          <Route path="/communities" component={CommunitiesPage} />
-          <Route path="/communities/:url_title" component={CommunityPage} />
-        </Router>
-      </main>
+      <div className="app-main">
+        <Sidebar />
+        <main className="container">
+          <Router store={pathStore}>
+            <Route path="/" component={HomePage} />
+            <Route path="/communities" component={CommunitiesPage} />
+            <Route path="/communities/:url_title" component={CommunityPage} />
+          </Router>
+        </main>
+      </div>
       <Portal>
         <NotificationTray />
         <PostCreator />

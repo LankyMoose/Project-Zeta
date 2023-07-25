@@ -9,6 +9,10 @@
   --primary: #0070f3;
   --primary-rgb: 0, 112, 243;
   --primary-light: #3291ff;
+  --primary-dark: #0366d6;
+  --primary-darken: #0544a5;
+  --primary-darker: #073b8c;
+  --primary-darkest: #0f336d;
   --secondary: #8600f3;
   --dark: #1e1e1e;
   --light: #fafaff;
@@ -46,6 +50,10 @@
 body {
   margin: 0;
   min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
 }
 
 a {
@@ -95,24 +103,64 @@ header {
   position: sticky;
   gap: 1rem;
   top: 0;
-  background-color: var(--content-area);
   z-index: 100;
   height: var(--header-height);
-  box-shadow: .25rem 0 1rem rgba(0, 0, 0, .05);
+  
+  /* box-shadow: .25rem 0 1rem rgba(0, 0, 0, .05); */
   transition: all .15s ease;
 }
+#app > header {
+  background-color: var(--primary-darker);
+  color: #eee;
+}
+#app > header a {
+  color: #eee;
+}
+
+ul#main-header-menu {
+  margin:0;
+  padding:0;
+  list-style: none;
+  display: flex;
+  gap:1rem;
+}
+
+
+/* @media screen and (prefers-color-scheme: light) {
+  header {
+    background-color: var(--primary);
+    color: white
+  }
+} */
+
 @media screen and (min-width: 768px) {
-  :root {
+  /* :root {
     --header-height: 100px;
   }
   header {
     padding: 2rem;
     gap: 2rem;
-  }
+  } */
   h1 {
     font-size: 2.5em;
     line-height: 1.1;
   }
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.app-main {
+  display: flex;
+  min-height: 100%;
+  width: 100%;
+  flex-grow: 1;
 }
 
 main {
@@ -124,7 +172,7 @@ h1.xl {
   font-size: clamp(3vw, 3rem, 10vw);
 }
 
-.section-title h2 {
+.section-title h3 {
   margin: 0;
   text-align: center;
 }
@@ -140,14 +188,7 @@ footer {
   font-size: small;
 }
 
-#app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-}
+
 
 .container {
   width: 100%;

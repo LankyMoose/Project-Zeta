@@ -80,20 +80,20 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
               <div className="community-page-inner">
                 <section className="flex flex-column community-page-posts">
                   <div className="section-title">
-                    <h2>Posts</h2>
+                    <h3>Posts</h3>
                     <AddPostButton />
                   </div>
                   <CommunityPosts posts={community.posts} />
                 </section>
                 <section className="flex flex-column community-page-members">
                   <div className="section-title">
-                    <h2>Owner</h2>
+                    <h3>Owner</h3>
                   </div>
                   <div className="flex flex-column mb-3">
                     <CommunityMemberCard member={community.owners[0]} />
                   </div>
                   <div className="section-title">
-                    <h2>Members</h2>
+                    <h3>Members</h3>
                   </div>
                   <div className="flex flex-column">
                     {community.members.map((member) => (

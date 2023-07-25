@@ -81,17 +81,16 @@ const sharedSettings = {
       async setup(build) {
         const options = build.initialOptions
         if (!options.metafile) {
-          console.log(
-            "[esbuild cleanup] Metafile is not enabled - skipping the cleanup"
-          )
+          console.log("[esbuild cleanup] Metafile is not enabled - skipping the cleanup")
           return
         }
 
         const safelistSet = new Set([])
         build.onEnd((result) => {
-          Object.keys(result.metafile.outputs).forEach((path) =>
-            safelistSet.add(path)
-          )
+          if (typeof result.metafile.outputs !== "undefined") {
+            return
+          }
+          Object.keys(result.metafile.outputs).forEach((path) => safelistSet.add(path))
           const fPath = path.join(options.outdir, "*").replace(/\\/g, "/")
           const files = globSync(fPath)
           files.forEach((f) => {

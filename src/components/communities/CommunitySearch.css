@@ -7,7 +7,10 @@
 
 .community-search input {
   width: 100%;
-  color: #ddd;
+  color: #eee;
+}
+.community-search input::placeholder {
+  color: #bbb;
 }
 @media (prefers-color-scheme: dark) {
   .community-search input {
@@ -43,28 +46,20 @@
   max-height: 0;
   transition: max-height 0.2s ease-out;
   overflow: hidden;
-  background-color: var(--content-area-light);
+  background-color: #10274b;
   box-shadow: 0 .15rem 0.3rem rgba(0, 0, 0, .15);
 }
-@media (prefers-color-scheme: light) {
-  .community-search ul {
-    background-color: var(--content-area-dark);
-  }
-}
+
 
 .community-search ul li {
   display: flex;
   padding: 1px;
-  border: 1px solid rgba(0, 0, 0, .15);
+  border: 1px solid transparent;
 }
-.community-search ul li:focus-within {
-  background-color: rgba(255, 255, 255, .15);
+.community-search ul li:focus-within, .community-search ul li:hover {
+  background-color: rgba(200, 200, 255, .05);
 }
-@media (prefers-color-scheme: light) {
-  .community-search ul li:focus-within {
-    background-color: rgba(255, 255, 255, .35);
-  }
-}
+
 
 .community-search ul li a {
   flex-grow: 1;
