@@ -1,8 +1,9 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
-import { Community, CommunityJoinRequest, NewCommunity } from "../../db/schema"
+import { Community, NewCommunity } from "../../db/schema"
 import {
   CommunityData,
+  CommunityJoinRequestData,
   CommunityListData,
   CommunitySearchData,
   JoinResult,
@@ -49,7 +50,7 @@ export const getCommunity = async (id: string): Promise<Partial<CommunityData> |
 
 export const getCommunityJoinRequests = async (
   id: string
-): Promise<CommunityJoinRequest[] | void> => {
+): Promise<CommunityJoinRequestData[] | void> => {
   try {
     const response = await fetch(`${API_URL}/communities/${id}/join-requests`)
     const data = await response.json()

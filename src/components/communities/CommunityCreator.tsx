@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { Button } from "../Button"
-import { Modal, ModalBody, ModalHeader } from "../Modal"
+import { Modal, ModalBody, ModalHeader } from "../modal/Modal"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { createCommunity } from "../../client/actions/communities"
 import { communityCreatorModalOpen, pathStore } from "../../state"

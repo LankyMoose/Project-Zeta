@@ -118,6 +118,9 @@
   }
 }
 
+.btn.btn-success {
+  background-color: var(--success);
+}
 .btn.btn-danger {
   background-color: var(--danger);
 }

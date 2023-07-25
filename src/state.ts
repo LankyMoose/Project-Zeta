@@ -1,7 +1,8 @@
 import { Cinnabun, Component, createSignal } from "cinnabun"
 import { PublicUser } from "./types/user"
-import { CommunityData } from "./types/community"
+import { CommunityData, CommunityJoinRequestData } from "./types/community"
 import { AuthModalCallback } from "./types/auth"
+import { ComponentFunc } from "cinnabun/types"
 
 const isClient = Cinnabun.isClient
 
@@ -49,9 +50,16 @@ export const communityJoinModalOpen = createSignal(false)
 
 export const selectedCommunity = createSignal<Partial<CommunityData> | null>(null)
 export const selectedCommunityPost = createSignal<string | null>(null)
+export const pendingCommunityJoinRequests = createSignal<CommunityJoinRequestData[]>([])
 
 export const sidebarOpen = createSignal(false)
 export const userDropdownOpen = createSignal(false)
+
+export const communityDrawerOpen = createSignal(false)
+export const communityDrawerState = createSignal({
+  title: "",
+  componentFunc: null as ComponentFunc | null,
+})
 
 export const communityRole = () => {
   if (!selectedCommunity.value) return null

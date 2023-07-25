@@ -10,6 +10,7 @@ import {
 } from "../../db/schema"
 import { ApiError, ForbiddenError, ServerError, UnauthorizedError } from "../../errors"
 import {
+  CommunityJoinRequestData,
   CommunityLinkData,
   CommunityListData,
   CommunitySearchData,
@@ -173,7 +174,7 @@ export const communityService = {
     }
   },
 
-  async getJoinRequests(communityId: string) {
+  async getJoinRequests(communityId: string): Promise<CommunityJoinRequestData[] | void> {
     try {
       return await db.query.communityJoinRequests
         .findMany({

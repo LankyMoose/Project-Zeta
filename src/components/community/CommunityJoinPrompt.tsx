@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
-import { Modal, ModalHeader, ModalBody } from "../Modal"
+import { Modal, ModalHeader, ModalBody } from "../modal/Modal"
 import { communityJoinModalOpen, pathStore, selectedCommunity } from "../../state"
 import { Button } from "../Button"
 import { joinCommunity } from "../../client/actions/communities"

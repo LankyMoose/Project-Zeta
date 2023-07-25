@@ -16,6 +16,7 @@ import { AuthModal } from "./components/auth/AuthModal"
 import { CommunitySearch } from "./components/communities/CommunitySearch"
 import { Sidebar } from "./components/sidebar/Sidebar"
 import { MenuButton } from "./components/MenuButton"
+import { CommunityDrawer } from "./components/community/CommunityDrawer"
 
 const Header = () => (
   <header>
@@ -65,6 +66,7 @@ export const App = () => {
         <CommunityEditor />
         <CommunityJoinPrompt />
         <AuthModal />
+        <CommunityDrawer />
       </Portal>
     </>
   )
