@@ -33,11 +33,7 @@ export const CommunityListCard = (props: CommunityListData) => {
               {community.title}
             </a>
           </h2>
-          {community.private ? (
-            <span className="badge bg-primary-light text-light">Private</span>
-          ) : (
-            <></>
-          )}
+          {community.private ? <span className="badge text-light">Private</span> : <></>}
         </div>
         <small className="text-muted">
           {nMembers} {nMembers > 1 ? "members" : "member"}
