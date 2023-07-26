@@ -3,18 +3,6 @@
   flex-basis: 100%;
 }
 
-.post-card .author {
-  display: flex;
-  align-items: center;
-  text-align: right;
-  white-space: nowrap;
-  gap: .5rem;
-}
-
-.post-card .author .created-at {
-  font-size: .65rem;
-}
-
 .post-card-content {
   color: #ddd;
   font-size: .95rem;

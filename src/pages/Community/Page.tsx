@@ -43,9 +43,9 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
     authModalOpen.value = true
   }
 
-  const loadCommunity = async (): Promise<Partial<CommunityData> | Error> => {
+  const loadCommunity = async (): Promise<Partial<CommunityData> | { message: string }> => {
     const res = await getCommunity(params.url_title!)
-    if (res instanceof Error) {
+    if ("message" in res) {
       addNotification({
         type: "error",
         text: res.message,
@@ -85,14 +85,16 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
 
   return (
     <Cinnabun.Suspense promise={loadCommunity} cache>
-      {(loading: boolean, data: Partial<CommunityData> | Error) => {
-        if (data && data instanceof Error) return <>{data.message}</>
+      {(loading: boolean, data: Partial<CommunityData> | { message: string }) => {
+        if (data && "message" in data) return data.message
 
         return (
           <div className="page-wrapper">
             <div className="page-title">
               <div className="flex gap align-items-center">
-                <h1>{data?.title ?? selectedCommunity.value?.title}</h1>
+                <h1 watch={selectedCommunity} bind:children>
+                  {() => selectedCommunity.value?.title}
+                </h1>
                 {isCommunityOwner() ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
@@ -108,8 +110,8 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <></>
                 )}
               </div>
-              <p className="page-description">
-                {data?.description ?? selectedCommunity.value?.description}
+              <p watch={selectedCommunity} bind:children className="page-description">
+                {() => selectedCommunity.value?.description ?? ""}
               </p>
             </div>
 

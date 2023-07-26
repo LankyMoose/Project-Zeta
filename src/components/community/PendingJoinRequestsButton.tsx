@@ -11,7 +11,7 @@ import { EllipsisLoader } from "../loaders/Ellipsis"
 import { PendingJoinRequests } from "./PendingJoinRequests"
 
 const loadRequests = async () => {
-  const res = selectedCommunity.value?.id
+  const res = !!selectedCommunity.value?.id
     ? await getCommunityJoinRequests(selectedCommunity.value.id)
     : []
   pendingCommunityJoinRequests.value = res ?? []

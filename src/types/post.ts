@@ -30,12 +30,12 @@ export type CommunityPostListData = {
   community: {
     id: string
     title: string
-    url_title: string | null
+    url_title: string | undefined
   }
   post: Post
   user: {
     id: string
     name: string
-    avatarUrl: string | null
+    avatarUrl: string | undefined
   }
 }

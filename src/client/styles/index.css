@@ -226,3 +226,15 @@ footer {
   text-align: center;
 }
 
+
+.author {
+  display: flex;
+  align-items: center;
+  text-align: right;
+  white-space: nowrap;
+  gap: .5rem;
+}
+
+.author .created-at {
+  font-size: .65rem;
+}

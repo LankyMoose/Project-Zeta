@@ -24,7 +24,7 @@ const Header = () => (
   <header>
     <MenuButton className="hide-sm" />
     <Link to="/" store={pathStore}>
-      <div id="logo">Zetabase</div>
+      <div id="logo">Project Zeta</div>
     </Link>
 
     <CommunitySearch />

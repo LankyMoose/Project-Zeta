@@ -7,7 +7,7 @@ export const AuthorTag = ({
 }: {
   user: {
     name: string
-    avatarUrl: string | null
+    avatarUrl: string | undefined
   }
   date?: string
 }) => {
