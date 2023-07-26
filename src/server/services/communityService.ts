@@ -25,7 +25,7 @@ import {
 } from "../../types/community"
 
 export const communityService = {
-  pageSize: 10,
+  pageSize: 25,
   fuzzySearchCache: [] as CommunitySearchData[],
   maxFuzzySearchCacheSize: 100,
 
