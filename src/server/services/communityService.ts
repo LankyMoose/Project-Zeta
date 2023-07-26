@@ -83,7 +83,7 @@ export const communityService = {
         with: {
           posts: {
             limit: 10,
-            orderBy: (posts, { desc }) => [desc(posts.createdAt)],
+            orderBy: (posts, { desc }) => desc(posts.createdAt),
             where: (post, { eq }) => eq(post.disabled, false),
             with: {
               user: {
@@ -94,7 +94,7 @@ export const communityService = {
                 },
               },
               comments: {
-                limit: 3,
+                orderBy: (comments, { asc }) => asc(comments.createdAt),
                 columns: {
                   id: true,
                   content: true,
@@ -118,26 +118,20 @@ export const communityService = {
               },
             },
           },
-          members: {
-            limit: 10,
-            where: (members, { eq }) => eq(members.memberType, "member"),
-            with: {
-              user: true,
-            },
+          owners: {
+            limit: 1,
+            where: (members, { eq }) => eq(members.memberType, "owner"),
+            with: { user: true },
           },
           moderators: {
             limit: 3,
             where: (members, { eq }) => eq(members.memberType, "moderator"),
-            with: {
-              user: true,
-            },
+            with: { user: true },
           },
-          owners: {
-            limit: 1,
-            where: (members, { eq }) => eq(members.memberType, "owner"),
-            with: {
-              user: true,
-            },
+          members: {
+            limit: 10,
+            where: (members, { eq }) => eq(members.memberType, "member"),
+            with: { user: true },
           },
         },
       })
