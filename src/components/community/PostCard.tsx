@@ -7,10 +7,19 @@ import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../client/actions/posts"
-import { pathStore, selectedCommunity, userStore } from "../../state"
+import {
+  authModalOpen,
+  authModalState,
+  communityJoinModalOpen,
+  isCommunityMember,
+  pathStore,
+  selectedCommunity,
+  userStore,
+} from "../../state"
 import { PostCardComments } from "./PostCardComments"
 import { AuthorTag } from "../AuthorTag"
 import "./PostCard.css"
+import { AuthModalCallback } from "../../types/auth"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
@@ -22,8 +31,20 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
 
   const addReaction = async (reaction: boolean) => {
     if (reacting.value) return
-    if (!userStore.value) return
+    if (!userStore.value) {
+      authModalState.value = {
+        title: "Log in to interact with this post",
+        message: "You must be logged in to interact with community posts.",
+        callbackAction: AuthModalCallback.ViewCommunity,
+      }
+      authModalOpen.value = true
+      return
+    }
     if (userReaction.value?.reaction === reaction) return
+    if (!isCommunityMember()) {
+      communityJoinModalOpen.value = true
+      return
+    }
 
     reacting.value = true
     const res = await addPostReaction(post.id, reaction)
@@ -38,12 +59,6 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       state.notify()
     }
     reacting.value = false
-  }
-
-  const disableReaction = () => {
-    if (reacting.value) return true
-    if (!userStore.value) return true
-    return false
   }
 
   const totalReactions = computed(state, () => {
@@ -86,7 +101,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
             }`
           }
           watch={[userStore, reacting, userReaction]}
-          bind:disabled={disableReaction}
+          bind:disabled={() => reacting.value}
         >
           <ThumbsUpIcon
             color="var(--primary)"
@@ -105,7 +120,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
             }`
           }
           watch={[userStore, reacting, userReaction]}
-          bind:disabled={disableReaction}
+          bind:disabled={() => reacting.value}
         >
           <ThumbsDownIcon
             color="var(--primary)"
