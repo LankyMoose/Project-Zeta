@@ -8,20 +8,20 @@ import { addNotification } from "../Notifications"
 import { JoinResultType } from "../../types/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 
-export const CommunityJoinPrompt = ({ communityUrlTitle }: { communityUrlTitle?: string }) => {
+export const CommunityJoinPrompt = () => {
   const loading = createSignal(false)
 
   const isPrivate = () => selectedCommunity.value?.private ?? false
 
   const reloadCommmunity = () => {
-    const communityTitle = communityUrlTitle ?? selectedCommunity.value?.url_title
+    const communityTitle = selectedCommunity.value?.url_title
     window.history.pushState({}, "", `/communities/${communityTitle}`)
     pathStore.value = `/communities/${communityTitle}`
     communityJoinModalOpen.value = false
   }
 
   const join = async () => {
-    const communityTitle = communityUrlTitle ?? selectedCommunity.value?.url_title
+    const communityTitle = selectedCommunity.value?.url_title
     if (!communityTitle) return addNotification({ type: "error", text: "No community selected." })
     loading.value = true
     const res = await joinCommunity(communityTitle)
@@ -65,9 +65,9 @@ export const CommunityJoinPrompt = ({ communityUrlTitle }: { communityUrlTitle?:
             <small watch={selectedCommunity} bind:children>
               {() =>
                 isPrivate() ? (
-                  <i>This community requires membership to view information.</i>
+                  <i>This private community requires membership to view information.</i>
                 ) : (
-                  <i>Joining a community will allow you to post and comment.</i>
+                  <i>Joining this community will allow you to post and comment.</i>
                 )
               }
             </small>

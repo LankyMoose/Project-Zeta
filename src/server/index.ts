@@ -26,6 +26,7 @@ import { generateUUID } from "../utils.js"
 import { configureCommunityRoutes } from "./api/communities.js"
 import { configurePostsRoutes } from "./api/posts.js"
 import { configureUserRoutes } from "./api/users.js"
+import { configureMeRoutes } from "./api/me.js"
 
 import { InvalidRequestError, ServerError } from "../errors.jsx"
 import { AuthProvider } from "../types/auth.js"
@@ -294,6 +295,7 @@ if (isDev) await import("../../.cb/sse").then(({ configureSSE }) => configureSSE
 configureUserRoutes(app)
 configureCommunityRoutes(app)
 configurePostsRoutes(app)
+configureMeRoutes(app)
 
 app.get("/*", async (req, res) => {
   const reqUser = req.cookies["user"]

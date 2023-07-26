@@ -64,7 +64,7 @@ export const communities = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom().notNull(),
     title: varchar("title", { length: 128 }).notNull(),
-    url_title: varchar("url_title", { length: 128 }),
+    url_title: varchar("url_title", { length: 128 }).default("").notNull(),
     description: varchar("description", { length: 255 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     disabled: boolean("disabled").default(false),

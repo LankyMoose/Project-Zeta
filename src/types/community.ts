@@ -63,3 +63,32 @@ export type JoinResult = {
   type: JoinResultType
   message?: string
 }
+
+export enum LeaveResultType {
+  Success,
+  NotAMember,
+  Error,
+}
+export type LeaveResult = {
+  type: LeaveResultType
+  message?: string
+}
+
+export enum DeleteResultType {
+  Success,
+  Error,
+}
+export type DeleteResult = {
+  type: DeleteResultType
+  message?: string
+}
+
+export enum OwnershipTransferResultType {
+  Success,
+  Error,
+}
+
+export type OwnershipTransferResult = {
+  type: OwnershipTransferResultType
+  message?: string
+}

@@ -8,6 +8,7 @@ import {
   communityJoinRequests,
   communityMembers,
   posts,
+  users,
 } from "../../db/schema"
 import {
   ApiError,
@@ -23,33 +24,85 @@ import {
   CommunitySearchData,
   JoinResult,
   JoinResultType,
+  LeaveResult,
+  LeaveResultType,
 } from "../../types/community"
+import { CommunityPostListData } from "../../types/post"
 
 export const communityService = {
   pageSize: 25,
   fuzzySearchCache: [] as CommunitySearchData[],
   maxFuzzySearchCacheSize: 100,
 
-  async getLatestCommunityPostsAvailableToUser(userId: string, page = 0) {
+  async getLatestPostsFromPublicCommunities(page = 0): Promise<CommunityPostListData[] | void> {
     try {
       return await db
         .select({
-          posts: posts,
-          community: communities,
+          post: posts,
+          community: {
+            id: communities.id,
+            title: communities.title,
+            url_title: communities.url_title,
+          },
+          user: {
+            id: users.id,
+            name: users.name,
+            avatarUrl: users.avatarUrl,
+          },
         })
         .from(posts)
-        .where(and(eq(posts.disabled, false)))
+        .where(and(eq(posts.disabled, false), eq(posts.deleted, false)))
         .limit(this.pageSize)
         .offset(page * this.pageSize)
-        .leftJoin(
+        .innerJoin(users, eq(users.id, posts.ownerId))
+        .innerJoin(
+          communities,
+          and(eq(communities.id, posts.communityId), eq(communities.private, false))
+        )
+        .orderBy(({ post }) => desc(post.createdAt))
+        .execute()
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getLatestPostsFromUserCommunities(
+    userId: string,
+    page = 0
+  ): Promise<CommunityPostListData[] | void> {
+    try {
+      return await db
+        .select({
+          post: posts,
+          community: {
+            id: communities.id,
+            title: communities.title,
+            url_title: communities.url_title,
+          },
+          user: {
+            id: users.id,
+            name: users.name,
+            avatarUrl: users.avatarUrl,
+          },
+        })
+        .from(posts)
+        .where(and(eq(posts.disabled, false), eq(posts.deleted, false)))
+        .limit(this.pageSize)
+        .offset(page * this.pageSize)
+        .innerJoin(users, eq(users.id, posts.ownerId))
+        .innerJoin(
           communityMembers,
           and(
             eq(communityMembers.communityId, posts.communityId),
             and(eq(communityMembers.userId, userId), eq(communityMembers.disabled, false))
           )
         )
-        .leftJoin(communities, eq(communities.id, posts.communityId))
-        .orderBy(({ posts }) => desc(posts.createdAt))
+        .innerJoin(
+          communities,
+          and(eq(communities.id, posts.communityId), eq(communities.disabled, false))
+        )
+        .orderBy(({ post }) => desc(post.createdAt))
         .execute()
     } catch (error) {
       console.error(error)
@@ -181,6 +234,23 @@ export const communityService = {
         .execute()
 
       return { type: JoinResultType.Success }
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async leaveCommunity(communityId: string, userId: string): Promise<LeaveResult | void> {
+    try {
+      const res = await db
+        .delete(communityMembers)
+        .where(
+          and(eq(communityMembers.communityId, communityId), eq(communityMembers.userId, userId))
+        )
+        .returning()
+        .execute()
+
+      return { type: res.length > 0 ? LeaveResultType.Success : LeaveResultType.NotAMember }
     } catch (error) {
       console.error(error)
       return

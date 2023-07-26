@@ -1,12 +1,14 @@
 import * as Cinnabun from "cinnabun"
-import { CommunityMemberUserData } from "../types/community"
 import { formatUTCDate } from "../utils"
 
 export const AuthorTag = ({
   user,
   date,
 }: {
-  user: Omit<CommunityMemberUserData, "createdAt">
+  user: {
+    name: string
+    avatarUrl: string | null
+  }
   date?: string
 }) => {
   return (

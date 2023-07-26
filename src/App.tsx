@@ -17,6 +17,8 @@ import { CommunitySearch } from "./components/communities/CommunitySearch"
 import { Sidebar } from "./components/sidebar/Sidebar"
 import { MenuButton } from "./components/MenuButton"
 import { CommunityDrawer } from "./components/community/CommunityDrawer"
+import { CommunityLeaveConfirmation } from "./components/community/CommunityLeaveConfirmation"
+import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation"
 
 const Header = () => (
   <header>
@@ -67,6 +69,8 @@ export const App = () => {
         <CommunityJoinPrompt />
         <AuthModal />
         <CommunityDrawer />
+        <CommunityLeaveConfirmation />
+        <CommunityDeleteConfirmation />
       </Portal>
     </>
   )

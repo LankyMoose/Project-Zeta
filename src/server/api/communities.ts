@@ -26,6 +26,13 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     return res
   })
 
+  app.get<{ Querystring: { page?: number } }>("/api/communities/latest", async (req) => {
+    const res = await communityService.getLatestPostsFromPublicCommunities(req.query.page)
+
+    if (!res) throw new ServerError()
+    return res
+  })
+
   app.get<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
     const res = await communityService.getCommunity(req.params.id)
@@ -93,6 +100,18 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       : await communityService.joinCommunity(community.id, req.cookies.user_id)
 
     if (!res) throw new ServerError("Failed to join community")
+    return res
+  })
+
+  app.post<{ Params: { id?: string } }>("/api/communities/:id/leave", async (req) => {
+    if (!req.params.id) throw new InvalidRequestError()
+    if (!req.cookies.user_id) throw new NotAuthenticatedError()
+
+    const community = await communityService.getCommunity(req.params.id, true)
+    if (!community) throw new NotFoundError()
+
+    const res = await communityService.leaveCommunity(community.id, req.cookies.user_id)
+    if (!res) throw new ServerError("Failed to leave community")
     return res
   })
 

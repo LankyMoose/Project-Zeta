@@ -47,6 +47,9 @@ export const postCreatorModalOpen = createSignal(false)
 export const communityCreatorModalOpen = createSignal(false)
 export const communityEditorModalOpen = createSignal(false)
 export const communityJoinModalOpen = createSignal(false)
+export const communityLeaveModalOpen = createSignal(false)
+export const communityDeleteModalOpen = createSignal(false)
+export const communityOwnershipTransferModalOpen = createSignal(false)
 
 export const selectedCommunity = createSignal<Partial<CommunityData> | null>(null)
 export const selectedCommunityPost = createSignal<string | null>(null)
@@ -64,6 +67,15 @@ export const communityDrawerState = createSignal({
 export const communityRole = () => {
   if (!selectedCommunity.value) return null
   return selectedCommunity.value.memberType
+}
+
+export const communityHasMembers = () => {
+  if (!selectedCommunity.value) return false
+  console.log(selectedCommunity.value)
+  return (
+    (selectedCommunity.value.members ?? []).length > 0 ||
+    (selectedCommunity.value.moderators ?? []).length > 0
+  )
 }
 
 export const isCommunityOwner = () => {

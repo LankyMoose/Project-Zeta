@@ -11,7 +11,7 @@
   height: 46px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, .15);
+  border: 2px solid rgba(255, 255, 255, .3);
 }
 
 .avatar-wrapper.sm {

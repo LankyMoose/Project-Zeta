@@ -6,9 +6,12 @@ import { setPath } from "cinnabun/router"
 import {
   authModalOpen,
   authModalState,
+  communityDeleteModalOpen,
   communityEditorModalOpen,
   communityJoinModalOpen,
+  communityLeaveModalOpen,
   isCommunityAdmin,
+  isCommunityMember,
   isCommunityOwner,
   pathStore,
   selectedCommunity,
@@ -68,6 +71,10 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       private: res.private,
       createdAt: res.createdAt,
       memberType: res.memberType,
+      members: res.members,
+      owners: res.owners,
+      posts: res.posts,
+      moderators: res.moderators,
     }
     return res
   }
@@ -79,20 +86,13 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
   return (
     <Cinnabun.Suspense promise={loadCommunity} cache>
       {(loading: boolean, data: Partial<CommunityData> | Error) => {
-        if (loading) {
-          return (
-            <div className="page-body">
-              <DefaultLoader />
-            </div>
-          )
-        }
-        if (data instanceof Error) return <>{data.message}</>
+        if (data && data instanceof Error) return <>{data.message}</>
 
         return (
           <div className="page-wrapper">
             <div className="page-title">
               <div className="flex gap align-items-center">
-                <h1>{data.title}</h1>
+                <h1>{data?.title ?? selectedCommunity.value?.title}</h1>
                 {isCommunityOwner() ? (
                   <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)" />
@@ -108,11 +108,52 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <></>
                 )}
               </div>
-              <p className="page-description">{data.description}</p>
+              <p className="page-description">
+                {data?.description ?? selectedCommunity.value?.description}
+              </p>
             </div>
-            {canViewCommunityData(data) ? (
+
+            {loading ? (
+              <div className="page-body">
+                <DefaultLoader />
+              </div>
+            ) : canViewCommunityData(data) ? (
               <>
                 <CommunityFixedHeader />
+
+                {isCommunityOwner() ? (
+                  <>
+                    <div className="flex gap">
+                      <Button
+                        className="btn btn-danger hover-animate btn-sm"
+                        onclick={() => (communityDeleteModalOpen.value = true)}
+                      >
+                        Delete this community
+                      </Button>
+                      <Button
+                        className="btn btn-primary hover-animate btn-sm"
+                        onclick={() => (communityLeaveModalOpen.value = true)}
+                      >
+                        Transfer ownership
+                      </Button>
+                    </div>
+                    <br />
+                  </>
+                ) : isCommunityMember() ? (
+                  <>
+                    <div>
+                      <Button
+                        className="btn btn-danger hover-animate btn-sm"
+                        onclick={() => (communityLeaveModalOpen.value = true)}
+                      >
+                        Leave this community
+                      </Button>
+                    </div>
+                    <br />
+                  </>
+                ) : (
+                  <> </>
+                )}
 
                 <div className="page-body">
                   <div className="community-page-inner">

@@ -3,9 +3,9 @@ import { NotAuthenticatedError, ServerError } from "../../errors"
 import { communityService } from "../services/communityService"
 
 export function configureMeRoutes(app: FastifyInstance) {
-  app.get<{ Querystring: { page?: number } }>("/api/me/latest", async (req) => {
+  app.get<{ Querystring: { page?: number } }>("/api/me/from-my-communities", async (req) => {
     if (!req.cookies.user_id) throw new NotAuthenticatedError()
-    const res = await communityService.getLatestCommunityPostsAvailableToUser(
+    const res = await communityService.getLatestPostsFromUserCommunities(
       req.cookies.user_id,
       req.query.page
     )

@@ -7,7 +7,9 @@ import {
   CommunityListData,
   CommunitySearchData,
   JoinResult,
+  LeaveResult,
 } from "../../types/community"
+import { CommunityPostListData } from "../../types/post"
 
 export const getCommunitySearch = async (title: string): Promise<CommunitySearchData | void> => {
   try {
@@ -45,6 +47,23 @@ export const getCommunity = async (id: string): Promise<Partial<CommunityData> |
     return await response.json()
   } catch (error: any) {
     return new Error(error.message)
+  }
+}
+
+export const getLatestPostsFromPublicCommunities = async (
+  page = 0
+): Promise<CommunityPostListData[] | void> => {
+  try {
+    const response = await fetch(`${API_URL}/communities/latest?page=${page}`)
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+
+    return data
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
   }
 }
 
@@ -134,9 +153,26 @@ export const updateCommunity = async (community: NewCommunity): Promise<Communit
   }
 }
 
-export const joinCommunity = async (id: string): Promise<JoinResult | void> => {
+export const joinCommunity = async (url_title: string): Promise<JoinResult | void> => {
   try {
-    const response = await fetch(`${API_URL}/communities/${id}/join`, {
+    const response = await fetch(`${API_URL}/communities/${url_title}/join`, {
+      method: "POST",
+    })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+
+    return data
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
+  }
+}
+
+export const leaveCommunity = async (id: string): Promise<LeaveResult | void> => {
+  try {
+    const response = await fetch(`${API_URL}/communities/${id}/leave`, {
       method: "POST",
     })
     const data = await response.json()
