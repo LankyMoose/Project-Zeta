@@ -7,6 +7,7 @@ import {
   communities,
   communityJoinRequests,
   communityMembers,
+  posts,
 } from "../../db/schema"
 import {
   ApiError,
@@ -28,6 +29,33 @@ export const communityService = {
   pageSize: 25,
   fuzzySearchCache: [] as CommunitySearchData[],
   maxFuzzySearchCacheSize: 100,
+
+  async getLatestCommunityPostsAvailableToUser(userId: string, page = 0) {
+    try {
+      return await db
+        .select({
+          posts: posts,
+          community: communities,
+        })
+        .from(posts)
+        .where(and(eq(posts.disabled, false)))
+        .limit(this.pageSize)
+        .offset(page * this.pageSize)
+        .leftJoin(
+          communityMembers,
+          and(
+            eq(communityMembers.communityId, posts.communityId),
+            and(eq(communityMembers.userId, userId), eq(communityMembers.disabled, false))
+          )
+        )
+        .leftJoin(communities, eq(communities.id, posts.communityId))
+        .orderBy(({ posts }) => desc(posts.createdAt))
+        .execute()
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
 
   async fuzzySearchCommunity(title: string): Promise<CommunitySearchData | void> {
     //https://www.freecodecamp.org/news/fuzzy-string-matching-with-postgresql/
