@@ -272,6 +272,7 @@ export const communityService = {
         .offset(_page * this.pageSize)
         .leftJoin(communityMembers, eq(communityMembers.communityId, communities.id))
         .groupBy(communities.id)
+        .orderBy(({ members }) => desc(members))
         .execute()
     } catch (error) {
       console.error(error)
