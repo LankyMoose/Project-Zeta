@@ -76,7 +76,7 @@ const sharedSettings = {
   sourcemap: "linked",
   splitting: false,
   define: { ...envVars },
-  metafile: !watch,
+  metafile: watch,
   plugins: [
     {
       name: "cleanup",
