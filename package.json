@@ -2,6 +2,7 @@
   "name": "project-zeta",
   "version": "1.0.0",
   "description": "",
+  "main": "dist/server/index.js",
   "type": "module",
   "scripts": {
     "build": "node .cb/build",
