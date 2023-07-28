@@ -31,6 +31,7 @@ export const CommunityFixedHeader = () => {
         settings={{ from: "top" }}
         watch={hasScrolled}
         bind:visible={() => hasScrolled.value}
+        cancelExit={() => hasScrolled.value}
       >
         <div className="flex gap align-items-center">
           <h2 className="m-0 text-light">{() => selectedCommunity.value?.title}</h2>

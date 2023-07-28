@@ -86476,7 +86476,8 @@ var CommunityFixedHeader = () => {
       className: "community-page-fixed-title flex justify-content-between align-items-center",
       settings: { from: "top" },
       watch: hasScrolled,
-      "bind:visible": () => hasScrolled.value
+      "bind:visible": () => hasScrolled.value,
+      cancelExit: () => hasScrolled.value
     },
     /* @__PURE__ */ h2("div", { className: "flex gap align-items-center" }, /* @__PURE__ */ h2("h2", { className: "m-0 text-light" }, () => selectedCommunity.value?.title), isCommunityOwner() ? /* @__PURE__ */ h2(IconButton, { onclick: () => communityEditorModalOpen.value = true }, /* @__PURE__ */ h2(EditIcon, { color: "var(--light)" })) : /* @__PURE__ */ h2(fragment, null)),
     /* @__PURE__ */ h2(AddPostButton, null)
