@@ -1,23 +1,23 @@
 import * as Cinnabun from "cinnabun";
 import { createSignal } from "cinnabun";
-import { Modal, ModalHeader, ModalBody } from "../Modal";
+import { Modal, ModalHeader, ModalBody } from "../modal/Modal";
 import { communityJoinModalOpen, pathStore, selectedCommunity } from "../../state";
 import { Button } from "../Button";
 import { joinCommunity } from "../../client/actions/communities";
 import { addNotification } from "../Notifications";
 import { JoinResultType } from "../../types/community";
 import { EllipsisLoader } from "../loaders/Ellipsis";
-export const CommunityJoinPrompt = ({ communityUrlTitle }) => {
+export const CommunityJoinPrompt = () => {
     const loading = createSignal(false);
     const isPrivate = () => selectedCommunity.value?.private ?? false;
     const reloadCommmunity = () => {
-        const communityTitle = communityUrlTitle ?? selectedCommunity.value?.url_title;
+        const communityTitle = selectedCommunity.value?.url_title;
         window.history.pushState({}, "", `/communities/${communityTitle}`);
         pathStore.value = `/communities/${communityTitle}`;
         communityJoinModalOpen.value = false;
     };
     const join = async () => {
-        const communityTitle = communityUrlTitle ?? selectedCommunity.value?.url_title;
+        const communityTitle = selectedCommunity.value?.url_title;
         if (!communityTitle)
             return addNotification({ type: "error", text: "No community selected." });
         loading.value = true;
@@ -37,6 +37,9 @@ export const CommunityJoinPrompt = ({ communityUrlTitle }) => {
                 addNotification({ type: "success", text: "You have joined the community." });
                 reloadCommmunity();
                 break;
+            case JoinResultType.Banned:
+                addNotification({ type: "error", text: "You are banned from this community." });
+                break;
             case JoinResultType.Pending:
                 addNotification({
                     type: "success",
@@ -55,7 +58,7 @@ export const CommunityJoinPrompt = ({ communityUrlTitle }) => {
         <div className="flex flex-column gap">
           <p className="text-muted m-0">
             <small watch={selectedCommunity} bind:children>
-              {() => isPrivate() ? (<i>This community requires membership to view information.</i>) : (<i>Joining a community will allow you to post and comment.</i>)}
+              {() => isPrivate() ? (<i>This private community requires membership to view information.</i>) : (<i>Joining this community will allow you to post and comment.</i>)}
             </small>
           </p>
           <div className="flex gap justify-content-between">

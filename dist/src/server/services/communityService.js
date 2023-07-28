@@ -1,12 +1,73 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, sql } from "drizzle-orm";
 import { db } from "../../db";
-import { communities, communityMembers } from "../../db/schema";
-import { ForbiddenError, ServerError, UnauthorizedError } from "../../errors";
-import { JoinResultType, } from "../../types/community";
+import { communities, communityJoinRequests, communityMembers, posts, users, } from "../../db/schema";
+import { ForbiddenError, NotFoundError, ServerError, UnauthorizedError, } from "../../errors";
+import { JoinResultType, LeaveResultType, } from "../../types/community";
 export const communityService = {
-    pageSize: 10,
+    pageSize: 25,
     fuzzySearchCache: [],
     maxFuzzySearchCacheSize: 100,
+    async getLatestPostsFromPublicCommunities(page = 0) {
+        try {
+            return await db
+                .select({
+                post: posts,
+                community: {
+                    id: communities.id,
+                    title: communities.title,
+                    url_title: communities.url_title,
+                },
+                user: {
+                    id: users.id,
+                    name: users.name,
+                    avatarUrl: users.avatarUrl,
+                },
+            })
+                .from(posts)
+                .where(and(eq(posts.disabled, false), eq(posts.deleted, false)))
+                .limit(this.pageSize)
+                .offset(page * this.pageSize)
+                .innerJoin(users, eq(users.id, posts.ownerId))
+                .innerJoin(communities, and(eq(communities.id, posts.communityId), eq(communities.private, false), eq(communities.disabled, false), eq(communities.deleted, false)))
+                .orderBy(({ post }) => desc(post.createdAt))
+                .execute();
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
+    async getLatestPostsFromUserCommunities(userId, page = 0) {
+        try {
+            return await db
+                .select({
+                post: posts,
+                community: {
+                    id: communities.id,
+                    title: communities.title,
+                    url_title: communities.url_title,
+                },
+                user: {
+                    id: users.id,
+                    name: users.name,
+                    avatarUrl: users.avatarUrl,
+                },
+            })
+                .from(posts)
+                .where(and(eq(posts.disabled, false), eq(posts.deleted, false)))
+                .limit(this.pageSize)
+                .offset(page * this.pageSize)
+                .innerJoin(users, eq(users.id, posts.ownerId))
+                .innerJoin(communityMembers, and(eq(communityMembers.communityId, posts.communityId), and(eq(communityMembers.userId, userId), eq(communityMembers.disabled, false))))
+                .innerJoin(communities, and(eq(communities.id, posts.communityId), eq(communities.disabled, false), eq(communities.deleted, false)))
+                .orderBy(({ post }) => desc(post.createdAt))
+                .execute();
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
     async fuzzySearchCommunity(title) {
         //https://www.freecodecamp.org/news/fuzzy-string-matching-with-postgresql/
         //https://www.postgresql.org/docs/current/pgtrgm.html
@@ -21,7 +82,7 @@ export const communityService = {
                 similarity: sql `SIMILARITY(title,${`%${title}%`})`.as("similarity"),
             })
                 .from(communities)
-                .where(({ similarity }) => and(eq(communities.disabled, false), gte(similarity, 0.15)))
+                .where(({ similarity }) => and(eq(communities.disabled, false), eq(communities.deleted, false), gte(similarity, 0.15)))
                 .orderBy(({ similarity }) => desc(similarity))
                 .limit(this.pageSize)
                 .execute();
@@ -50,11 +111,11 @@ export const communityService = {
     async getCommunity(titleOrId, useId = false) {
         try {
             return await db.query.communities.findFirst({
-                where: (community, { eq, and }) => and(eq(useId ? community.id : community.url_title, titleOrId), eq(community.disabled, false)),
+                where: (community, { eq, and }) => and(eq(useId ? community.id : community.url_title, titleOrId), eq(community.disabled, false), eq(community.deleted, false)),
                 with: {
                     posts: {
                         limit: 10,
-                        orderBy: (posts, { desc }) => [desc(posts.createdAt)],
+                        orderBy: (posts, { desc }) => desc(posts.createdAt),
                         where: (post, { eq }) => eq(post.disabled, false),
                         with: {
                             user: {
@@ -65,7 +126,7 @@ export const communityService = {
                                 },
                             },
                             comments: {
-                                limit: 3,
+                                orderBy: (comments, { asc }) => asc(comments.createdAt),
                                 columns: {
                                     id: true,
                                     content: true,
@@ -89,29 +150,45 @@ export const communityService = {
                             },
                         },
                     },
-                    members: {
-                        limit: 10,
-                        where: (members, { eq }) => eq(members.memberType, "member"),
-                        with: {
-                            user: true,
-                        },
+                    owners: {
+                        limit: 1,
+                        where: (members, { eq }) => eq(members.memberType, "owner"),
+                        with: { user: true },
                     },
                     moderators: {
                         limit: 3,
                         where: (members, { eq }) => eq(members.memberType, "moderator"),
-                        with: {
-                            user: true,
-                        },
+                        with: { user: true },
                     },
-                    owners: {
-                        limit: 1,
-                        where: (members, { eq }) => eq(members.memberType, "owner"),
-                        with: {
-                            user: true,
-                        },
+                    members: {
+                        limit: 10,
+                        where: (members, { eq }) => eq(members.memberType, "member"),
+                        with: { user: true },
                     },
                 },
             });
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
+    async getOwnedCommunities(userId) {
+        try {
+            return await db
+                .select({
+                community: communities,
+                members: sql `count(${communityMembers.id})`,
+            })
+                .from(communities)
+                .where(eq(communities.disabled, false))
+                .limit(this.pageSize)
+                .offset(0)
+                .innerJoin(communityMembers, eq(communityMembers.communityId, communities.id))
+                .where(eq(communityMembers.userId, userId))
+                .groupBy(communities.id)
+                .orderBy(({ members }) => desc(members))
+                .execute();
         }
         catch (error) {
             console.error(error);
@@ -128,9 +205,84 @@ export const communityService = {
                 memberType: "member",
             })
                 .execute();
-            return {
-                type: JoinResultType.Success,
-            };
+            return { type: JoinResultType.Success };
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
+    async leaveCommunity(communityId, userId) {
+        try {
+            const res = await db
+                .delete(communityMembers)
+                .where(and(eq(communityMembers.communityId, communityId), eq(communityMembers.userId, userId)))
+                .returning()
+                .execute();
+            return { type: res.length > 0 ? LeaveResultType.Success : LeaveResultType.NotAMember };
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
+    async submitJoinRequest(communityId, userId) {
+        try {
+            await db
+                .insert(communityJoinRequests)
+                .values({ communityId, userId })
+                .onConflictDoNothing()
+                .execute();
+            return { type: JoinResultType.Pending };
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
+    async getJoinRequests(communityId) {
+        try {
+            return await db.query.communityJoinRequests
+                .findMany({
+                where: (joinReq, { and, eq }) => and(eq(joinReq.communityId, communityId), isNull(joinReq.response)),
+                columns: {
+                    id: true,
+                    createdAt: true,
+                    communityId: true,
+                },
+                with: {
+                    user: true,
+                },
+            })
+                .execute();
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
+    async respondToJoinRequest(requestId, response) {
+        try {
+            const res = await db
+                .update(communityJoinRequests)
+                .set({ response })
+                .where(eq(communityJoinRequests.id, requestId))
+                .returning()
+                .execute();
+            if (res.length === 0)
+                return new NotFoundError();
+            if (!response)
+                return;
+            const { communityId, userId } = res[0];
+            return (await db
+                .insert(communityMembers)
+                .values({
+                communityId,
+                userId,
+                memberType: "member",
+            })
+                .returning()
+                .execute()).at(0);
         }
         catch (error) {
             console.error(error);
@@ -164,11 +316,12 @@ export const communityService = {
                 community: communities,
             })
                 .from(communities)
-                .where(eq(communities.disabled, false))
+                .where(and(eq(communities.disabled, false), eq(communities.deleted, false)))
                 .limit(this.pageSize)
                 .offset(_page * this.pageSize)
                 .leftJoin(communityMembers, eq(communityMembers.communityId, communities.id))
                 .groupBy(communities.id)
+                .orderBy(({ members }) => desc(members))
                 .execute();
         }
         catch (error) {
@@ -210,6 +363,23 @@ export const communityService = {
             if (!updatedCommunity)
                 return new ServerError("Failed to update community");
             return updatedCommunity;
+        }
+        catch (error) {
+            console.error(error);
+            return;
+        }
+    },
+    async deleteCommunity(communityId) {
+        try {
+            const res = await db
+                .update(communities)
+                .set({ deleted: true })
+                .where(eq(communities.id, communityId))
+                .returning()
+                .execute();
+            if (res.length === 0)
+                return new ServerError();
+            return true;
         }
         catch (error) {
             console.error(error);

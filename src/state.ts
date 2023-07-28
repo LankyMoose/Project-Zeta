@@ -33,10 +33,6 @@ export const getUser = (self: Component) =>
 export const isAuthenticated = (self: Component) => !!getUser(self)
 export const isNotAuthenticated = (self: Component) => !getUser(self)
 
-export const isCommunityMember = () => {
-  if (!selectedCommunity.value) return true
-  return selectedCommunity.value.memberType !== "guest"
-}
 export const authModalOpen = createSignal(false)
 export const authModalState = createSignal({
   title: "",
@@ -76,6 +72,11 @@ export const communityHasMembers = () => {
     (selectedCommunity.value.members ?? []).length > 0 ||
     (selectedCommunity.value.moderators ?? []).length > 0
   )
+}
+
+export const isCommunityMember = () => {
+  if (!selectedCommunity.value) return true
+  return selectedCommunity.value.memberType !== "guest"
 }
 
 export const isCommunityOwner = () => {

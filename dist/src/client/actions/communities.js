@@ -39,6 +39,57 @@ export const getCommunity = async (id) => {
         return new Error(error.message);
     }
 };
+export const getLatestPostsFromPublicCommunities = async (page = 0) => {
+    try {
+        const response = await fetch(`${API_URL}/communities/latest?page=${page}`);
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data?.message ?? response.statusText);
+        return data;
+    }
+    catch (error) {
+        addNotification({
+            type: "error",
+            text: error.message,
+        });
+    }
+};
+export const getCommunityJoinRequests = async (id) => {
+    try {
+        const response = await fetch(`${API_URL}/communities/${id}/join-requests`);
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data?.message ?? response.statusText);
+        return data;
+    }
+    catch (error) {
+        addNotification({
+            type: "error",
+            text: error.message,
+        });
+    }
+};
+export const respondToCommunityJoinRequest = async (communityId, requestId, accepted) => {
+    try {
+        const response = await fetch(`${API_URL}/communities/${communityId}/join-requests`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ requestId, accepted }),
+        });
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data?.message ?? response.statusText);
+        return data;
+    }
+    catch (error) {
+        addNotification({
+            type: "error",
+            text: error.message,
+        });
+    }
+};
 export const createCommunity = async (community) => {
     try {
         const response = await fetch(`${API_URL}/communities`, {
@@ -81,9 +132,9 @@ export const updateCommunity = async (community) => {
         });
     }
 };
-export const joinCommunity = async (id) => {
+export const joinCommunity = async (url_title) => {
     try {
-        const response = await fetch(`${API_URL}/communities/${id}/join`, {
+        const response = await fetch(`${API_URL}/communities/${url_title}/join`, {
             method: "POST",
         });
         const data = await response.json();
@@ -96,5 +147,40 @@ export const joinCommunity = async (id) => {
             type: "error",
             text: error.message,
         });
+    }
+};
+export const leaveCommunity = async (id) => {
+    try {
+        const response = await fetch(`${API_URL}/communities/${id}/leave`, {
+            method: "POST",
+        });
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data?.message ?? response.statusText);
+        return data;
+    }
+    catch (error) {
+        addNotification({
+            type: "error",
+            text: error.message,
+        });
+    }
+};
+export const deleteCommunity = async (id) => {
+    try {
+        const response = await fetch(`${API_URL}/communities/${id}`, {
+            method: "DELETE",
+        });
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data?.message ?? response.statusText);
+        return true;
+    }
+    catch (error) {
+        addNotification({
+            type: "error",
+            text: error.message,
+        });
+        return false;
     }
 };

@@ -20,6 +20,7 @@ import { generateUUID } from "../utils.js";
 import { configureCommunityRoutes } from "./api/communities.js";
 import { configurePostsRoutes } from "./api/posts.js";
 import { configureUserRoutes } from "./api/users.js";
+import { configureMeRoutes } from "./api/me.js";
 import { InvalidRequestError, ServerError } from "../errors.jsx";
 import { AuthProvider } from "../types/auth.js";
 const _fetch = globalThis.fetch ?? fetch;
@@ -238,6 +239,7 @@ if (isDev)
 configureUserRoutes(app);
 configureCommunityRoutes(app);
 configurePostsRoutes(app);
+configureMeRoutes(app);
 app.get("/*", async (req, res) => {
     const reqUser = req.cookies["user"];
     const reqUserId = req.cookies["user_id"];

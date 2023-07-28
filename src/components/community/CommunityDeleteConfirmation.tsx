@@ -1,12 +1,49 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
-import { communityDeleteModalOpen, communityHasMembers, selectedCommunity } from "../../state"
+import {
+  communityDeleteModalOpen,
+  communityHasMembers,
+  pathStore,
+  selectedCommunity,
+} from "../../state"
 import { Button } from "../Button"
+import { deleteCommunity } from "../../client/actions/communities"
+import { addNotification } from "../Notifications"
+import { setPath } from "cinnabun/router"
+import { EllipsisLoader } from "../loaders/Ellipsis"
 
 export const CommunityDeleteConfirmation = () => {
   const loading = createSignal(false)
   const confirmText = createSignal("")
+
+  const handleDelete = async () => {
+    if (confirmText.value !== selectedCommunity.value!.title) {
+      addNotification({
+        text: "Confirmation text does not match!",
+        type: "error",
+      })
+      return
+    }
+    if (!selectedCommunity.value?.id) {
+      addNotification({
+        text: "No community selected!",
+        type: "error",
+      })
+      return
+    }
+    loading.value = true
+    const res = await deleteCommunity(selectedCommunity.value?.id)
+    communityDeleteModalOpen.value = false
+    setPath(pathStore, "/communities")
+    loading.value = false
+    if (!res) return
+
+    addNotification({
+      text: "Community deleted.",
+      type: "success",
+    })
+  }
 
   return (
     <Modal
@@ -61,9 +98,10 @@ export const CommunityDeleteConfirmation = () => {
             confirmText.value !== selectedCommunity.value?.title || loading.value
           }
           className="btn btn-danger hover-animate"
-          onclick={() => (communityDeleteModalOpen.value = false)}
+          onclick={handleDelete}
         >
           Delete
+          <EllipsisLoader watch={loading} bind:visible={() => loading.value} />
         </Button>
       </ModalFooter>
     </Modal>

@@ -6,10 +6,11 @@ import { IconButton } from "../IconButton";
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon";
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon";
 import { addPostReaction } from "../../client/actions/posts";
-import { pathStore, selectedCommunity, userStore } from "../../state";
+import { authModalOpen, authModalState, communityJoinModalOpen, isCommunityMember, pathStore, selectedCommunity, userStore, } from "../../state";
 import { PostCardComments } from "./PostCardComments";
 import { AuthorTag } from "../AuthorTag";
 import "./PostCard.css";
+import { AuthModalCallback } from "../../types/auth";
 export const PostCard = ({ post }) => {
     const state = createSignal(post);
     const reacting = createSignal(false);
@@ -21,10 +22,21 @@ export const PostCard = ({ post }) => {
     const addReaction = async (reaction) => {
         if (reacting.value)
             return;
-        if (!userStore.value)
+        if (!userStore.value) {
+            authModalState.value = {
+                title: "Log in to interact with this post",
+                message: "You must be logged in to interact with community posts.",
+                callbackAction: AuthModalCallback.ViewCommunity,
+            };
+            authModalOpen.value = true;
             return;
+        }
         if (userReaction.value?.reaction === reaction)
             return;
+        if (!isCommunityMember()) {
+            communityJoinModalOpen.value = true;
+            return;
+        }
         reacting.value = true;
         const res = await addPostReaction(post.id, reaction);
         if (res) {
@@ -37,13 +49,6 @@ export const PostCard = ({ post }) => {
             state.notify();
         }
         reacting.value = false;
-    };
-    const disableReaction = () => {
-        if (reacting.value)
-            return true;
-        if (!userStore.value)
-            return true;
-        return false;
     };
     const totalReactions = computed(state, () => {
         return state.value.reactions.reduce((acc, reaction) => {
@@ -70,13 +75,13 @@ export const PostCard = ({ post }) => {
       </div>
       <p className="post-card-content">{truncateText(post.content, 256)}</p>
       <div className="flex gap post-reactions">
-        <IconButton onclick={() => addReaction(true)} bind:className={() => `icon-button flex align-items-center gap-sm ${userReaction.value?.reaction === true ? "selected" : ""}`} watch={[userStore, reacting, userReaction]} bind:disabled={disableReaction}>
+        <IconButton onclick={() => addReaction(true)} bind:className={() => `icon-button flex align-items-center gap-sm ${userReaction.value?.reaction === true ? "selected" : ""}`} watch={[userStore, reacting, userReaction]} bind:disabled={() => reacting.value}>
           <ThumbsUpIcon color="var(--primary)" color:hover="var(--primary-light)" className="text-rg"/>
           <small className="text-muted" watch={totalReactions} bind:children>
             {() => totalReactions.value.positive}
           </small>
         </IconButton>
-        <IconButton onclick={() => addReaction(false)} bind:className={() => `icon-button flex align-items-center gap-sm ${userReaction.value?.reaction === false ? "selected" : ""}`} watch={[userStore, reacting, userReaction]} bind:disabled={disableReaction}>
+        <IconButton onclick={() => addReaction(false)} bind:className={() => `icon-button flex align-items-center gap-sm ${userReaction.value?.reaction === false ? "selected" : ""}`} watch={[userStore, reacting, userReaction]} bind:disabled={() => reacting.value}>
           <ThumbsDownIcon color="var(--primary)" color:hover="var(--primary-light)" className="text-rg"/>
           <small className="text-muted" watch={totalReactions} bind:children>
             {() => totalReactions.value.negative}

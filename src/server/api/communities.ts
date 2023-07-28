@@ -165,4 +165,18 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       return res
     }
   )
+  app.delete<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
+    if (!req.cookies.user_id) throw new NotAuthenticatedError()
+    if (!req.params.id) throw new InvalidRequestError()
+
+    const communityId = req.params.id
+    const userId = req.cookies.user_id
+
+    const member = await communityService.getCommunityMember(communityId, userId)
+    if (!member || member.memberType !== "owner") throw new UnauthorizedError()
+
+    const res = await communityService.deleteCommunity(communityId)
+    if (!res) throw new ServerError("Failed to delete community")
+    return res
+  })
 }

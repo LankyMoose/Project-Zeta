@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun";
 import { createSignal } from "cinnabun";
 import { Button } from "../Button";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../Modal";
+import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal";
 import { postValidation } from "../../db/validation";
 import { addPost } from "../../client/actions/posts";
 import { postCreatorModalOpen, selectedCommunity, userStore } from "../../state";

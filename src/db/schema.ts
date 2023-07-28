@@ -68,6 +68,7 @@ export const communities = pgTable(
     description: varchar("description", { length: 255 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     disabled: boolean("disabled").default(false),
+    deleted: boolean("deleted").default(false),
     private: boolean("private").default(false),
   },
   (table) => {

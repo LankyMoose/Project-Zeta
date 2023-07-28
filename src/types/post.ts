@@ -1,5 +1,4 @@
 import { Post } from "../db/schema"
-import { CommunityMemberUserData } from "./community"
 
 export type CommunityPostReaction = {
   reaction: boolean
@@ -36,6 +35,6 @@ export type CommunityPostListData = {
   user: {
     id: string
     name: string
-    avatarUrl: string | undefined
+    avatarUrl: string | undefined | null
   }
 }

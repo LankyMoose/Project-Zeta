@@ -3,6 +3,7 @@ import { db } from "../../db";
 import { posts, postReactions, postComments } from "../../db/schema";
 import { ServerError } from "../../errors";
 export const postService = {
+    pageSize: 25,
     async getPost(postId) {
         try {
             return (await db.select().from(posts).where(eq(posts.id, postId))).at(0);
@@ -70,7 +71,7 @@ export const postService = {
                 .from(posts)
                 .where(eq(posts.communityId, communityId))
                 .offset(offset)
-                .limit(10)
+                .limit(this.pageSize)
                 .orderBy(posts.createdAt);
         }
         catch (error) {

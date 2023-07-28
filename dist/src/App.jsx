@@ -15,10 +15,13 @@ import { AuthModal } from "./components/auth/AuthModal";
 import { CommunitySearch } from "./components/communities/CommunitySearch";
 import { Sidebar } from "./components/sidebar/Sidebar";
 import { MenuButton } from "./components/MenuButton";
+import { CommunityDrawer } from "./components/community/CommunityDrawer";
+import { CommunityLeaveConfirmation } from "./components/community/CommunityLeaveConfirmation";
+import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation";
 const Header = () => (<header>
     <MenuButton className="hide-sm"/>
     <Link to="/" store={pathStore}>
-      <div id="logo">Zetabase</div>
+      <div id="logo">Project Zeta</div>
     </Link>
 
     <CommunitySearch />
@@ -59,6 +62,9 @@ export const App = () => {
         <CommunityEditor />
         <CommunityJoinPrompt />
         <AuthModal />
+        <CommunityDrawer />
+        <CommunityLeaveConfirmation />
+        <CommunityDeleteConfirmation />
       </Portal>
     </>);
 };

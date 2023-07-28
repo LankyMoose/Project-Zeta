@@ -1517,11 +1517,6 @@ var userStore = createSignal(isClient ? getUserDataFromCookie() : null);
 var getUser = (self) => self.useRequestData("data.user", userStore.value);
 var isAuthenticated = (self) => !!getUser(self);
 var isNotAuthenticated = (self) => !getUser(self);
-var isCommunityMember = () => {
-  if (!selectedCommunity.value)
-    return true;
-  return selectedCommunity.value.memberType !== "guest";
-};
 var authModalOpen = createSignal(false);
 var authModalState = createSignal({
   title: "",
@@ -1550,6 +1545,11 @@ var communityHasMembers = () => {
     return false;
   console.log(selectedCommunity.value);
   return (selectedCommunity.value.members ?? []).length > 0 || (selectedCommunity.value.moderators ?? []).length > 0;
+};
+var isCommunityMember = () => {
+  if (!selectedCommunity.value)
+    return true;
+  return selectedCommunity.value.memberType !== "guest";
 };
 var isCommunityOwner = () => {
   return selectedCommunity.value?.memberType === "owner";
@@ -2045,6 +2045,23 @@ var leaveCommunity = async (id) => {
       type: "error",
       text: error.message
     });
+  }
+};
+var deleteCommunity = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/communities/${id}`, {
+      method: "DELETE"
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data?.message ?? response.statusText);
+    return true;
+  } catch (error) {
+    addNotification({
+      type: "error",
+      text: error.message
+    });
+    return false;
   }
 };
 
@@ -3636,6 +3653,33 @@ var CommunityLeaveConfirmation = () => {
 var CommunityDeleteConfirmation = () => {
   const loading2 = createSignal(false);
   const confirmText = createSignal("");
+  const handleDelete = async () => {
+    if (confirmText.value !== selectedCommunity.value.title) {
+      addNotification({
+        text: "Confirmation text does not match!",
+        type: "error"
+      });
+      return;
+    }
+    if (!selectedCommunity.value?.id) {
+      addNotification({
+        text: "No community selected!",
+        type: "error"
+      });
+      return;
+    }
+    loading2.value = true;
+    const res = await deleteCommunity(selectedCommunity.value?.id);
+    communityDeleteModalOpen.value = false;
+    setPath(pathStore, "/communities");
+    loading2.value = false;
+    if (!res)
+      return;
+    addNotification({
+      text: "Community deleted.",
+      type: "success"
+    });
+  };
   return /* @__PURE__ */ h(
     Modal,
     {
@@ -3670,9 +3714,10 @@ var CommunityDeleteConfirmation = () => {
         watch: [confirmText, loading2],
         "bind:disabled": () => confirmText.value !== selectedCommunity.value?.title || loading2.value,
         className: "btn btn-danger hover-animate",
-        onclick: () => communityDeleteModalOpen.value = false
+        onclick: handleDelete
       },
-      "Delete"
+      "Delete",
+      /* @__PURE__ */ h(EllipsisLoader, { watch: loading2, "bind:visible": () => loading2.value })
     ))
   );
 };

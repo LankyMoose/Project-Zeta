@@ -15,6 +15,13 @@
       "when": 1690297042857,
       "tag": "0001_busy_raza",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1690510784509,
+      "tag": "0002_brown_gunslinger",
+      "breakpoints": false
     }
   ]
 }

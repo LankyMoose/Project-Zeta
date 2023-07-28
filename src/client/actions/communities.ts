@@ -186,3 +186,20 @@ export const leaveCommunity = async (id: string): Promise<LeaveResult | void> =>
     })
   }
 }
+
+export const deleteCommunity = async (id: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/communities/${id}`, {
+      method: "DELETE",
+    })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+    return true
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
+    return false
+  }
+}

@@ -3,7 +3,7 @@ import "./Page.css";
 import { getCommunity } from "../../client/actions/communities";
 import { DefaultLoader } from "../../components/loaders/Default";
 import { setPath } from "cinnabun/router";
-import { authModalOpen, authModalState, communityEditorModalOpen, communityJoinModalOpen, isCommunityOwner, pathStore, selectedCommunity, userStore, } from "../../state";
+import { authModalOpen, authModalState, communityDeleteModalOpen, communityEditorModalOpen, communityJoinModalOpen, communityLeaveModalOpen, isCommunityAdmin, isCommunityMember, isCommunityOwner, pathStore, selectedCommunity, userStore, } from "../../state";
 import { CommunityPosts } from "../../components/community/CommunityPosts";
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard";
 import { IconButton } from "../../components/IconButton";
@@ -13,6 +13,7 @@ import { AddPostButton } from "../../components/community/AddPostButton";
 import { addNotification } from "../../components/Notifications";
 import { AuthModalCallback } from "../../types/auth";
 import { Button } from "../../components/Button";
+import { PendingJoinRequestsButton } from "../../components/community/PendingJoinRequestsButton";
 export default function CommunityPage({ params }) {
     if (!params?.url_title)
         return setPath(pathStore, "/communities");
@@ -26,7 +27,7 @@ export default function CommunityPage({ params }) {
     };
     const loadCommunity = async () => {
         const res = await getCommunity(params.url_title);
-        if (res instanceof Error) {
+        if ("message" in res) {
             addNotification({
                 type: "error",
                 text: res.message,
@@ -51,6 +52,10 @@ export default function CommunityPage({ params }) {
             private: res.private,
             createdAt: res.createdAt,
             memberType: res.memberType,
+            members: res.members,
+            owners: res.owners,
+            posts: res.posts,
+            moderators: res.moderators,
         };
         return res;
     };
@@ -59,25 +64,49 @@ export default function CommunityPage({ params }) {
     };
     return (<Cinnabun.Suspense promise={loadCommunity} cache>
       {(loading, data) => {
-            if (loading) {
-                return (<div className="page-body">
-              <DefaultLoader />
-            </div>);
-            }
-            if (data instanceof Error)
-                return <>{data.message}</>;
+            if (data && "message" in data)
+                return data.message;
             return (<div className="page-wrapper">
             <div className="page-title">
               <div className="flex gap align-items-center">
-                <h1>{data.title}</h1>
+                <h1 watch={selectedCommunity} bind:children>
+                  {() => selectedCommunity.value?.title}
+                </h1>
                 {isCommunityOwner() ? (<IconButton onclick={() => (communityEditorModalOpen.value = true)}>
                     <EditIcon color="var(--primary)"/>
                   </IconButton>) : (<></>)}
+                {isCommunityAdmin() ? (<div className="ml-auto">
+                    <PendingJoinRequestsButton />
+                  </div>) : (<></>)}
               </div>
-              <p className="page-description">{data.description}</p>
+              <p watch={selectedCommunity} bind:children className="page-description">
+                {() => selectedCommunity.value?.description ?? ""}
+              </p>
             </div>
-            {canViewCommunityData(data) ? (<>
+
+            {loading ? (<div className="page-body">
+                <DefaultLoader />
+              </div>) : canViewCommunityData(data) ? (<>
                 <CommunityFixedHeader />
+
+                {isCommunityOwner() ? (<>
+                    <div className="flex gap">
+                      <Button className="btn btn-danger hover-animate btn-sm" onclick={() => (communityDeleteModalOpen.value = true)}>
+                        Delete this community
+                      </Button>
+                      <Button className="btn btn-primary hover-animate btn-sm" onclick={() => (communityLeaveModalOpen.value = true)}>
+                        Transfer ownership
+                      </Button>
+                    </div>
+                    <br />
+                  </>) : isCommunityMember() ? (<>
+                    <div>
+                      <Button className="btn btn-danger hover-animate btn-sm" onclick={() => (communityLeaveModalOpen.value = true)}>
+                        Leave this community
+                      </Button>
+                    </div>
+                    <br />
+                  </>) : (<> </>)}
 
                 <div className="page-body">
                   <div className="community-page-inner">

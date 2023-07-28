@@ -57,7 +57,12 @@ export const communityService = {
         .innerJoin(users, eq(users.id, posts.ownerId))
         .innerJoin(
           communities,
-          and(eq(communities.id, posts.communityId), eq(communities.private, false))
+          and(
+            eq(communities.id, posts.communityId),
+            eq(communities.private, false),
+            eq(communities.disabled, false),
+            eq(communities.deleted, false)
+          )
         )
         .orderBy(({ post }) => desc(post.createdAt))
         .execute()
@@ -100,7 +105,11 @@ export const communityService = {
         )
         .innerJoin(
           communities,
-          and(eq(communities.id, posts.communityId), eq(communities.disabled, false))
+          and(
+            eq(communities.id, posts.communityId),
+            eq(communities.disabled, false),
+            eq(communities.deleted, false)
+          )
         )
         .orderBy(({ post }) => desc(post.createdAt))
         .execute()
@@ -124,7 +133,13 @@ export const communityService = {
           similarity: sql<number>`SIMILARITY(title,${`%${title}%`})`.as("similarity"),
         })
         .from(communities)
-        .where(({ similarity }) => and(eq(communities.disabled, false), gte(similarity, 0.15)))
+        .where(({ similarity }) =>
+          and(
+            eq(communities.disabled, false),
+            eq(communities.deleted, false),
+            gte(similarity, 0.15)
+          )
+        )
         .orderBy(({ similarity }) => desc(similarity))
         .limit(this.pageSize)
         .execute()
@@ -159,7 +174,8 @@ export const communityService = {
         where: (community, { eq, and }) =>
           and(
             eq(useId ? community.id : community.url_title, titleOrId),
-            eq(community.disabled, false)
+            eq(community.disabled, false),
+            eq(community.deleted, false)
           ),
         with: {
           posts: {
@@ -216,6 +232,28 @@ export const communityService = {
           },
         },
       })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getOwnedCommunities(userId: string): Promise<CommunityListData[] | void> {
+    try {
+      return await db
+        .select({
+          community: communities,
+          members: sql<number>`count(${communityMembers.id})`,
+        })
+        .from(communities)
+        .where(eq(communities.disabled, false))
+        .limit(this.pageSize)
+        .offset(0)
+        .innerJoin(communityMembers, eq(communityMembers.communityId, communities.id))
+        .where(eq(communityMembers.userId, userId))
+        .groupBy(communities.id)
+        .orderBy(({ members }) => desc(members))
+        .execute()
     } catch (error) {
       console.error(error)
       return
@@ -359,7 +397,7 @@ export const communityService = {
           community: communities,
         })
         .from(communities)
-        .where(eq(communities.disabled, false))
+        .where(and(eq(communities.disabled, false), eq(communities.deleted, false)))
         .limit(this.pageSize)
         .offset(_page * this.pageSize)
         .leftJoin(communityMembers, eq(communityMembers.communityId, communities.id))
@@ -416,6 +454,23 @@ export const communityService = {
 
       if (!updatedCommunity) return new ServerError("Failed to update community")
       return updatedCommunity
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async deleteCommunity(communityId: string) {
+    try {
+      const res = await db
+        .update(communities)
+        .set({ deleted: true })
+        .where(eq(communities.id, communityId))
+        .returning()
+        .execute()
+
+      if (res.length === 0) return new ServerError()
+      return true
     } catch (error) {
       console.error(error)
       return

@@ -1,11 +1,12 @@
 import * as Cinnabun from "cinnabun";
 import { For, createSignal, computed } from "cinnabun";
-import { communityJoinModalOpen, isCommunityMember, userStore } from "../../state";
+import { authModalOpen, authModalState, communityJoinModalOpen, isCommunityMember, userStore, } from "../../state";
 import { addPostComment } from "../../client/actions/posts";
 import { formatUTCDate } from "../../utils";
 import { Button } from "../Button";
 import { EllipsisLoader } from "../loaders/Ellipsis";
 import { commentValidation } from "../../db/validation";
+import { AuthModalCallback } from "../../types/auth";
 const CommentItem = ({ comment }) => {
     return (<div className="comment-item flex align-items-center gap" key={comment.id}>
       <div className="avatar-wrapper sm">
@@ -42,6 +43,18 @@ const NewCommentForm = ({ post }) => {
     const loading = createSignal(false);
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!userStore.value) {
+            if (!userStore.value) {
+                authModalState.value = {
+                    title: "Log in to interact with this post",
+                    message: "You must be logged in to interact with community posts.",
+                    callbackAction: AuthModalCallback.ViewCommunity,
+                };
+                authModalOpen.value = true;
+                return;
+            }
+            return;
+        }
         if (!isCommunityMember()) {
             communityJoinModalOpen.value = true;
             return;

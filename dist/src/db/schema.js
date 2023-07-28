@@ -3,8 +3,8 @@ import { relations } from "drizzle-orm";
 export const users = pgTable("user", {
     id: uuid("id").primaryKey().defaultRandom(),
     name: varchar("username", { length: 80 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
-    disabled: boolean("disabled").default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    disabled: boolean("disabled").default(false).notNull(),
     avatarUrl: varchar("avatar_url", { length: 255 }),
     deleted: boolean("deleted").default(false),
 }, (table) => {
@@ -43,10 +43,11 @@ export const userAuthRelations = relations(userAuths, ({ one }) => ({
 export const communities = pgTable("community", {
     id: uuid("id").primaryKey().defaultRandom().notNull(),
     title: varchar("title", { length: 128 }).notNull(),
-    url_title: varchar("url_title", { length: 128 }),
+    url_title: varchar("url_title", { length: 128 }).default("").notNull(),
     description: varchar("description", { length: 255 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     disabled: boolean("disabled").default(false),
+    deleted: boolean("deleted").default(false),
     private: boolean("private").default(false),
 }, (table) => {
     return {

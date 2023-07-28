@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun";
 import { createSignal, computed } from "cinnabun";
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../Modal";
+import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal";
 import { communityEditorModalOpen, selectedCommunity } from "../../state";
 import { Button } from "../Button";
 import { communityValidation } from "../../db/validation";
