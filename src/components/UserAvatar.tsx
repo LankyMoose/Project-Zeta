@@ -2,6 +2,7 @@ import * as Cinnabun from "cinnabun"
 import {
   authModalOpen,
   authModalState,
+  getUser,
   isAuthenticated,
   isNotAuthenticated,
   userDropdownOpen,
@@ -39,8 +40,8 @@ export const UserAvatar = () => {
         <img
           watch={userStore}
           bind:visible={isAuthenticated}
+          bind:src={(self: Cinnabun.Component) => getUser(self)?.picture}
           className="avatar"
-          src={userStore.value?.picture}
           alt="avatar"
         />
       </button>

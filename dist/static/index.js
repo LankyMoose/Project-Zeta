@@ -925,8 +925,9 @@ var _SSR = class {
     };
     const serialized = await _SSR.serialize(accumulator, app, config);
     if (true) {
+      const renderTime = Number(performance.now() - startTime).toFixed(3);
       console.log(
-        `render time: ${Number(performance.now() - startTime).toFixed(3)}ms`
+        `${config.cinnabunInstance.getServerRequestData("path")} | render time: ${renderTime}ms`
       );
     }
     _SSR.render(
@@ -1719,8 +1720,8 @@ var UserAvatar = () => {
       {
         watch: userStore,
         "bind:visible": isAuthenticated,
+        "bind:src": (self) => getUser(self)?.picture,
         className: "avatar",
-        src: userStore.value?.picture,
         alt: "avatar"
       }
     )
