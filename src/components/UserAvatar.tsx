@@ -7,7 +7,7 @@ import {
   isNotAuthenticated,
   userDropdownOpen,
   userStore,
-} from "../state"
+} from "../state/global"
 import { UserIcon } from "./icons/UserIcon"
 import { UserDropdown } from "./UserDropdown"
 

@@ -7,15 +7,9 @@ import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../client/actions/posts"
-import {
-  authModalOpen,
-  authModalState,
-  communityJoinModalOpen,
-  isCommunityMember,
-  pathStore,
-  selectedCommunity,
-  userStore,
-} from "../../state"
+import { isCommunityMember, communityJoinModalOpen, selectedCommunity } from "../../state/community"
+import { userStore, authModalState, authModalOpen, pathStore } from "../../state/global"
+
 import { PostCardComments } from "./PostCardComments"
 import { AuthorTag } from "../AuthorTag"
 import "./PostCard.css"

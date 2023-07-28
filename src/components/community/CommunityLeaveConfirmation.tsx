@@ -1,12 +1,13 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
-import { communityLeaveModalOpen, pathStore, selectedCommunity } from "../../state"
 import { Button } from "../Button"
 import { addNotification } from "../Notifications"
 import { leaveCommunity } from "../../client/actions/communities"
 import { LeaveResultType } from "../../types/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
+import { selectedCommunity, communityLeaveModalOpen } from "../../state/community"
+import { pathStore } from "../../state/global"
 
 export const CommunityLeaveConfirmation = () => {
   const loading = createSignal(false)

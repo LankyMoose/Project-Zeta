@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { SlideInOut } from "cinnabun-transitions"
-import { pathStore, userDropdownOpen } from "../state"
+import { pathStore, userDropdownOpen } from "../state/global"
 import { Link } from "cinnabun/router"
 import "./UserDropdown.css"
 

@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
-import { authModalOpen, authModalState } from "../../state"
+import { authModalOpen, authModalState } from "../../state/global"
 import { Button } from "../Button"
 import { GoogleIcon } from "../icons/auth/GoogleIcon"
 import { GithubIcon } from "../icons/auth/GithubIcon"

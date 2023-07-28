@@ -24,7 +24,7 @@ export const MyCommunities = () => {
   return (
     <>
       <h2>My Communities</h2>
-      <Suspense promise={getMyCommunities}>
+      <Suspense promise={getMyCommunities} cache>
         {(loading: boolean, data?: MyCommunitiesData) => {
           if (loading) return <DefaultLoader />
           if (!data) return <></>

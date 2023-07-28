@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal } from "cinnabun"
-import { communityDrawerOpen, pendingCommunityJoinRequests } from "../../state"
+import { communityDrawerOpen, pendingCommunityJoinRequests } from "../../state/community"
 import { CommunityJoinRequestData } from "../../types/community"
 import { respondToCommunityJoinRequest } from "../../client/actions/communities"
 import { addNotification } from "../Notifications"

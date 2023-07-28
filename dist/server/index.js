@@ -85380,7 +85380,7 @@ function matchPath(path2, location) {
   return { params, query, routeMatch };
 }
 
-// src/state.ts
+// src/state/global.ts
 var isClient = Cinnabun.isClient;
 var pathStore = createSignal(isClient ? window.location.pathname : "/");
 var decodeCookie = (str) => str.split(";").map((v) => v.split("=")).reduce((acc, v) => {
@@ -85406,43 +85406,8 @@ var authModalState = createSignal({
   message: "",
   callbackAction: void 0
 });
-var postCreatorModalOpen = createSignal(false);
-var communityCreatorModalOpen = createSignal(false);
-var communityEditorModalOpen = createSignal(false);
-var communityJoinModalOpen = createSignal(false);
-var communityLeaveModalOpen = createSignal(false);
-var communityDeleteModalOpen = createSignal(false);
-var communityOwnershipTransferModalOpen = createSignal(false);
-var selectedCommunity = createSignal(null);
-var selectedCommunityPost = createSignal(null);
-var pendingCommunityJoinRequests = createSignal([]);
 var sidebarOpen = createSignal(false);
 var userDropdownOpen = createSignal(false);
-var communityDrawerOpen = createSignal(false);
-var communityDrawerState = createSignal({
-  title: "",
-  componentFunc: null
-});
-var communityHasMembers = () => {
-  if (!selectedCommunity.value)
-    return false;
-  console.log(selectedCommunity.value);
-  return (selectedCommunity.value.members ?? []).length > 0 || (selectedCommunity.value.moderators ?? []).length > 0;
-};
-var isCommunityMember = () => {
-  if (!selectedCommunity.value)
-    return true;
-  return selectedCommunity.value.memberType !== "guest";
-};
-var isCommunityOwner = () => {
-  return selectedCommunity.value?.memberType === "owner";
-};
-var isCommunityModerator = () => {
-  return selectedCommunity.value?.memberType === "moderator";
-};
-var isCommunityAdmin = () => {
-  return isCommunityModerator() || isCommunityOwner();
-};
 
 // src/components/icons/UserIcon.tsx
 var UserIcon = (props) => {
@@ -85960,6 +85925,43 @@ var deleteCommunity = async (id) => {
     });
     return false;
   }
+};
+
+// src/state/community.ts
+var postCreatorModalOpen = createSignal(false);
+var communityCreatorModalOpen = createSignal(false);
+var communityEditorModalOpen = createSignal(false);
+var communityJoinModalOpen = createSignal(false);
+var communityLeaveModalOpen = createSignal(false);
+var communityDeleteModalOpen = createSignal(false);
+var communityOwnershipTransferModalOpen = createSignal(false);
+var selectedCommunity = createSignal(null);
+var selectedCommunityPost = createSignal(null);
+var pendingCommunityJoinRequests = createSignal([]);
+var communityDrawerOpen = createSignal(false);
+var communityDrawerState = createSignal({
+  title: "",
+  componentFunc: null
+});
+var communityHasMembers = () => {
+  if (!selectedCommunity.value)
+    return false;
+  console.log(selectedCommunity.value);
+  return (selectedCommunity.value.members ?? []).length > 0 || (selectedCommunity.value.moderators ?? []).length > 0;
+};
+var isCommunityMember = () => {
+  if (!selectedCommunity.value)
+    return true;
+  return selectedCommunity.value.memberType !== "guest";
+};
+var isCommunityOwner = () => {
+  return selectedCommunity.value?.memberType === "owner";
+};
+var isCommunityModerator = () => {
+  return selectedCommunity.value?.memberType === "moderator";
+};
+var isCommunityAdmin = () => {
+  return isCommunityModerator() || isCommunityOwner();
 };
 
 // src/components/loaders/Default.tsx
@@ -86695,7 +86697,7 @@ var CommunityTypeList = ({
   return /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("h3", null, title), /* @__PURE__ */ h2(CommunityList, { communities: communities2 }));
 };
 var MyCommunities = () => {
-  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("h2", null, "My Communities"), /* @__PURE__ */ h2(Suspense, { promise: getMyCommunities }, (loading2, data) => {
+  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("h2", null, "My Communities"), /* @__PURE__ */ h2(Suspense, { promise: getMyCommunities, cache: true }, (loading2, data) => {
     if (loading2)
       return /* @__PURE__ */ h2(DefaultLoader, null);
     if (!data)
@@ -86706,10 +86708,14 @@ var MyCommunities = () => {
 
 // src/client/actions/users.ts
 var getUser2 = async (id) => {
-  const res = await fetch(`/api/users/${id}`);
-  if (!res.ok)
-    throw new Error("Failed to fetch user");
-  return await res.json();
+  try {
+    const res = await fetch(`${API_URL}/users/${id}`);
+    if (!res.ok)
+      throw new Error("Failed to fetch user");
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 // src/pages/User/Page.tsx
@@ -86721,31 +86727,34 @@ function UserPage({ params }) {
   const isSelfView = () => {
     return params.userId?.toLowerCase() === "me";
   };
-  if (!userStore.value && isSelfView()) {
-    addNotification({
-      type: "error",
-      text: "You must be logged in to view your profile."
-    });
-    window.history.replaceState({}, "", "/");
-    pathStore.value = "/";
-    return;
-  }
+  const handleMount = () => {
+    if (!userStore.value && isSelfView())
+      setPath(pathStore, `/`);
+  };
   const loadUser = () => {
-    if (isSelfView() && userStore.value)
+    if (isSelfView() && userStore.value) {
       return Promise.resolve({
         user: userStore.value
       });
-    const id = isSelfView() ? userStore.value.userId : params.userId;
-    console.log("loadUser", id);
-    return getUser2(id);
+    } else if (isSelfView()) {
+      return Promise.resolve({});
+    }
+    return getUser2(params.userId);
   };
-  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(Suspense, { promise: loadUser }, (loading2, data) => {
+  return /* @__PURE__ */ h2("div", { onMounted: handleMount }, /* @__PURE__ */ h2(Suspense, { promise: loadUser }, (loading2, data) => {
     if (loading2)
       return /* @__PURE__ */ h2(DefaultLoader, null);
     if (!data?.user)
       return /* @__PURE__ */ h2(fragment, null);
     return /* @__PURE__ */ h2("h1", null, data?.user.name);
-  }), /* @__PURE__ */ h2("div", { watch: userStore, "bind:visible": () => params?.userId?.toLowerCase() === "me" }, /* @__PURE__ */ h2(MyCommunities, null)));
+  }), /* @__PURE__ */ h2(
+    "div",
+    {
+      watch: userStore,
+      "bind:visible": () => !Cinnabun.isClient || params?.userId?.toLowerCase() === "me"
+    },
+    /* @__PURE__ */ h2(MyCommunities, null)
+  ));
 }
 
 // node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/listeners/KeyboardListener.ts

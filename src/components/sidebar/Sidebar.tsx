@@ -1,5 +1,5 @@
 import * as Cinnabun from "cinnabun"
-import { pathStore, sidebarOpen } from "../../state"
+import { pathStore, sidebarOpen } from "../../state/global"
 import { Link } from "cinnabun/router"
 import "./Sidebar.css"
 import { UsersIcon } from "../icons/UsersIcon"

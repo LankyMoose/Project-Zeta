@@ -3,9 +3,8 @@ import "./Page.css"
 import { getCommunity } from "../../client/actions/communities"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
+import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
 import {
-  authModalOpen,
-  authModalState,
   communityDeleteModalOpen,
   communityEditorModalOpen,
   communityJoinModalOpen,
@@ -13,10 +12,8 @@ import {
   isCommunityAdmin,
   isCommunityMember,
   isCommunityOwner,
-  pathStore,
   selectedCommunity,
-  userStore,
-} from "../../state"
+} from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"

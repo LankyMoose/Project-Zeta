@@ -1,12 +1,13 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { Modal, ModalHeader, ModalBody } from "../modal/Modal"
-import { communityJoinModalOpen, pathStore, selectedCommunity } from "../../state"
 import { Button } from "../Button"
 import { joinCommunity } from "../../client/actions/communities"
 import { addNotification } from "../Notifications"
 import { JoinResultType } from "../../types/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
+import { selectedCommunity, communityJoinModalOpen } from "../../state/community"
+import { pathStore } from "../../state/global"
 
 export const CommunityJoinPrompt = () => {
   const loading = createSignal(false)

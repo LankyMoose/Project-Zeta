@@ -1,7 +1,11 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { SlideInOut } from "cinnabun-transitions"
-import { selectedCommunity, isCommunityOwner, communityEditorModalOpen } from "../../state"
+import {
+  selectedCommunity,
+  isCommunityOwner,
+  communityEditorModalOpen,
+} from "../../state/community"
 import { IconButton } from "../IconButton"
 import { EditIcon } from "../icons"
 import { AddPostButton } from "./AddPostButton"

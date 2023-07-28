@@ -1,13 +1,8 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal, computed } from "cinnabun"
 import { CommunityPostComment, CommunityPostData } from "../../types/post"
-import {
-  authModalOpen,
-  authModalState,
-  communityJoinModalOpen,
-  isCommunityMember,
-  userStore,
-} from "../../state"
+import { authModalOpen, authModalState, userStore } from "../../state/global"
+import { isCommunityMember, communityJoinModalOpen } from "../../state/community"
 import { addPostComment } from "../../client/actions/posts"
 import { formatUTCDate } from "../../utils"
 import { Button } from "../Button"

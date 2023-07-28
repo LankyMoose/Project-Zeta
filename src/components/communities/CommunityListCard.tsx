@@ -1,9 +1,10 @@
 import * as Cinnabun from "cinnabun"
 import { truncateText } from "../../utils"
 import { setPath } from "cinnabun/router"
-import { pathStore, selectedCommunity } from "../../state"
+import { pathStore } from "../../state/global"
 import "./CommunityListCard.css"
 import type { CommunityListData } from "../../types/community"
+import { selectedCommunity } from "../../state/community"
 
 export const CommunityListCard = (props: CommunityListData) => {
   const { members, community } = props

@@ -3,7 +3,7 @@ import { Router, Route, Link } from "cinnabun/router"
 import { UserAvatar } from "./components/UserAvatar"
 import { Portal } from "./components/Portal"
 import { NotificationTray } from "./components/Notifications"
-import { pathStore } from "./state"
+import { pathStore } from "./state/global"
 
 import HomePage from "./pages/Home"
 import CommunitiesPage from "./pages/Communities"
