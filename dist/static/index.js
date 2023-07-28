@@ -2696,6 +2696,11 @@ var PendingJoinRequests = () => {
   return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(For, { each: pendingCommunityJoinRequests, template: JoinRequestCard }));
 };
 
+// src/components/community/CommunityMemberManager.tsx
+var CommunityMemberManager = () => {
+  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("h2", null, "Community Member Manager"));
+};
+
 // src/components/community/AdminMenu/AdminMenu.tsx
 var loadRequests = async () => {
   const res = !!selectedCommunity.value?.id ? await getCommunityJoinRequests(selectedCommunity.value.id) : [];
@@ -2705,6 +2710,13 @@ var handlePendingRequestsClick = () => {
   communityDrawerState.value = {
     title: "Join Requests",
     componentFunc: PendingJoinRequests
+  };
+  communityDrawerOpen.value = true;
+};
+var handleManageMembersClick = () => {
+  communityDrawerState.value = {
+    title: "Manage Members",
+    componentFunc: CommunityMemberManager
   };
   communityDrawerOpen.value = true;
 };
@@ -2731,7 +2743,7 @@ var AdminMenu = () => {
       properties: [{ name: "opacity", from: 0, to: 1 }],
       "bind:visible": () => showMenu.value
     },
-    /* @__PURE__ */ h("ul", null, /* @__PURE__ */ h("li", null, /* @__PURE__ */ h("a", { href: "javascript:void(0)" }, /* @__PURE__ */ h("small", null, "Manage members"))), selectedCommunity.value?.private ? /* @__PURE__ */ h("li", null, /* @__PURE__ */ h(
+    /* @__PURE__ */ h("ul", null, /* @__PURE__ */ h("li", null, /* @__PURE__ */ h("a", { onclick: handleManageMembersClick, href: "javascript:void(0)" }, /* @__PURE__ */ h("small", null, "Manage members"))), selectedCommunity.value?.private ? /* @__PURE__ */ h("li", null, /* @__PURE__ */ h(
       "a",
       {
         href: "javascript:void(0)",

@@ -12,6 +12,7 @@ import {
 import { getCommunityJoinRequests } from "../../../client/actions/communities"
 import { PendingJoinRequests } from "../PendingJoinRequests"
 import { EllipsisLoader } from "../../loaders/Ellipsis"
+import { CommunityMemberManager } from "../CommunityMemberManager"
 
 const loadRequests = async () => {
   const res = !!selectedCommunity.value?.id
@@ -24,6 +25,14 @@ const handlePendingRequestsClick = () => {
   communityDrawerState.value = {
     title: "Join Requests",
     componentFunc: PendingJoinRequests,
+  }
+  communityDrawerOpen.value = true
+}
+
+const handleManageMembersClick = () => {
+  communityDrawerState.value = {
+    title: "Manage Members",
+    componentFunc: CommunityMemberManager,
   }
   communityDrawerOpen.value = true
 }
@@ -63,7 +72,7 @@ export const AdminMenu = () => {
           >
             <ul>
               <li>
-                <a href="javascript:void(0)">
+                <a onclick={handleManageMembersClick} href="javascript:void(0)">
                   <small>Manage members</small>
                 </a>
               </li>
