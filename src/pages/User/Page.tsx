@@ -6,25 +6,34 @@ import { MyCommunities } from "../../components/user/MyCommunities"
 import { getUser } from "../../client/actions/users"
 import { PublicUser } from "../../types/user"
 import { DefaultLoader } from "../../components/loaders/Default"
+import { addNotification } from "../../components/Notifications"
 
 export default function UserPage({ params }: { params?: { userId?: string } }) {
   if (!params?.userId) return setPath(pathStore, "/users")
 
-  const isOwnProfile = () => {
+  if (!cb.isClient) return <></>
+
+  const isSelfView = () => {
     return params.userId?.toLowerCase() === "me"
   }
 
-  if (cb.isClient && !userStore.value?.userId && isOwnProfile()) {
-    return setPath(pathStore, "/users")
+  if (!userStore.value && isSelfView()) {
+    addNotification({
+      type: "error",
+      text: "You must be logged in to view your profile.",
+    })
+    window.history.replaceState({}, "", "/")
+    pathStore.value = "/"
+    return
   }
 
   const loadUser = () => {
-    if (isOwnProfile() && userStore.value)
+    if (isSelfView() && userStore.value)
       return Promise.resolve({
         user: userStore.value,
       })
 
-    const id = isOwnProfile() ? userStore.value!.userId! : params.userId!
+    const id = isSelfView() ? userStore.value!.userId! : params.userId!
     console.log("loadUser", id)
     return getUser(id)
   }

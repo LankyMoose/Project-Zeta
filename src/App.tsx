@@ -38,8 +38,8 @@ const Header = () => (
           </Link>
         </li>
         <li>
-          <Link to="/people" store={pathStore}>
-            <small>People</small>
+          <Link to="/users" store={pathStore}>
+            <small>Users</small>
           </Link>
         </li>
       </ul>
@@ -60,6 +60,7 @@ export const App = () => {
             <Route path="/" component={HomePage} />
             <Route path="/communities" component={CommunitiesPage} />
             <Route path="/communities/:url_title" component={CommunityPage} />
+            <Route path="/users" component={<div>Users</div>} />
             <Route path="/users/:userId" component={UserPage} />
           </Router>
         </main>

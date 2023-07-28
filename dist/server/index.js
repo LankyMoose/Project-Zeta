@@ -85306,10 +85306,14 @@ var setHash = (store, newHash) => {
   window.location.hash = newHash;
   store.value = newHash;
 };
-var setPath = (store, newPath) => {
+var setPath = (store, newPath, replace = false) => {
   if (window.location.pathname === newPath)
     return;
-  window.history.pushState({}, "", newPath);
+  if (replace) {
+    window.history.replaceState({}, "", newPath);
+  } else {
+    window.history.pushState({}, "", newPath);
+  }
   store.value = newPath;
 };
 var Link = (props, children) => {
@@ -86712,18 +86716,26 @@ var getUser2 = async (id) => {
 function UserPage({ params }) {
   if (!params?.userId)
     return setPath(pathStore, "/users");
-  const isOwnProfile = () => {
+  if (!Cinnabun.isClient)
+    return /* @__PURE__ */ h2(fragment, null);
+  const isSelfView = () => {
     return params.userId?.toLowerCase() === "me";
   };
-  if (Cinnabun.isClient && !userStore.value?.userId && isOwnProfile()) {
-    return setPath(pathStore, "/users");
+  if (!userStore.value && isSelfView()) {
+    addNotification({
+      type: "error",
+      text: "You must be logged in to view your profile."
+    });
+    window.history.replaceState({}, "", "/");
+    pathStore.value = "/";
+    return;
   }
   const loadUser = () => {
-    if (isOwnProfile() && userStore.value)
+    if (isSelfView() && userStore.value)
       return Promise.resolve({
         user: userStore.value
       });
-    const id = isOwnProfile() ? userStore.value.userId : params.userId;
+    const id = isSelfView() ? userStore.value.userId : params.userId;
     console.log("loadUser", id);
     return getUser2(id);
   };
@@ -87668,9 +87680,9 @@ var CommunityDeleteConfirmation = () => {
 };
 
 // src/App.tsx
-var Header = () => /* @__PURE__ */ h2("header", null, /* @__PURE__ */ h2(MenuButton, { className: "hide-sm" }), /* @__PURE__ */ h2(Link, { to: "/", store: pathStore }, /* @__PURE__ */ h2("div", { id: "logo" }, "Project Zeta")), /* @__PURE__ */ h2(CommunitySearch, null), /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("ul", { id: "main-header-menu", className: "none flex-sm" }, /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2(Link, { to: "/communities", store: pathStore }, /* @__PURE__ */ h2("small", null, "Communities"))), /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2(Link, { to: "/people", store: pathStore }, /* @__PURE__ */ h2("small", null, "People"))))), /* @__PURE__ */ h2(UserAvatar, null));
+var Header = () => /* @__PURE__ */ h2("header", null, /* @__PURE__ */ h2(MenuButton, { className: "hide-sm" }), /* @__PURE__ */ h2(Link, { to: "/", store: pathStore }, /* @__PURE__ */ h2("div", { id: "logo" }, "Project Zeta")), /* @__PURE__ */ h2(CommunitySearch, null), /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("ul", { id: "main-header-menu", className: "none flex-sm" }, /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2(Link, { to: "/communities", store: pathStore }, /* @__PURE__ */ h2("small", null, "Communities"))), /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2(Link, { to: "/users", store: pathStore }, /* @__PURE__ */ h2("small", null, "Users"))))), /* @__PURE__ */ h2(UserAvatar, null));
 var App = () => {
-  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(Header, null), /* @__PURE__ */ h2("div", { className: "app-main" }, /* @__PURE__ */ h2(Sidebar, null), /* @__PURE__ */ h2("main", { className: "container" }, /* @__PURE__ */ h2(Router, { store: pathStore }, /* @__PURE__ */ h2(Route, { path: "/", component: Home }), /* @__PURE__ */ h2(Route, { path: "/communities", component: Communities }), /* @__PURE__ */ h2(Route, { path: "/communities/:url_title", component: CommunityPage }), /* @__PURE__ */ h2(Route, { path: "/users/:userId", component: UserPage })))), /* @__PURE__ */ h2(Portal, null, /* @__PURE__ */ h2(NotificationTray, null), /* @__PURE__ */ h2(PostCreator, null), /* @__PURE__ */ h2(CommunityCreator, null), /* @__PURE__ */ h2(CommunityEditor, null), /* @__PURE__ */ h2(CommunityJoinPrompt, null), /* @__PURE__ */ h2(AuthModal, null), /* @__PURE__ */ h2(CommunityDrawer, null), /* @__PURE__ */ h2(CommunityLeaveConfirmation, null), /* @__PURE__ */ h2(CommunityDeleteConfirmation, null)));
+  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(Header, null), /* @__PURE__ */ h2("div", { className: "app-main" }, /* @__PURE__ */ h2(Sidebar, null), /* @__PURE__ */ h2("main", { className: "container" }, /* @__PURE__ */ h2(Router, { store: pathStore }, /* @__PURE__ */ h2(Route, { path: "/", component: Home }), /* @__PURE__ */ h2(Route, { path: "/communities", component: Communities }), /* @__PURE__ */ h2(Route, { path: "/communities/:url_title", component: CommunityPage }), /* @__PURE__ */ h2(Route, { path: "/users", component: /* @__PURE__ */ h2("div", null, "Users") }), /* @__PURE__ */ h2(Route, { path: "/users/:userId", component: UserPage })))), /* @__PURE__ */ h2(Portal, null, /* @__PURE__ */ h2(NotificationTray, null), /* @__PURE__ */ h2(PostCreator, null), /* @__PURE__ */ h2(CommunityCreator, null), /* @__PURE__ */ h2(CommunityEditor, null), /* @__PURE__ */ h2(CommunityJoinPrompt, null), /* @__PURE__ */ h2(AuthModal, null), /* @__PURE__ */ h2(CommunityDrawer, null), /* @__PURE__ */ h2(CommunityLeaveConfirmation, null), /* @__PURE__ */ h2(CommunityDeleteConfirmation, null)));
 };
 
 // src/env.ts

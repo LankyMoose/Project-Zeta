@@ -729,7 +729,7 @@ ul.card-list {
 /* src/components/Notifications.css */
 .notification-tray {
   position: fixed;
-  top: 0;
+  top: var(--header-height);
   right: .5rem;
   display: flex;
   flex-direction: column;
