@@ -85722,36 +85722,6 @@ var NotificationTray = ({
 // src/constants.tsx
 var API_URL = "/api";
 
-// src/client/actions/me.ts
-var getLatestPostsFromMyCommunities = async (page = 0) => {
-  try {
-    const response = await fetch(`${API_URL}/me/from-my-communities?page=${page}`);
-    const data = await response.json();
-    if (!response.ok)
-      throw new Error(data?.message ?? response.statusText);
-    return data;
-  } catch (error) {
-    addNotification({
-      type: "error",
-      text: error.message
-    });
-  }
-};
-var getMyCommunities = async () => {
-  try {
-    const response = await fetch(`${API_URL}/me/communities`);
-    const data = await response.json();
-    if (!response.ok)
-      throw new Error(data?.message ?? response.statusText);
-    return data;
-  } catch (error) {
-    addNotification({
-      type: "error",
-      text: error.message
-    });
-  }
-};
-
 // src/client/actions/communities.ts
 var getCommunitySearch = async (title) => {
   try {
@@ -85789,7 +85759,7 @@ var getCommunity = async (id) => {
     return new Error(error.message);
   }
 };
-var getLatestPostsFromPublicCommunities = async (page = 0) => {
+var getLatestPostsCommunities = async (page = 0) => {
   try {
     const response = await fetch(`${API_URL}/communities/latest?page=${page}`);
     const data = await response.json();
@@ -85983,7 +85953,7 @@ var PostCard = ({ post, community, user }) => {
     Link,
     {
       onBeforeNavigate: () => {
-        selectedCommunity.value = { ...selectedCommunity.value ?? {}, ...community };
+        selectedCommunity.value = { ...community };
         return true;
       },
       store: pathStore,
@@ -86005,7 +85975,7 @@ var PostList = ({
   });
 };
 function Home() {
-  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "flex gap flex-wrap" }, /* @__PURE__ */ h2("section", { watch: userStore, "bind:visible": isAuthenticated }, /* @__PURE__ */ h2("div", { className: "section-header" }, /* @__PURE__ */ h2("h2", null, "Latest from your communities")), /* @__PURE__ */ h2(PostList, { promiseFn: getLatestPostsFromMyCommunities })), /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("div", { className: "section-header" }, /* @__PURE__ */ h2("h2", null, "Latest from public communities")), /* @__PURE__ */ h2(PostList, { promiseFn: getLatestPostsFromPublicCommunities }))));
+  return /* @__PURE__ */ h2("div", { className: "flex gap flex-wrap" }, /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("div", { className: "section-header" }, /* @__PURE__ */ h2("h2", null, "Newest posts")), /* @__PURE__ */ h2(PostList, { promiseFn: getLatestPostsCommunities })));
 }
 
 // src/components/communities/CommunityListCard.tsx
@@ -86688,6 +86658,22 @@ function CommunityPage({ params }) {
     ) : /* @__PURE__ */ h2(Button, { className: "btn btn-primary hover-animate btn-lg", onclick: showLoginPrompt }, "Log in to view this community"));
   });
 }
+
+// src/client/actions/me.ts
+var getMyCommunities = async () => {
+  try {
+    const response = await fetch(`${API_URL}/me/communities`);
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data?.message ?? response.statusText);
+    return data;
+  } catch (error) {
+    addNotification({
+      type: "error",
+      text: error.message
+    });
+  }
+};
 
 // src/components/user/MyCommunities.tsx
 var CommunityTypeList = ({
@@ -93162,66 +93148,75 @@ var ServerError = class extends ApiError {
 };
 
 // src/server/services/communityService.ts
+var latestPostColumns = sql`
+${posts.id} as post_id,
+${posts.title} as post_title,
+${posts.content} as post_content,
+${posts.createdAt} as post_created_at,
+${communities.id} as community_id,
+${communities.title} as community_title,
+${communities.url_title} as community_url_title,
+${users.id} as user_id,
+${users.name} as user_name,
+${users.avatarUrl} as user_avatar_url`;
 var communityService = {
   pageSize: 25,
   fuzzySearchCache: [],
   maxFuzzySearchCacheSize: 100,
-  async getLatestPostsFromPublicCommunities(page = 0) {
+  async getLatestPosts(userId, _page = 0) {
     try {
-      return await db.select({
-        post: posts,
+      const query = sql`
+          select
+            ${latestPostColumns}
+          from ${posts}
+            inner join ${communities} on ${posts.communityId} = ${communities.id}
+            inner join ${users} on ${posts.ownerId} = ${users.id}
+          where
+            ${posts.disabled} = false
+            and ${posts.deleted} = false
+            and ${communities.disabled} = false
+            and ${communities.deleted} = false
+            and ${communities.private} = false
+        `;
+      if (userId) {
+        query.append(sql` UNION
+          select
+            ${latestPostColumns}
+          from ${posts}
+            inner join ${communities} on ${posts.communityId} = ${communities.id}
+            inner join ${users} on ${posts.ownerId} = ${users.id}
+            inner join ${communityMembers} on 
+                  ${communityMembers.communityId} = ${communities.id}
+              and ${communityMembers.userId} = ${userId}
+              and ${communityMembers.disabled} = false
+          where
+            ${posts.disabled} = false
+            and ${posts.deleted} = false
+            and ${communities.disabled} = false
+            and ${communities.deleted} = false
+            and ${communities.private} = true `);
+      }
+      query.append(
+        sql`order by post_created_at desc limit ${this.pageSize} offset ${_page * this.pageSize}`
+      );
+      return (await db.execute(query)).map((item) => ({
+        post: {
+          id: item.post_id,
+          title: item.post_title,
+          content: item.post_content,
+          createdAt: item.post_created_at
+        },
         community: {
-          id: communities.id,
-          title: communities.title,
-          url_title: communities.url_title
+          id: item.community_id,
+          title: item.community_title,
+          url_title: item.community_url_title
         },
         user: {
-          id: users.id,
-          name: users.name,
-          avatarUrl: users.avatarUrl
+          id: item.user_id,
+          name: item.user_name,
+          avatarUrl: item.user_avatar_url
         }
-      }).from(posts).where(and(eq(posts.disabled, false), eq(posts.deleted, false))).limit(this.pageSize).offset(page * this.pageSize).innerJoin(users, eq(users.id, posts.ownerId)).innerJoin(
-        communities,
-        and(
-          eq(communities.id, posts.communityId),
-          eq(communities.private, false),
-          eq(communities.disabled, false),
-          eq(communities.deleted, false)
-        )
-      ).orderBy(({ post }) => desc(post.createdAt)).execute();
-    } catch (error) {
-      console.error(error);
-      return;
-    }
-  },
-  async getLatestPostsFromUserCommunities(userId, page = 0) {
-    try {
-      return await db.select({
-        post: posts,
-        community: {
-          id: communities.id,
-          title: communities.title,
-          url_title: communities.url_title
-        },
-        user: {
-          id: users.id,
-          name: users.name,
-          avatarUrl: users.avatarUrl
-        }
-      }).from(posts).where(and(eq(posts.disabled, false), eq(posts.deleted, false))).limit(this.pageSize).offset(page * this.pageSize).innerJoin(users, eq(users.id, posts.ownerId)).innerJoin(
-        communityMembers,
-        and(
-          eq(communityMembers.communityId, posts.communityId),
-          and(eq(communityMembers.userId, userId), eq(communityMembers.disabled, false))
-        )
-      ).innerJoin(
-        communities,
-        and(
-          eq(communities.id, posts.communityId),
-          eq(communities.disabled, false),
-          eq(communities.deleted, false)
-        )
-      ).orderBy(({ post }) => desc(post.createdAt)).execute();
+      }));
     } catch (error) {
       console.error(error);
       return;
@@ -93546,7 +93541,7 @@ function configureCommunityRoutes(app2) {
     return res;
   });
   app2.get("/api/communities/latest", async (req) => {
-    const res = await communityService.getLatestPostsFromPublicCommunities(req.query.page);
+    const res = await communityService.getLatestPosts(req.cookies.user_id, req.query.page);
     if (!res)
       throw new ServerError();
     return res;
@@ -93855,17 +93850,6 @@ function configureUserRoutes(app2) {
 
 // src/server/api/me.ts
 function configureMeRoutes(app2) {
-  app2.get("/api/me/from-my-communities", async (req) => {
-    if (!req.cookies.user_id)
-      throw new NotAuthenticatedError();
-    const res = await communityService.getLatestPostsFromUserCommunities(
-      req.cookies.user_id,
-      req.query.page
-    );
-    if (!res)
-      throw new ServerError();
-    return res;
-  });
   app2.get("/api/me/communities", async (req) => {
     if (!req.cookies.user_id)
       throw new NotAuthenticatedError();

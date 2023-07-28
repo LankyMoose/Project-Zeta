@@ -1,21 +1,20 @@
 import * as Cinnabun from "cinnabun"
-import { getLatestPostsFromMyCommunities } from "../client/actions/me"
-import { getLatestPostsFromPublicCommunities } from "../client/actions/communities"
-import { isAuthenticated, pathStore, userStore } from "../state/global"
+import { getLatestPostsCommunities } from "../client/actions/communities"
+import { pathStore } from "../state/global"
 import { selectedCommunity } from "../state/community"
-import { CommunityPostListData } from "../types/post"
+import { LatestPostsData } from "../types/post"
 import { DefaultLoader } from "../components/loaders/Default"
 import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
 
-const PostCard = ({ post, community, user }: CommunityPostListData) => {
+const PostCard = ({ post, community, user }: LatestPostsData) => {
   return (
     <div className="card" key={post.id}>
       <div className="card-title flex justify-content-between">
         {post.title}
         <Link
           onBeforeNavigate={() => {
-            selectedCommunity.value = { ...(selectedCommunity.value ?? {}), ...community }
+            selectedCommunity.value = { ...community }
             return true
           }}
           store={pathStore}
@@ -39,11 +38,11 @@ const PostCard = ({ post, community, user }: CommunityPostListData) => {
 const PostList = ({
   promiseFn,
 }: {
-  promiseFn: { (page?: number): Promise<void | CommunityPostListData[]> }
+  promiseFn: { (page?: number): Promise<void | LatestPostsData[]> }
 }) => {
   return (
     <Cinnabun.Suspense promise={promiseFn} cache>
-      {(loading: boolean, data?: CommunityPostListData[]) => {
+      {(loading: boolean, data?: LatestPostsData[]) => {
         if (loading) return <DefaultLoader />
         if (!data) return <></>
         return <Cinnabun.For each={data} template={(item) => <PostCard {...item} />} />
@@ -54,21 +53,13 @@ const PostList = ({
 
 export default function Home() {
   return (
-    <>
-      <div className="flex gap flex-wrap">
-        <section watch={userStore} bind:visible={isAuthenticated}>
-          <div className="section-header">
-            <h2>Latest from your communities</h2>
-          </div>
-          <PostList promiseFn={getLatestPostsFromMyCommunities} />
-        </section>
-        <section>
-          <div className="section-header">
-            <h2>Latest from public communities</h2>
-          </div>
-          <PostList promiseFn={getLatestPostsFromPublicCommunities} />
-        </section>
-      </div>
-    </>
+    <div className="flex gap flex-wrap">
+      <section>
+        <div className="section-header">
+          <h2>Newest posts</h2>
+        </div>
+        <PostList promiseFn={getLatestPostsCommunities} />
+      </section>
+    </div>
   )
 }

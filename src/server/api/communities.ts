@@ -27,8 +27,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   })
 
   app.get<{ Querystring: { page?: number } }>("/api/communities/latest", async (req) => {
-    const res = await communityService.getLatestPostsFromPublicCommunities(req.query.page)
-
+    const res = await communityService.getLatestPosts(req.cookies.user_id, req.query.page)
     if (!res) throw new ServerError()
     return res
   })

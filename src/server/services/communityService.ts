@@ -27,92 +27,80 @@ import {
   LeaveResult,
   LeaveResultType,
 } from "../../types/community"
-import { CommunityPostListData } from "../../types/post"
+import { LatestPostsData } from "../../types/post"
+
+const latestPostColumns = sql`
+${posts.id} as post_id,
+${posts.title} as post_title,
+${posts.content} as post_content,
+${posts.createdAt} as post_created_at,
+${communities.id} as community_id,
+${communities.title} as community_title,
+${communities.url_title} as community_url_title,
+${users.id} as user_id,
+${users.name} as user_name,
+${users.avatarUrl} as user_avatar_url`
 
 export const communityService = {
   pageSize: 25,
   fuzzySearchCache: [] as CommunitySearchData[],
   maxFuzzySearchCacheSize: 100,
 
-  async getLatestPostsFromPublicCommunities(page = 0): Promise<CommunityPostListData[] | void> {
+  async getLatestPosts(userId?: string, _page = 0): Promise<LatestPostsData[] | void> {
     try {
-      return await db
-        .select({
-          post: posts,
-          community: {
-            id: communities.id,
-            title: communities.title,
-            url_title: communities.url_title,
-          },
-          user: {
-            id: users.id,
-            name: users.name,
-            avatarUrl: users.avatarUrl,
-          },
-        })
-        .from(posts)
-        .where(and(eq(posts.disabled, false), eq(posts.deleted, false)))
-        .limit(this.pageSize)
-        .offset(page * this.pageSize)
-        .innerJoin(users, eq(users.id, posts.ownerId))
-        .innerJoin(
-          communities,
-          and(
-            eq(communities.id, posts.communityId),
-            eq(communities.private, false),
-            eq(communities.disabled, false),
-            eq(communities.deleted, false)
-          )
-        )
-        .orderBy(({ post }) => desc(post.createdAt))
-        .execute()
-    } catch (error) {
-      console.error(error)
-      return
-    }
-  },
+      const query = sql`
+          select
+            ${latestPostColumns}
+          from ${posts}
+            inner join ${communities} on ${posts.communityId} = ${communities.id}
+            inner join ${users} on ${posts.ownerId} = ${users.id}
+          where
+            ${posts.disabled} = false
+            and ${posts.deleted} = false
+            and ${communities.disabled} = false
+            and ${communities.deleted} = false
+            and ${communities.private} = false
+        `
+      if (userId) {
+        query.append(sql` UNION
+          select
+            ${latestPostColumns}
+          from ${posts}
+            inner join ${communities} on ${posts.communityId} = ${communities.id}
+            inner join ${users} on ${posts.ownerId} = ${users.id}
+            inner join ${communityMembers} on 
+                  ${communityMembers.communityId} = ${communities.id}
+              and ${communityMembers.userId} = ${userId}
+              and ${communityMembers.disabled} = false
+          where
+            ${posts.disabled} = false
+            and ${posts.deleted} = false
+            and ${communities.disabled} = false
+            and ${communities.deleted} = false
+            and ${communities.private} = true `)
+      }
+      query.append(
+        sql`order by post_created_at desc limit ${this.pageSize} offset ${_page * this.pageSize}`
+      )
 
-  async getLatestPostsFromUserCommunities(
-    userId: string,
-    page = 0
-  ): Promise<CommunityPostListData[] | void> {
-    try {
-      return await db
-        .select({
-          post: posts,
-          community: {
-            id: communities.id,
-            title: communities.title,
-            url_title: communities.url_title,
-          },
-          user: {
-            id: users.id,
-            name: users.name,
-            avatarUrl: users.avatarUrl,
-          },
-        })
-        .from(posts)
-        .where(and(eq(posts.disabled, false), eq(posts.deleted, false)))
-        .limit(this.pageSize)
-        .offset(page * this.pageSize)
-        .innerJoin(users, eq(users.id, posts.ownerId))
-        .innerJoin(
-          communityMembers,
-          and(
-            eq(communityMembers.communityId, posts.communityId),
-            and(eq(communityMembers.userId, userId), eq(communityMembers.disabled, false))
-          )
-        )
-        .innerJoin(
-          communities,
-          and(
-            eq(communities.id, posts.communityId),
-            eq(communities.disabled, false),
-            eq(communities.deleted, false)
-          )
-        )
-        .orderBy(({ post }) => desc(post.createdAt))
-        .execute()
+      return (await db.execute(query)).map((item) => ({
+        post: {
+          id: item.post_id as string,
+          title: item.post_title as string,
+          content: item.post_content as string,
+          createdAt: item.post_created_at as string,
+        },
+        community: {
+          id: item.community_id as string,
+          title: item.community_title as string,
+          url_title: item.community_url_title as string,
+        },
+        user: {
+          id: item.user_id as string,
+          name: item.user_name as string,
+          avatarUrl: item.user_avatar_url as string,
+        },
+      }))
     } catch (error) {
       console.error(error)
       return

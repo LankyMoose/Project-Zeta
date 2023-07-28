@@ -1844,36 +1844,6 @@ var NotificationTray = ({
 // src/constants.tsx
 var API_URL = "/api";
 
-// src/client/actions/me.ts
-var getLatestPostsFromMyCommunities = async (page = 0) => {
-  try {
-    const response = await fetch(`${API_URL}/me/from-my-communities?page=${page}`);
-    const data = await response.json();
-    if (!response.ok)
-      throw new Error(data?.message ?? response.statusText);
-    return data;
-  } catch (error) {
-    addNotification({
-      type: "error",
-      text: error.message
-    });
-  }
-};
-var getMyCommunities = async () => {
-  try {
-    const response = await fetch(`${API_URL}/me/communities`);
-    const data = await response.json();
-    if (!response.ok)
-      throw new Error(data?.message ?? response.statusText);
-    return data;
-  } catch (error) {
-    addNotification({
-      type: "error",
-      text: error.message
-    });
-  }
-};
-
 // src/client/actions/communities.ts
 var getCommunitySearch = async (title) => {
   try {
@@ -1911,7 +1881,7 @@ var getCommunity = async (id) => {
     return new Error(error.message);
   }
 };
-var getLatestPostsFromPublicCommunities = async (page = 0) => {
+var getLatestPostsCommunities = async (page = 0) => {
   try {
     const response = await fetch(`${API_URL}/communities/latest?page=${page}`);
     const data = await response.json();
@@ -2105,7 +2075,7 @@ var PostCard = ({ post, community, user }) => {
     Link,
     {
       onBeforeNavigate: () => {
-        selectedCommunity.value = { ...selectedCommunity.value ?? {}, ...community };
+        selectedCommunity.value = { ...community };
         return true;
       },
       store: pathStore,
@@ -2127,7 +2097,7 @@ var PostList = ({
   });
 };
 function Home() {
-  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("div", { className: "flex gap flex-wrap" }, /* @__PURE__ */ h("section", { watch: userStore, "bind:visible": isAuthenticated }, /* @__PURE__ */ h("div", { className: "section-header" }, /* @__PURE__ */ h("h2", null, "Latest from your communities")), /* @__PURE__ */ h(PostList, { promiseFn: getLatestPostsFromMyCommunities })), /* @__PURE__ */ h("section", null, /* @__PURE__ */ h("div", { className: "section-header" }, /* @__PURE__ */ h("h2", null, "Latest from public communities")), /* @__PURE__ */ h(PostList, { promiseFn: getLatestPostsFromPublicCommunities }))));
+  return /* @__PURE__ */ h("div", { className: "flex gap flex-wrap" }, /* @__PURE__ */ h("section", null, /* @__PURE__ */ h("div", { className: "section-header" }, /* @__PURE__ */ h("h2", null, "Newest posts")), /* @__PURE__ */ h(PostList, { promiseFn: getLatestPostsCommunities })));
 }
 
 // src/components/communities/CommunityListCard.tsx
@@ -2810,6 +2780,22 @@ function CommunityPage({ params }) {
     ) : /* @__PURE__ */ h(Button, { className: "btn btn-primary hover-animate btn-lg", onclick: showLoginPrompt }, "Log in to view this community"));
   });
 }
+
+// src/client/actions/me.ts
+var getMyCommunities = async () => {
+  try {
+    const response = await fetch(`${API_URL}/me/communities`);
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data?.message ?? response.statusText);
+    return data;
+  } catch (error) {
+    addNotification({
+      type: "error",
+      text: error.message
+    });
+  }
+};
 
 // src/components/user/MyCommunities.tsx
 var CommunityTypeList = ({

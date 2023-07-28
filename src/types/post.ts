@@ -25,13 +25,18 @@ export type CommunityPostData = Post & {
   reactions: CommunityPostReaction[]
 }
 
-export type CommunityPostListData = {
+export type LatestPostsData = {
+  post: {
+    id: string
+    title: string
+    content: string
+    createdAt: Date | string
+  }
   community: {
     id: string
     title: string
     url_title: string | undefined
   }
-  post: Post
   user: {
     id: string
     name: string

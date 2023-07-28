@@ -24,6 +24,7 @@ const getUserDataFromCookie = (): PublicUser | null => {
 }
 
 export const userStore = createSignal<PublicUser | null>(isClient ? getUserDataFromCookie() : null)
+//userStore.subscribe(console.log)
 
 export const getUser = (self: Component) =>
   self.useRequestData<PublicUser | null>("data.user", userStore.value)
