@@ -85767,6 +85767,20 @@ var getLatestPostsFromMyCommunities = async (page = 0) => {
     });
   }
 };
+var getMyCommunities = async () => {
+  try {
+    const response = await fetch(`${API_URL}/me/communities`);
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data?.message ?? response.statusText);
+    return data;
+  } catch (error) {
+    addNotification({
+      type: "error",
+      text: error.message
+    });
+  }
+};
 
 // src/client/actions/communities.ts
 var getCommunitySearch = async (title) => {
@@ -85958,7 +85972,6 @@ var AuthorTag = ({
 
 // src/pages/Home.tsx
 var PostCard = ({ post, community, user }) => {
-  console.log(post, community, user);
   return /* @__PURE__ */ h2("div", { className: "card", key: post.id }, /* @__PURE__ */ h2("div", { className: "card-title flex justify-content-between" }, post.title, /* @__PURE__ */ h2(
     Link,
     {
@@ -86667,6 +86680,58 @@ function CommunityPage({ params }) {
       "Join to view this community"
     ) : /* @__PURE__ */ h2(Button, { className: "btn btn-primary hover-animate btn-lg", onclick: showLoginPrompt }, "Log in to view this community"));
   });
+}
+
+// src/components/user/MyCommunities.tsx
+var CommunityTypeList = ({
+  title,
+  communities: communities2
+}) => {
+  return /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("h2", null, title), /* @__PURE__ */ h2(CommunityList, { communities: communities2 }));
+};
+var MyCommunities = () => {
+  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("h1", null, "My Communities"), /* @__PURE__ */ h2(Suspense, { promise: getMyCommunities }, (loading2, data) => {
+    if (loading2)
+      return /* @__PURE__ */ h2(DefaultLoader, null);
+    if (!data)
+      return /* @__PURE__ */ h2(fragment, null);
+    return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(CommunityTypeList, { title: "Joined", communities: data.member }), /* @__PURE__ */ h2(CommunityTypeList, { title: "Owned", communities: data.owned }), /* @__PURE__ */ h2(CommunityTypeList, { title: "Moderating", communities: data.moderated }));
+  }));
+};
+
+// src/client/actions/users.ts
+var getUser2 = async (id) => {
+  const res = await fetch(`/api/users/${id}`);
+  if (!res.ok)
+    throw new Error("Failed to fetch user");
+  return await res.json();
+};
+
+// src/pages/User/Page.tsx
+function UserPage({ params }) {
+  if (!params?.userId)
+    return setPath(pathStore, "/users");
+  const isOwnProfile = () => {
+    return params.userId?.toLowerCase() === "me";
+  };
+  if (Cinnabun.isClient && !userStore.value?.userId && isOwnProfile()) {
+    return setPath(pathStore, "/users");
+  }
+  const loadUser = () => {
+    if (isOwnProfile() && userStore.value)
+      return Promise.resolve({
+        user: userStore.value
+      });
+    return getUser2(isOwnProfile() ? userStore.value.userId : params.userId);
+  };
+  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(Suspense, { promise: loadUser }, (loading2, data) => {
+    console.log(data);
+    if (loading2)
+      return /* @__PURE__ */ h2(DefaultLoader, null);
+    if (!data?.user)
+      return /* @__PURE__ */ h2(fragment, null);
+    return /* @__PURE__ */ h2("h1", null, data?.user.name);
+  }), /* @__PURE__ */ h2("div", { watch: userStore, "bind:visible": () => params?.userId?.toLowerCase() === "me" }, /* @__PURE__ */ h2(MyCommunities, null)));
 }
 
 // node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/listeners/KeyboardListener.ts
@@ -87603,7 +87668,7 @@ var CommunityDeleteConfirmation = () => {
 // src/App.tsx
 var Header = () => /* @__PURE__ */ h2("header", null, /* @__PURE__ */ h2(MenuButton, { className: "hide-sm" }), /* @__PURE__ */ h2(Link, { to: "/", store: pathStore }, /* @__PURE__ */ h2("div", { id: "logo" }, "Project Zeta")), /* @__PURE__ */ h2(CommunitySearch, null), /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("ul", { id: "main-header-menu", className: "none flex-sm" }, /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2(Link, { to: "/communities", store: pathStore }, /* @__PURE__ */ h2("small", null, "Communities"))), /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2(Link, { to: "/people", store: pathStore }, /* @__PURE__ */ h2("small", null, "People"))))), /* @__PURE__ */ h2(UserAvatar, null));
 var App = () => {
-  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(Header, null), /* @__PURE__ */ h2("div", { className: "app-main" }, /* @__PURE__ */ h2(Sidebar, null), /* @__PURE__ */ h2("main", { className: "container" }, /* @__PURE__ */ h2(Router, { store: pathStore }, /* @__PURE__ */ h2(Route, { path: "/", component: Home }), /* @__PURE__ */ h2(Route, { path: "/communities", component: Communities }), /* @__PURE__ */ h2(Route, { path: "/communities/:url_title", component: CommunityPage })))), /* @__PURE__ */ h2(Portal, null, /* @__PURE__ */ h2(NotificationTray, null), /* @__PURE__ */ h2(PostCreator, null), /* @__PURE__ */ h2(CommunityCreator, null), /* @__PURE__ */ h2(CommunityEditor, null), /* @__PURE__ */ h2(CommunityJoinPrompt, null), /* @__PURE__ */ h2(AuthModal, null), /* @__PURE__ */ h2(CommunityDrawer, null), /* @__PURE__ */ h2(CommunityLeaveConfirmation, null), /* @__PURE__ */ h2(CommunityDeleteConfirmation, null)));
+  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(Header, null), /* @__PURE__ */ h2("div", { className: "app-main" }, /* @__PURE__ */ h2(Sidebar, null), /* @__PURE__ */ h2("main", { className: "container" }, /* @__PURE__ */ h2(Router, { store: pathStore }, /* @__PURE__ */ h2(Route, { path: "/", component: Home }), /* @__PURE__ */ h2(Route, { path: "/communities", component: Communities }), /* @__PURE__ */ h2(Route, { path: "/communities/:url_title", component: CommunityPage }), /* @__PURE__ */ h2(Route, { path: "/users/:userId", component: UserPage })))), /* @__PURE__ */ h2(Portal, null, /* @__PURE__ */ h2(NotificationTray, null), /* @__PURE__ */ h2(PostCreator, null), /* @__PURE__ */ h2(CommunityCreator, null), /* @__PURE__ */ h2(CommunityEditor, null), /* @__PURE__ */ h2(CommunityJoinPrompt, null), /* @__PURE__ */ h2(AuthModal, null), /* @__PURE__ */ h2(CommunityDrawer, null), /* @__PURE__ */ h2(CommunityLeaveConfirmation, null), /* @__PURE__ */ h2(CommunityDeleteConfirmation, null)));
 };
 
 // src/env.ts
@@ -92966,7 +93031,11 @@ var userService = {
   },
   async getById(id) {
     try {
-      return (await db.select().from(users).where(and(eq(users.id, id), eq(users.disabled, false), eq(users.deleted, false))).limit(1)).at(0);
+      return (await db.select({
+        userId: users.id,
+        name: users.name,
+        picture: users.avatarUrl
+      }).from(users).where(and(eq(users.id, id), eq(users.disabled, false), eq(users.deleted, false))).limit(1)).at(0);
     } catch (error) {
       console.error(error);
       return;
@@ -93240,15 +93309,55 @@ var communityService = {
       return;
     }
   },
-  async getOwnedCommunities(userId) {
+  async getOwnedCommunitiesByUser(userId) {
     try {
       return await db.select({
         community: communities,
         members: sql`count(${communityMembers.id})`
-      }).from(communities).where(eq(communities.disabled, false)).limit(this.pageSize).offset(0).innerJoin(communityMembers, eq(communityMembers.communityId, communities.id)).where(eq(communityMembers.userId, userId)).groupBy(communities.id).orderBy(({ members }) => desc(members)).execute();
+      }).from(communities).where(eq(communities.disabled, false)).innerJoin(
+        communityMembers,
+        and(
+          eq(communityMembers.communityId, communities.id),
+          eq(communityMembers.memberType, "owner")
+        )
+      ).where(eq(communityMembers.userId, userId)).groupBy(communities.id).orderBy(({ members }) => desc(members)).execute();
     } catch (error) {
       console.error(error);
-      return;
+      return [];
+    }
+  },
+  async getModeratedCommunitiesByUser(userId) {
+    try {
+      return await db.select({
+        community: communities,
+        members: sql`count(${communityMembers.id})`
+      }).from(communities).where(and(eq(communities.disabled, false), eq(communities.deleted, false))).innerJoin(
+        communityMembers,
+        and(
+          eq(communityMembers.communityId, communities.id),
+          eq(communityMembers.memberType, "moderator")
+        )
+      ).where(eq(communityMembers.userId, userId)).groupBy(communities.id).orderBy(({ members }) => desc(members)).execute();
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  },
+  async getMemberCommunitiesByUser(userId) {
+    try {
+      return await db.select({
+        community: communities,
+        members: sql`count(${communityMembers.id})`
+      }).from(communities).where(and(eq(communities.disabled, false), eq(communities.deleted, false))).innerJoin(
+        communityMembers,
+        and(
+          eq(communityMembers.communityId, communities.id),
+          eq(communityMembers.memberType, "member")
+        )
+      ).where(eq(communityMembers.userId, userId)).groupBy(communities.id).orderBy(({ members }) => desc(members)).execute();
+    } catch (error) {
+      console.error(error);
+      return [];
     }
   },
   async joinCommunity(communityId, userId) {
@@ -93733,6 +93842,20 @@ function configureMeRoutes(app2) {
     if (!res)
       throw new ServerError();
     return res;
+  });
+  app2.get("/api/me/communities", async (req) => {
+    if (!req.cookies.user_id)
+      throw new NotAuthenticatedError();
+    const [owned, moderated, member] = await Promise.all([
+      communityService.getOwnedCommunitiesByUser(req.cookies.user_id),
+      communityService.getModeratedCommunitiesByUser(req.cookies.user_id),
+      communityService.getMemberCommunitiesByUser(req.cookies.user_id)
+    ]);
+    return {
+      owned,
+      moderated,
+      member
+    };
   });
 }
 

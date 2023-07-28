@@ -238,7 +238,7 @@ export const communityService = {
     }
   },
 
-  async getOwnedCommunities(userId: string): Promise<CommunityListData[] | void> {
+  async getOwnedCommunitiesByUser(userId: string): Promise<CommunityListData[]> {
     try {
       return await db
         .select({
@@ -247,16 +247,70 @@ export const communityService = {
         })
         .from(communities)
         .where(eq(communities.disabled, false))
-        .limit(this.pageSize)
-        .offset(0)
-        .innerJoin(communityMembers, eq(communityMembers.communityId, communities.id))
+        .innerJoin(
+          communityMembers,
+          and(
+            eq(communityMembers.communityId, communities.id),
+            eq(communityMembers.memberType, "owner")
+          )
+        )
         .where(eq(communityMembers.userId, userId))
         .groupBy(communities.id)
         .orderBy(({ members }) => desc(members))
         .execute()
     } catch (error) {
       console.error(error)
-      return
+      return []
+    }
+  },
+  async getModeratedCommunitiesByUser(userId: string): Promise<CommunityListData[]> {
+    try {
+      return await db
+        .select({
+          community: communities,
+          members: sql<number>`count(${communityMembers.id})`,
+        })
+        .from(communities)
+        .where(and(eq(communities.disabled, false), eq(communities.deleted, false)))
+        .innerJoin(
+          communityMembers,
+          and(
+            eq(communityMembers.communityId, communities.id),
+            eq(communityMembers.memberType, "moderator")
+          )
+        )
+        .where(eq(communityMembers.userId, userId))
+        .groupBy(communities.id)
+        .orderBy(({ members }) => desc(members))
+        .execute()
+    } catch (error) {
+      console.error(error)
+      return []
+    }
+  },
+  async getMemberCommunitiesByUser(userId: string): Promise<CommunityListData[]> {
+    try {
+      return await db
+        .select({
+          community: communities,
+          members: sql<number>`count(${communityMembers.id})`,
+        })
+        .from(communities)
+        .where(and(eq(communities.disabled, false), eq(communities.deleted, false)))
+        .innerJoin(
+          communityMembers,
+          and(
+            eq(communityMembers.communityId, communities.id),
+            eq(communityMembers.memberType, "member")
+          )
+        )
+        .where(eq(communityMembers.userId, userId))
+        .groupBy(communities.id)
+        .orderBy(({ members }) => desc(members))
+        .execute()
+    } catch (error) {
+      console.error(error)
+      return []
     }
   },
 

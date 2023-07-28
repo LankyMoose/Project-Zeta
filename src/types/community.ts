@@ -12,6 +12,12 @@ export type CommunityListData = {
   community: Community
 }
 
+export type MyCommunitiesData = {
+  owned: CommunityListData[]
+  moderated: CommunityListData[]
+  member: CommunityListData[]
+}
+
 export type CommunityJoinRequestData = {
   id: string
   createdAt: Date

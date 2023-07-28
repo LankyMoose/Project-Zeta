@@ -1889,6 +1889,20 @@ var getLatestPostsFromMyCommunities = async (page = 0) => {
     });
   }
 };
+var getMyCommunities = async () => {
+  try {
+    const response = await fetch(`${API_URL}/me/communities`);
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data?.message ?? response.statusText);
+    return data;
+  } catch (error) {
+    addNotification({
+      type: "error",
+      text: error.message
+    });
+  }
+};
 
 // src/client/actions/communities.ts
 var getCommunitySearch = async (title) => {
@@ -2080,7 +2094,6 @@ var AuthorTag = ({
 
 // src/pages/Home.tsx
 var PostCard = ({ post, community, user }) => {
-  console.log(post, community, user);
   return /* @__PURE__ */ h("div", { className: "card", key: post.id }, /* @__PURE__ */ h("div", { className: "card-title flex justify-content-between" }, post.title, /* @__PURE__ */ h(
     Link,
     {
@@ -2789,6 +2802,58 @@ function CommunityPage({ params }) {
       "Join to view this community"
     ) : /* @__PURE__ */ h(Button, { className: "btn btn-primary hover-animate btn-lg", onclick: showLoginPrompt }, "Log in to view this community"));
   });
+}
+
+// src/components/user/MyCommunities.tsx
+var CommunityTypeList = ({
+  title,
+  communities
+}) => {
+  return /* @__PURE__ */ h("section", null, /* @__PURE__ */ h("h2", null, title), /* @__PURE__ */ h(CommunityList, { communities }));
+};
+var MyCommunities = () => {
+  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("h1", null, "My Communities"), /* @__PURE__ */ h(Suspense, { promise: getMyCommunities }, (loading2, data) => {
+    if (loading2)
+      return /* @__PURE__ */ h(DefaultLoader, null);
+    if (!data)
+      return /* @__PURE__ */ h(fragment, null);
+    return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h(CommunityTypeList, { title: "Joined", communities: data.member }), /* @__PURE__ */ h(CommunityTypeList, { title: "Owned", communities: data.owned }), /* @__PURE__ */ h(CommunityTypeList, { title: "Moderating", communities: data.moderated }));
+  }));
+};
+
+// src/client/actions/users.ts
+var getUser2 = async (id) => {
+  const res = await fetch(`/api/users/${id}`);
+  if (!res.ok)
+    throw new Error("Failed to fetch user");
+  return await res.json();
+};
+
+// src/pages/User/Page.tsx
+function UserPage({ params }) {
+  if (!params?.userId)
+    return setPath(pathStore, "/users");
+  const isOwnProfile = () => {
+    return params.userId?.toLowerCase() === "me";
+  };
+  if (Cinnabun.isClient && !userStore.value?.userId && isOwnProfile()) {
+    return setPath(pathStore, "/users");
+  }
+  const loadUser = () => {
+    if (isOwnProfile() && userStore.value)
+      return Promise.resolve({
+        user: userStore.value
+      });
+    return getUser2(isOwnProfile() ? userStore.value.userId : params.userId);
+  };
+  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h(Suspense, { promise: loadUser }, (loading2, data) => {
+    console.log(data);
+    if (loading2)
+      return /* @__PURE__ */ h(DefaultLoader, null);
+    if (!data?.user)
+      return /* @__PURE__ */ h(fragment, null);
+    return /* @__PURE__ */ h("h1", null, data?.user.name);
+  }), /* @__PURE__ */ h("div", { watch: userStore, "bind:visible": () => params?.userId?.toLowerCase() === "me" }, /* @__PURE__ */ h(MyCommunities, null)));
 }
 
 // node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/listeners/KeyboardListener.ts
@@ -3725,7 +3790,7 @@ var CommunityDeleteConfirmation = () => {
 // src/App.tsx
 var Header = () => /* @__PURE__ */ h("header", null, /* @__PURE__ */ h(MenuButton, { className: "hide-sm" }), /* @__PURE__ */ h(Link, { to: "/", store: pathStore }, /* @__PURE__ */ h("div", { id: "logo" }, "Project Zeta")), /* @__PURE__ */ h(CommunitySearch, null), /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("ul", { id: "main-header-menu", className: "none flex-sm" }, /* @__PURE__ */ h("li", null, /* @__PURE__ */ h(Link, { to: "/communities", store: pathStore }, /* @__PURE__ */ h("small", null, "Communities"))), /* @__PURE__ */ h("li", null, /* @__PURE__ */ h(Link, { to: "/people", store: pathStore }, /* @__PURE__ */ h("small", null, "People"))))), /* @__PURE__ */ h(UserAvatar, null));
 var App = () => {
-  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h(Header, null), /* @__PURE__ */ h("div", { className: "app-main" }, /* @__PURE__ */ h(Sidebar, null), /* @__PURE__ */ h("main", { className: "container" }, /* @__PURE__ */ h(Router, { store: pathStore }, /* @__PURE__ */ h(Route, { path: "/", component: Home }), /* @__PURE__ */ h(Route, { path: "/communities", component: Communities }), /* @__PURE__ */ h(Route, { path: "/communities/:url_title", component: CommunityPage })))), /* @__PURE__ */ h(Portal, null, /* @__PURE__ */ h(NotificationTray, null), /* @__PURE__ */ h(PostCreator, null), /* @__PURE__ */ h(CommunityCreator, null), /* @__PURE__ */ h(CommunityEditor, null), /* @__PURE__ */ h(CommunityJoinPrompt, null), /* @__PURE__ */ h(AuthModal, null), /* @__PURE__ */ h(CommunityDrawer, null), /* @__PURE__ */ h(CommunityLeaveConfirmation, null), /* @__PURE__ */ h(CommunityDeleteConfirmation, null)));
+  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h(Header, null), /* @__PURE__ */ h("div", { className: "app-main" }, /* @__PURE__ */ h(Sidebar, null), /* @__PURE__ */ h("main", { className: "container" }, /* @__PURE__ */ h(Router, { store: pathStore }, /* @__PURE__ */ h(Route, { path: "/", component: Home }), /* @__PURE__ */ h(Route, { path: "/communities", component: Communities }), /* @__PURE__ */ h(Route, { path: "/communities/:url_title", component: CommunityPage }), /* @__PURE__ */ h(Route, { path: "/users/:userId", component: UserPage })))), /* @__PURE__ */ h(Portal, null, /* @__PURE__ */ h(NotificationTray, null), /* @__PURE__ */ h(PostCreator, null), /* @__PURE__ */ h(CommunityCreator, null), /* @__PURE__ */ h(CommunityEditor, null), /* @__PURE__ */ h(CommunityJoinPrompt, null), /* @__PURE__ */ h(AuthModal, null), /* @__PURE__ */ h(CommunityDrawer, null), /* @__PURE__ */ h(CommunityLeaveConfirmation, null), /* @__PURE__ */ h(CommunityDeleteConfirmation, null)));
 };
 
 // src/client/liveSocket.ts

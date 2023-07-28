@@ -8,7 +8,6 @@ import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
 
 const PostCard = ({ post, community, user }: CommunityPostListData) => {
-  console.log(post, community, user)
   return (
     <div className="card" key={post.id}>
       <div className="card-title flex justify-content-between">

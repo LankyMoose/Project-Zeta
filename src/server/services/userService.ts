@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
 import { NewUser, User, users } from "../../db/schema"
+import { PublicUser } from "../../types/user"
 
 export const userService = {
   pageSize: 100,
@@ -17,11 +18,15 @@ export const userService = {
       return
     }
   },
-  async getById(id: string): Promise<User | undefined> {
+  async getById(id: string): Promise<PublicUser | undefined> {
     try {
       return (
         await db
-          .select()
+          .select({
+            userId: users.id,
+            name: users.name,
+            picture: users.avatarUrl,
+          })
           .from(users)
           .where(and(eq(users.id, id), eq(users.disabled, false), eq(users.deleted, false)))
           .limit(1)
