@@ -2697,8 +2697,14 @@ var PendingJoinRequests = () => {
 };
 
 // src/components/community/CommunityMemberManager.tsx
+var MemberCard = ({ member }) => {
+  return /* @__PURE__ */ h("div", { className: "card" }, /* @__PURE__ */ h("div", { className: "card-title flex gap justify-content-between" }, /* @__PURE__ */ h("span", null, member.user.name), /* @__PURE__ */ h("div", { className: "flex flex-wrap flex-column gap-sm" }, member.memberType === "moderator" ? /* @__PURE__ */ h(Button, { className: "btn btn-danger hover-animate btn-sm" }, "Demote to member") : /* @__PURE__ */ h(Button, { className: "btn btn-secondary hover-animate btn-sm" }, "Promote to moderator"))));
+};
+var MemberList = ({ members, title }) => {
+  return /* @__PURE__ */ h("section", null, /* @__PURE__ */ h("h3", null, title), /* @__PURE__ */ h(For, { each: members, template: (member) => /* @__PURE__ */ h(MemberCard, { member }) }));
+};
 var CommunityMemberManager = () => {
-  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("h2", null, "Community Member Manager"));
+  return /* @__PURE__ */ h(fragment, null, isCommunityAdmin() ? /* @__PURE__ */ h(MemberList, { title: "Moderators", members: selectedCommunity.value?.moderators ?? [] }) : /* @__PURE__ */ h(fragment, null), /* @__PURE__ */ h(MemberList, { title: "Members", members: selectedCommunity.value?.members ?? [] }));
 };
 
 // src/components/community/AdminMenu/AdminMenu.tsx

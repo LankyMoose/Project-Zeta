@@ -86575,8 +86575,14 @@ var PendingJoinRequests = () => {
 };
 
 // src/components/community/CommunityMemberManager.tsx
+var MemberCard = ({ member }) => {
+  return /* @__PURE__ */ h2("div", { className: "card" }, /* @__PURE__ */ h2("div", { className: "card-title flex gap justify-content-between" }, /* @__PURE__ */ h2("span", null, member.user.name), /* @__PURE__ */ h2("div", { className: "flex flex-wrap flex-column gap-sm" }, member.memberType === "moderator" ? /* @__PURE__ */ h2(Button, { className: "btn btn-danger hover-animate btn-sm" }, "Demote to member") : /* @__PURE__ */ h2(Button, { className: "btn btn-secondary hover-animate btn-sm" }, "Promote to moderator"))));
+};
+var MemberList = ({ members, title }) => {
+  return /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("h3", null, title), /* @__PURE__ */ h2(For, { each: members, template: (member) => /* @__PURE__ */ h2(MemberCard, { member }) }));
+};
 var CommunityMemberManager = () => {
-  return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("h2", null, "Community Member Manager"));
+  return /* @__PURE__ */ h2(fragment, null, isCommunityAdmin() ? /* @__PURE__ */ h2(MemberList, { title: "Moderators", members: selectedCommunity.value?.moderators ?? [] }) : /* @__PURE__ */ h2(fragment, null), /* @__PURE__ */ h2(MemberList, { title: "Members", members: selectedCommunity.value?.members ?? [] }));
 };
 
 // src/components/community/AdminMenu/AdminMenu.tsx
