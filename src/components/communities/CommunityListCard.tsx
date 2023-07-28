@@ -15,7 +15,7 @@ export const CommunityListCard = (props: CommunityListData) => {
     <div className="card community-card" key={community.id}>
       <div className="card-title flex justify-content-between">
         <div className="flex gap align-items-center">
-          <h2 className="m-0 line-height-1">
+          <h2 className="m-0">
             <a
               href={`/communities/${community.url_title}`}
               onclick={(e: Event) => {
@@ -33,10 +33,10 @@ export const CommunityListCard = (props: CommunityListData) => {
             >
               {community.title}
             </a>
+            {community.private ? <span className="badge text-light ml-2">Private</span> : <></>}
           </h2>
-          {community.private ? <span className="badge text-light">Private</span> : <></>}
         </div>
-        <small className="text-muted">
+        <small className="text-muted nowrap">
           {nMembers} {nMembers > 1 ? "members" : "member"}
         </small>
       </div>

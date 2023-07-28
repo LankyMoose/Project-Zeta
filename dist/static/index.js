@@ -2099,7 +2099,7 @@ function Home() {
 var CommunityListCard = (props) => {
   const { members, community } = props;
   const nMembers = parseInt(members.toString());
-  return /* @__PURE__ */ h("div", { className: "card community-card", key: community.id }, /* @__PURE__ */ h("div", { className: "card-title flex justify-content-between" }, /* @__PURE__ */ h("div", { className: "flex gap align-items-center" }, /* @__PURE__ */ h("h2", { className: "m-0 line-height-1" }, /* @__PURE__ */ h(
+  return /* @__PURE__ */ h("div", { className: "card community-card", key: community.id }, /* @__PURE__ */ h("div", { className: "card-title flex justify-content-between" }, /* @__PURE__ */ h("div", { className: "flex gap align-items-center" }, /* @__PURE__ */ h("h2", { className: "m-0" }, /* @__PURE__ */ h(
     "a",
     {
       href: `/communities/${community.url_title}`,
@@ -2117,7 +2117,7 @@ var CommunityListCard = (props) => {
       }
     },
     community.title
-  )), community.private ? /* @__PURE__ */ h("span", { className: "badge text-light" }, "Private") : /* @__PURE__ */ h(fragment, null)), /* @__PURE__ */ h("small", { className: "text-muted" }, nMembers, " ", nMembers > 1 ? "members" : "member")), /* @__PURE__ */ h("p", { className: "card-description text-muted" }, truncateText(community.description, 128)));
+  ), community.private ? /* @__PURE__ */ h("span", { className: "badge text-light ml-2" }, "Private") : /* @__PURE__ */ h(fragment, null))), /* @__PURE__ */ h("small", { className: "text-muted nowrap" }, nMembers, " ", nMembers > 1 ? "members" : "member")), /* @__PURE__ */ h("p", { className: "card-description text-muted" }, truncateText(community.description, 128)));
 };
 
 // src/components/communities/CommunityList.tsx
