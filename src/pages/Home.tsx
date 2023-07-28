@@ -35,30 +35,20 @@ const PostCard = ({ post, community, user }: LatestPostsData) => {
   )
 }
 
-const PostList = ({
-  promiseFn,
-}: {
-  promiseFn: { (page?: number): Promise<void | LatestPostsData[]> }
-}) => {
-  return (
-    <Cinnabun.Suspense promise={promiseFn} cache>
-      {(loading: boolean, data?: LatestPostsData[]) => {
-        if (loading) return <DefaultLoader />
-        if (!data) return <></>
-        return <Cinnabun.For each={data} template={(item) => <PostCard {...item} />} />
-      }}
-    </Cinnabun.Suspense>
-  )
-}
-
 export default function Home() {
   return (
     <div className="flex gap flex-wrap">
       <section>
         <div className="section-header">
-          <h2>Newest posts</h2>
+          <h2>Latest posts</h2>
         </div>
-        <PostList promiseFn={getLatestPostsCommunities} />
+        <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
+          {(loading: boolean, data?: LatestPostsData[]) => {
+            if (loading) return <DefaultLoader />
+            if (!data) return <div className="text-muted">No posts yet.</div>
+            return <Cinnabun.For each={data} template={(item) => <PostCard {...item} />} />
+          }}
+        </Cinnabun.Suspense>
       </section>
     </div>
   )

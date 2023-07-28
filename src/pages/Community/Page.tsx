@@ -81,134 +81,136 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
   }
 
   return (
-    <Cinnabun.Suspense promise={loadCommunity} cache>
-      {(loading: boolean, data: Partial<CommunityData> | { message: string }) => {
-        if (data && "message" in data) return data.message
+    <div>
+      <Cinnabun.Suspense promise={loadCommunity} cache>
+        {(loading: boolean, data: Partial<CommunityData> | { message: string }) => {
+          if (data && "message" in data) return data.message
 
-        return (
-          <div className="page-wrapper">
-            <div className="page-title">
-              <div className="flex gap align-items-center">
-                <h1 watch={selectedCommunity} bind:children>
-                  {() => selectedCommunity.value?.title}
-                </h1>
-                {isCommunityOwner() ? (
-                  <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
-                    <EditIcon color="var(--primary)" />
-                  </IconButton>
-                ) : (
-                  <></>
-                )}
-                {isCommunityAdmin() ? (
-                  <div className="ml-auto">
-                    <PendingJoinRequestsButton />
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
-              <p watch={selectedCommunity} bind:children className="page-description">
-                {() => selectedCommunity.value?.description ?? ""}
-              </p>
-            </div>
-
-            {loading ? (
-              <div className="page-body">
-                <DefaultLoader />
-              </div>
-            ) : canViewCommunityData(data) ? (
-              <>
-                <CommunityFixedHeader />
-
-                {isCommunityOwner() ? (
-                  <>
-                    <div className="flex gap">
-                      <Button
-                        className="btn btn-danger hover-animate btn-sm"
-                        onclick={() => (communityDeleteModalOpen.value = true)}
-                      >
-                        Delete this community
-                      </Button>
-                      <Button
-                        className="btn btn-primary hover-animate btn-sm"
-                        onclick={() => (communityLeaveModalOpen.value = true)}
-                      >
-                        Transfer ownership
-                      </Button>
+          return (
+            <div className="page-wrapper">
+              <div className="page-title">
+                <div className="flex gap align-items-center">
+                  <h1 watch={selectedCommunity} bind:children>
+                    {() => selectedCommunity.value?.title}
+                  </h1>
+                  {isCommunityOwner() ? (
+                    <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
+                      <EditIcon color="var(--primary)" />
+                    </IconButton>
+                  ) : (
+                    <></>
+                  )}
+                  {isCommunityAdmin() ? (
+                    <div className="ml-auto">
+                      <PendingJoinRequestsButton />
                     </div>
-                    <br />
-                  </>
-                ) : isCommunityMember() ? (
-                  <>
-                    <div>
-                      <Button
-                        className="btn btn-danger hover-animate btn-sm"
-                        onclick={() => (communityLeaveModalOpen.value = true)}
-                      >
-                        Leave this community
-                      </Button>
-                    </div>
-                    <br />
-                  </>
-                ) : (
-                  <> </>
-                )}
-
-                <div className="page-body">
-                  <div className="community-page-inner">
-                    <section className="flex flex-column community-page-posts">
-                      <div className="section-title">
-                        <h3>Posts</h3>
-                        <AddPostButton />
-                      </div>
-                      <CommunityPosts posts={data.posts ?? []} />
-                    </section>
-                    <section className="flex flex-column community-page-members">
-                      {data.owners && data.owners[0] ? (
-                        <>
-                          <div className="section-title">
-                            <h3>Owner</h3>
-                          </div>
-                          <div className="flex flex-column mb-3">
-                            <CommunityMemberCard member={data.owners[0]} />
-                          </div>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {data.members ? (
-                        <>
-                          <div className="section-title">
-                            <h3>Members</h3>
-                          </div>
-                          <div className="flex flex-column">
-                            {data.members.map((member) => (
-                              <CommunityMemberCard member={member} />
-                            ))}
-                          </div>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                    </section>
-                  </div>
+                  ) : (
+                    <></>
+                  )}
                 </div>
-              </>
-            ) : userStore.value ? (
-              <Button
-                className="btn btn-primary hover-animate btn-lg"
-                onclick={() => (communityJoinModalOpen.value = true)}
-              >
-                Join to view this community
-              </Button>
-            ) : (
-              <Button className="btn btn-primary hover-animate btn-lg" onclick={showLoginPrompt}>
-                Log in to view this community
-              </Button>
-            )}
-          </div>
-        )
-      }}
-    </Cinnabun.Suspense>
+                <p watch={selectedCommunity} bind:children className="page-description">
+                  {() => selectedCommunity.value?.description ?? ""}
+                </p>
+              </div>
+
+              {loading ? (
+                <div className="page-body">
+                  <DefaultLoader />
+                </div>
+              ) : canViewCommunityData(data) ? (
+                <>
+                  <CommunityFixedHeader />
+
+                  {isCommunityOwner() ? (
+                    <>
+                      <div className="flex gap">
+                        <Button
+                          className="btn btn-danger hover-animate btn-sm"
+                          onclick={() => (communityDeleteModalOpen.value = true)}
+                        >
+                          Delete this community
+                        </Button>
+                        <Button
+                          className="btn btn-primary hover-animate btn-sm"
+                          onclick={() => (communityLeaveModalOpen.value = true)}
+                        >
+                          Transfer ownership
+                        </Button>
+                      </div>
+                      <br />
+                    </>
+                  ) : isCommunityMember() ? (
+                    <>
+                      <div>
+                        <Button
+                          className="btn btn-danger hover-animate btn-sm"
+                          onclick={() => (communityLeaveModalOpen.value = true)}
+                        >
+                          Leave this community
+                        </Button>
+                      </div>
+                      <br />
+                    </>
+                  ) : (
+                    <> </>
+                  )}
+
+                  <div className="page-body">
+                    <div className="community-page-inner">
+                      <section className="flex flex-column community-page-posts">
+                        <div className="section-title">
+                          <h3>Posts</h3>
+                          <AddPostButton />
+                        </div>
+                        <CommunityPosts posts={data.posts ?? []} />
+                      </section>
+                      <section className="flex flex-column community-page-members">
+                        {data.owners && data.owners[0] ? (
+                          <>
+                            <div className="section-title">
+                              <h3>Owner</h3>
+                            </div>
+                            <div className="flex flex-column mb-3">
+                              <CommunityMemberCard member={data.owners[0]} />
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                        {data.members ? (
+                          <>
+                            <div className="section-title">
+                              <h3>Members</h3>
+                            </div>
+                            <div className="flex flex-column">
+                              {data.members.map((member) => (
+                                <CommunityMemberCard member={member} />
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                      </section>
+                    </div>
+                  </div>
+                </>
+              ) : userStore.value ? (
+                <Button
+                  className="btn btn-primary hover-animate btn-lg"
+                  onclick={() => (communityJoinModalOpen.value = true)}
+                >
+                  Join to view this community
+                </Button>
+              ) : (
+                <Button className="btn btn-primary hover-animate btn-lg" onclick={showLoginPrompt}>
+                  Log in to view this community
+                </Button>
+              )}
+            </div>
+          )
+        }}
+      </Cinnabun.Suspense>
+    </div>
   )
 }

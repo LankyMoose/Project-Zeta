@@ -85963,19 +85963,14 @@ var PostCard = ({ post, community, user }) => {
     community.title
   )), /* @__PURE__ */ h2("div", { className: "card-body" }, post.content), /* @__PURE__ */ h2("div", { className: "flex justify-content-between" }, /* @__PURE__ */ h2("div", null), /* @__PURE__ */ h2("div", { className: "flex flex-column align-items-end" }, /* @__PURE__ */ h2(AuthorTag, { user, date: post.createdAt.toString() }))));
 };
-var PostList = ({
-  promiseFn
-}) => {
-  return /* @__PURE__ */ h2(Suspense, { promise: promiseFn, cache: true }, (loading2, data) => {
+function Home() {
+  return /* @__PURE__ */ h2("div", { className: "flex gap flex-wrap" }, /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("div", { className: "section-header" }, /* @__PURE__ */ h2("h2", null, "Latest posts")), /* @__PURE__ */ h2(Suspense, { promise: getLatestPostsCommunities, cache: true }, (loading2, data) => {
     if (loading2)
       return /* @__PURE__ */ h2(DefaultLoader, null);
     if (!data)
-      return /* @__PURE__ */ h2(fragment, null);
+      return /* @__PURE__ */ h2("div", { className: "text-muted" }, "No posts yet.");
     return /* @__PURE__ */ h2(For, { each: data, template: (item) => /* @__PURE__ */ h2(PostCard, { ...item }) });
-  });
-};
-function Home() {
-  return /* @__PURE__ */ h2("div", { className: "flex gap flex-wrap" }, /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("div", { className: "section-header" }, /* @__PURE__ */ h2("h2", null, "Newest posts")), /* @__PURE__ */ h2(PostList, { promiseFn: getLatestPostsCommunities })));
+  })));
 }
 
 // src/components/communities/CommunityListCard.tsx
@@ -86624,7 +86619,7 @@ function CommunityPage({ params }) {
   const canViewCommunityData = (data) => {
     return !data.private || data.memberType && data.memberType !== "guest";
   };
-  return /* @__PURE__ */ h2(Suspense, { promise: loadCommunity, cache: true }, (loading2, data) => {
+  return /* @__PURE__ */ h2("div", null, /* @__PURE__ */ h2(Suspense, { promise: loadCommunity, cache: true }, (loading2, data) => {
     if (data && "message" in data)
       return data.message;
     return /* @__PURE__ */ h2("div", { className: "page-wrapper" }, /* @__PURE__ */ h2("div", { className: "page-title" }, /* @__PURE__ */ h2("div", { className: "flex gap align-items-center" }, /* @__PURE__ */ h2("h1", { watch: selectedCommunity, "bind:children": true }, () => selectedCommunity.value?.title), isCommunityOwner() ? /* @__PURE__ */ h2(IconButton, { onclick: () => communityEditorModalOpen.value = true }, /* @__PURE__ */ h2(EditIcon, { color: "var(--primary)" })) : /* @__PURE__ */ h2(fragment, null), isCommunityAdmin() ? /* @__PURE__ */ h2("div", { className: "ml-auto" }, /* @__PURE__ */ h2(PendingJoinRequestsButton, null)) : /* @__PURE__ */ h2(fragment, null)), /* @__PURE__ */ h2("p", { watch: selectedCommunity, "bind:children": true, className: "page-description" }, () => selectedCommunity.value?.description ?? "")), loading2 ? /* @__PURE__ */ h2("div", { className: "page-body" }, /* @__PURE__ */ h2(DefaultLoader, null)) : canViewCommunityData(data) ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(CommunityFixedHeader, null), isCommunityOwner() ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "flex gap" }, /* @__PURE__ */ h2(
@@ -86656,7 +86651,7 @@ function CommunityPage({ params }) {
       },
       "Join to view this community"
     ) : /* @__PURE__ */ h2(Button, { className: "btn btn-primary hover-animate btn-lg", onclick: showLoginPrompt }, "Log in to view this community"));
-  });
+  }));
 }
 
 // src/client/actions/me.ts
