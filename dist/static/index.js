@@ -815,6 +815,11 @@ var createPortal = (children, rootId) => {
   return res;
 };
 
+// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/ref.ts
+var useRef = () => {
+  return createSignal(null);
+};
+
 // node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/index.ts
 var h = (tag, props, ...children) => {
   if (typeof tag === "function") {
@@ -2814,60 +2819,110 @@ var CommunityMemberManager = () => {
   return /* @__PURE__ */ h("div", { watch: selectedCommunity, "bind:children": true }, () => isCommunityOwner() ? /* @__PURE__ */ h(MemberList, { title: "Moderators", members: selectedCommunity.value?.moderators ?? [] }) : /* @__PURE__ */ h(fragment, null), () => /* @__PURE__ */ h(MemberList, { title: "Members", members: selectedCommunity.value?.members ?? [] }));
 };
 
+// src/components/ClickOutsideListener.tsx
+var ClickOutsideListener = ({ tag, onCapture, ...rest }) => {
+  const ref = useRef();
+  const handleClick = (e) => {
+    const tgt = e.target;
+    if (!ref.value)
+      return;
+    if (ref.value === tgt)
+      return;
+    if (ref.value.contains(tgt))
+      return;
+    console.log("click outside", tgt, ref.value);
+    onCapture();
+  };
+  return new Component(tag, {
+    ...rest,
+    ref,
+    onMounted() {
+      if (!Cinnabun.isClient)
+        return;
+      document.addEventListener("click", handleClick);
+    },
+    onUnmounted() {
+      if (!Cinnabun.isClient)
+        return;
+      document.removeEventListener("click", handleClick);
+    }
+  });
+};
+
 // src/components/community/AdminMenu/AdminMenu.tsx
 var loadRequests = async () => {
   const res = !!selectedCommunity.value?.id ? await getCommunityJoinRequests(selectedCommunity.value.id) : [];
   pendingCommunityJoinRequests.value = res ?? [];
 };
-var handlePendingRequestsClick = () => {
-  communityDrawerState.value = {
-    title: "Join Requests",
-    componentFunc: PendingJoinRequests
-  };
-  communityDrawerOpen.value = true;
-};
-var handleManageMembersClick = () => {
-  communityDrawerState.value = {
-    title: "Manage Members",
-    componentFunc: CommunityMemberManager
-  };
-  communityDrawerOpen.value = true;
-};
 var AdminMenu = () => {
   const showMenu = createSignal(false);
   const loadingRequests = createSignal(false);
   const totalNotifications = () => pendingCommunityJoinRequests.value.length;
+  const handlePendingRequestsClick = () => {
+    if (!showMenu.value)
+      return;
+    showMenu.value = false;
+    communityDrawerState.value = {
+      title: "Join Requests",
+      componentFunc: PendingJoinRequests
+    };
+    communityDrawerOpen.value = true;
+  };
+  const handleManageMembersClick = () => {
+    if (!showMenu.value)
+      return;
+    showMenu.value = false;
+    communityDrawerState.value = {
+      title: "Manage Members",
+      componentFunc: CommunityMemberManager
+    };
+    communityDrawerOpen.value = true;
+  };
   return /* @__PURE__ */ h("div", { className: "ml-auto", onMounted: loadRequests }, /* @__PURE__ */ h(
-    IconButton,
+    ClickOutsideListener,
     {
-      watch: [showMenu, pendingCommunityJoinRequests, loadingRequests],
-      "bind:className": () => `icon-button admin-menu-button ${showMenu.value ? "selected" : ""}`,
-      onclick: () => showMenu.value = !showMenu.value,
-      "bind:children": true
+      tag: "div",
+      onCapture: () => {
+        if (showMenu.value)
+          showMenu.value = false;
+      }
     },
-    /* @__PURE__ */ h(MoreIcon, null),
-    () => loadingRequests.value ? /* @__PURE__ */ h(EllipsisLoader, { style: "color:var(--text-color); font-size: .75rem;" }) : totalNotifications() > 0 ? /* @__PURE__ */ h("span", { className: "badge " }, totalNotifications()) : /* @__PURE__ */ h(fragment, null)
-  ), /* @__PURE__ */ h("div", { style: "position:relative" }, /* @__PURE__ */ h("div", { className: "admin-menu-wrapper" }, /* @__PURE__ */ h(
-    SlideInOut,
-    {
-      className: "admin-menu",
-      watch: showMenu,
-      settings: { from: "top" },
-      properties: [{ name: "opacity", from: 0, to: 1 }],
-      "bind:visible": () => showMenu.value
-    },
-    /* @__PURE__ */ h("ul", null, /* @__PURE__ */ h("li", null, /* @__PURE__ */ h("a", { onclick: handleManageMembersClick, href: "javascript:void(0)" }, /* @__PURE__ */ h("small", null, "Manage members"))), selectedCommunity.value?.private ? /* @__PURE__ */ h("li", null, /* @__PURE__ */ h(
-      "a",
+    /* @__PURE__ */ h(
+      IconButton,
       {
-        href: "javascript:void(0)",
-        onclick: handlePendingRequestsClick,
-        watch: [pendingCommunityJoinRequests, loadingRequests],
-        "bind:children": true
+        watch: [showMenu],
+        "bind:className": () => `icon-button admin-menu-button ${showMenu.value ? "selected" : ""}`,
+        onclick: () => {
+          if (!showMenu.value)
+            showMenu.value = true;
+        }
       },
-      /* @__PURE__ */ h("small", null, "Join Requests"),
-      () => loadingRequests.value ? /* @__PURE__ */ h(EllipsisLoader, { style: "color:var(--text-color); font-size: .75rem;" }) : /* @__PURE__ */ h("span", { className: "badge " }, () => pendingCommunityJoinRequests.value.length)
-    )) : /* @__PURE__ */ h(fragment, null))
-  ))));
+      /* @__PURE__ */ h(MoreIcon, null),
+      /* @__PURE__ */ h("span", { watch: [pendingCommunityJoinRequests, loadingRequests], "bind:children": true }, () => loadingRequests.value ? /* @__PURE__ */ h(EllipsisLoader, { style: "color:var(--text-color); font-size: .75rem;" }) : totalNotifications() > 0 ? /* @__PURE__ */ h("span", { className: "badge " }, totalNotifications()) : /* @__PURE__ */ h(fragment, null))
+    ),
+    /* @__PURE__ */ h("div", { style: "position:relative" }, /* @__PURE__ */ h("div", { className: "admin-menu-wrapper" }, /* @__PURE__ */ h(
+      SlideInOut,
+      {
+        className: "admin-menu",
+        watch: showMenu,
+        settings: { from: "top", duration: 225 },
+        properties: [{ name: "opacity", from: 0, to: 1, ms: 225 }],
+        "bind:visible": () => showMenu.value,
+        cancelExit: () => showMenu.value
+      },
+      /* @__PURE__ */ h("ul", null, /* @__PURE__ */ h("li", null, /* @__PURE__ */ h("a", { onclick: handleManageMembersClick, href: "javascript:void(0)" }, /* @__PURE__ */ h("small", null, "Manage members"))), selectedCommunity.value?.private ? /* @__PURE__ */ h("li", null, /* @__PURE__ */ h(
+        "a",
+        {
+          href: "javascript:void(0)",
+          onclick: handlePendingRequestsClick,
+          watch: [pendingCommunityJoinRequests, loadingRequests],
+          "bind:children": true
+        },
+        /* @__PURE__ */ h("small", null, "Join Requests"),
+        () => loadingRequests.value ? /* @__PURE__ */ h(EllipsisLoader, { style: "color:var(--text-color); font-size: .75rem;" }) : /* @__PURE__ */ h("span", { className: "badge " }, () => pendingCommunityJoinRequests.value.length)
+      )) : /* @__PURE__ */ h(fragment, null))
+    )))
+  ));
 };
 
 // src/pages/Community/Page.tsx

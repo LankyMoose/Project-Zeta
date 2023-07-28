@@ -13,6 +13,7 @@ import { getCommunityJoinRequests } from "../../../client/actions/communities"
 import { PendingJoinRequests } from "../PendingJoinRequests"
 import { EllipsisLoader } from "../../loaders/Ellipsis"
 import { CommunityMemberManager } from "../CommunityMemberManager"
+import { ClickOutsideListener } from "../../ClickOutsideListener"
 
 const loadRequests = async () => {
   const res = !!selectedCommunity.value?.id
@@ -21,88 +22,103 @@ const loadRequests = async () => {
   pendingCommunityJoinRequests.value = res ?? []
 }
 
-const handlePendingRequestsClick = () => {
-  communityDrawerState.value = {
-    title: "Join Requests",
-    componentFunc: PendingJoinRequests,
-  }
-  communityDrawerOpen.value = true
-}
-
-const handleManageMembersClick = () => {
-  communityDrawerState.value = {
-    title: "Manage Members",
-    componentFunc: CommunityMemberManager,
-  }
-  communityDrawerOpen.value = true
-}
-
 export const AdminMenu = () => {
   const showMenu = Cinnabun.createSignal(false)
   const loadingRequests = Cinnabun.createSignal(false)
   const totalNotifications = () => pendingCommunityJoinRequests.value.length
 
+  const handlePendingRequestsClick = () => {
+    if (!showMenu.value) return
+    showMenu.value = false
+    communityDrawerState.value = {
+      title: "Join Requests",
+      componentFunc: PendingJoinRequests,
+    }
+    communityDrawerOpen.value = true
+  }
+
+  const handleManageMembersClick = () => {
+    if (!showMenu.value) return
+    showMenu.value = false
+    communityDrawerState.value = {
+      title: "Manage Members",
+      componentFunc: CommunityMemberManager,
+    }
+    communityDrawerOpen.value = true
+  }
+
   return (
     <div className="ml-auto" onMounted={loadRequests}>
-      <IconButton
-        watch={[showMenu, pendingCommunityJoinRequests, loadingRequests]}
-        bind:className={() => `icon-button admin-menu-button ${showMenu.value ? "selected" : ""}`}
-        onclick={() => (showMenu.value = !showMenu.value)}
-        bind:children
+      <ClickOutsideListener
+        tag="div"
+        onCapture={() => {
+          if (showMenu.value) showMenu.value = false
+        }}
       >
-        <MoreIcon />
-        {() =>
-          loadingRequests.value ? (
-            <EllipsisLoader style="color:var(--text-color); font-size: .75rem;" />
-          ) : totalNotifications() > 0 ? (
-            <span className="badge ">{totalNotifications()}</span>
-          ) : (
-            <></>
-          )
-        }
-      </IconButton>
-      <div style="position:relative">
-        <div className="admin-menu-wrapper">
-          <SlideInOut
-            className="admin-menu"
-            watch={showMenu}
-            settings={{ from: "top" }}
-            properties={[{ name: "opacity", from: 0, to: 1 }]}
-            bind:visible={() => showMenu.value}
-          >
-            <ul>
-              <li>
-                <a onclick={handleManageMembersClick} href="javascript:void(0)">
-                  <small>Manage members</small>
-                </a>
-              </li>
-              {selectedCommunity.value?.private ? (
-                <li>
-                  <a
-                    href="javascript:void(0)"
-                    onclick={handlePendingRequestsClick}
-                    watch={[pendingCommunityJoinRequests, loadingRequests]}
-                    bind:children
-                  >
-                    <small>Join Requests</small>
-                    {() =>
-                      loadingRequests.value ? (
-                        <EllipsisLoader style="color:var(--text-color); font-size: .75rem;" />
-                      ) : (
-                        <span className="badge ">
-                          {() => pendingCommunityJoinRequests.value.length}
-                        </span>
-                      )
-                    }
-                  </a>
-                </li>
+        <IconButton
+          watch={[showMenu]}
+          bind:className={() => `icon-button admin-menu-button ${showMenu.value ? "selected" : ""}`}
+          onclick={() => {
+            if (!showMenu.value) showMenu.value = true
+          }}
+        >
+          <MoreIcon />
+          <span watch={[pendingCommunityJoinRequests, loadingRequests]} bind:children>
+            {() =>
+              loadingRequests.value ? (
+                <EllipsisLoader style="color:var(--text-color); font-size: .75rem;" />
+              ) : totalNotifications() > 0 ? (
+                <span className="badge ">{totalNotifications()}</span>
               ) : (
                 <></>
-              )}
-            </ul>
-          </SlideInOut>
+              )
+            }
+          </span>
+        </IconButton>
+        <div style="position:relative">
+          <div className="admin-menu-wrapper">
+            <SlideInOut
+              className="admin-menu"
+              watch={showMenu}
+              settings={{ from: "top", duration: 225 }}
+              properties={[{ name: "opacity", from: 0, to: 1, ms: 225 }]}
+              bind:visible={() => showMenu.value}
+              cancelExit={() => showMenu.value}
+            >
+              <ul>
+                <li>
+                  <a onclick={handleManageMembersClick} href="javascript:void(0)">
+                    <small>Manage members</small>
+                  </a>
+                </li>
+                {selectedCommunity.value?.private ? (
+                  <li>
+                    <a
+                      href="javascript:void(0)"
+                      onclick={handlePendingRequestsClick}
+                      watch={[pendingCommunityJoinRequests, loadingRequests]}
+                      bind:children
+                    >
+                      <small>Join Requests</small>
+                      {() =>
+                        loadingRequests.value ? (
+                          <EllipsisLoader style="color:var(--text-color); font-size: .75rem;" />
+                        ) : (
+                          <span className="badge ">
+                            {() => pendingCommunityJoinRequests.value.length}
+                          </span>
+                        )
+                      }
+                    </a>
+                  </li>
+                ) : (
+                  <></>
+                )}
+              </ul>
+            </SlideInOut>
+          </div>
         </div>
-      </div>
+      </ClickOutsideListener>
     </div>
   )
 }

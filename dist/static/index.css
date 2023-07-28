@@ -1074,6 +1074,9 @@ ul.card-list {
   align-items: center;
   gap: .25rem;
 }
+.admin-menu-button svg {
+  width: 1.5rem;
+}
 @media screen and (prefers-color-scheme:light) {
   .admin-menu-button svg {
     color: #222;
@@ -1108,7 +1111,7 @@ ul.card-list {
   display: flex;
   align-items: center;
   gap: .5rem;
-  padding: 0.5rem 1rem;
+  padding: .75rem 1.5rem;
   color: var(--text-color);
   text-decoration: none;
   border-bottom: 1px solid var(--border-color);
