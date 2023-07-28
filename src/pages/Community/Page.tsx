@@ -156,35 +156,59 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                           <h3>Posts</h3>
                           <AddPostButton />
                         </div>
-                        <CommunityPosts posts={data.posts ?? []} />
+                        <CommunityPosts posts={selectedCommunity.value?.posts ?? []} />
                       </section>
-                      <section className="flex flex-column community-page-members">
-                        {data.owners && data.owners[0] ? (
-                          <>
-                            <div className="section-title">
-                              <h3>Owner</h3>
-                            </div>
-                            <div className="flex flex-column mb-3">
-                              <CommunityMemberCard member={data.owners[0]} />
-                            </div>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                        {data.members ? (
-                          <>
-                            <div className="section-title">
-                              <h3>Members</h3>
-                            </div>
-                            <div className="flex flex-column">
-                              {data.members.map((member) => (
-                                <CommunityMemberCard member={member} />
-                              ))}
-                            </div>
-                          </>
-                        ) : (
-                          <></>
-                        )}
+                      <section
+                        watch={selectedCommunity}
+                        bind:children
+                        className="flex flex-column community-page-members"
+                      >
+                        {() =>
+                          selectedCommunity.value?.owners && selectedCommunity.value.owners[0] ? (
+                            <>
+                              <div className="section-title">
+                                <h3>Owner</h3>
+                              </div>
+                              <div className="flex flex-column mb-3">
+                                <CommunityMemberCard member={selectedCommunity.value.owners[0]} />
+                              </div>
+                            </>
+                          ) : (
+                            <></>
+                          )
+                        }
+                        {() =>
+                          selectedCommunity.value?.moderators ? (
+                            <>
+                              <div className="section-title">
+                                <h3>Moderators</h3>
+                              </div>
+                              <div className="flex flex-column">
+                                {selectedCommunity.value.moderators.map((member) => (
+                                  <CommunityMemberCard member={member} />
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            <></>
+                          )
+                        }
+                        {() =>
+                          selectedCommunity.value?.members ? (
+                            <>
+                              <div className="section-title">
+                                <h3>Members</h3>
+                              </div>
+                              <div className="flex flex-column">
+                                {selectedCommunity.value.members.map((member) => (
+                                  <CommunityMemberCard member={member} />
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            <></>
+                          )
+                        }
                       </section>
                     </div>
                   </div>

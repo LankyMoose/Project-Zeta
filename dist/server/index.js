@@ -85896,6 +85896,26 @@ var deleteCommunity = async (id) => {
     return false;
   }
 };
+var updateCommunityMemberType = async (communityId, userId, memberType) => {
+  try {
+    const response = await fetch(`${API_URL}/communities/${communityId}/members`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ userId, memberType })
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data?.message ?? response.statusText);
+    return data;
+  } catch (error) {
+    addNotification({
+      type: "error",
+      text: error.message
+    });
+  }
+};
 
 // src/state/community.ts
 var postCreatorModalOpen = createSignal(false);
@@ -86576,13 +86596,100 @@ var PendingJoinRequests = () => {
 
 // src/components/community/CommunityMemberManager.tsx
 var MemberCard = ({ member }) => {
-  return /* @__PURE__ */ h2("div", { className: "card" }, /* @__PURE__ */ h2("div", { className: "card-title flex gap justify-content-between" }, /* @__PURE__ */ h2("span", null, member.user.name), /* @__PURE__ */ h2("div", { className: "flex flex-wrap flex-column gap-sm" }, member.memberType === "moderator" ? /* @__PURE__ */ h2(Button, { className: "btn btn-danger hover-animate btn-sm" }, "Demote to member") : /* @__PURE__ */ h2(Button, { className: "btn btn-secondary hover-animate btn-sm" }, "Promote to moderator"))));
+  const loading2 = createSignal(false);
+  const demoteToMember = async () => {
+    loading2.value = true;
+    const res = await updateCommunityMemberType(
+      selectedCommunity.value.id,
+      member.user.id,
+      "member"
+    );
+    loading2.value = false;
+    if (!res)
+      return;
+    if ("type" in res)
+      return;
+    addNotification({
+      type: "success",
+      text: `${res.user.name} is now a member`
+    });
+    selectedCommunity.value.members = [...selectedCommunity.value?.members ?? [], res];
+    selectedCommunity.value.moderators = (selectedCommunity.value?.moderators ?? []).filter(
+      (mod) => mod.user.id !== res.user.id
+    );
+    selectedCommunity.notify();
+  };
+  const promoteToModerator = async () => {
+    loading2.value = true;
+    const res = await updateCommunityMemberType(
+      selectedCommunity.value.id,
+      member.user.id,
+      "moderator"
+    );
+    loading2.value = false;
+    if (!res)
+      return;
+    if ("type" in res)
+      return;
+    addNotification({
+      type: "success",
+      text: `${res.user.name} is now a moderator`
+    });
+    selectedCommunity.value.moderators = [...selectedCommunity.value?.moderators ?? [], res];
+    selectedCommunity.value.members = (selectedCommunity.value?.members ?? []).filter(
+      (member2) => member2.user.id !== res.user.id
+    );
+    selectedCommunity.notify();
+  };
+  const revokeMembership = async () => {
+    loading2.value = true;
+    const res = await updateCommunityMemberType(
+      selectedCommunity.value.id,
+      member.user.id,
+      "none"
+    );
+    loading2.value = false;
+    if (!res)
+      return;
+    if ("type" in res && res.type === "removed") {
+      addNotification({
+        type: "success",
+        text: `${member.user.name} has been removed from the community`
+      });
+      selectedCommunity.value.moderators = (selectedCommunity.value?.moderators ?? []).filter(
+        (mod) => mod.user.id !== member.user.id
+      );
+      selectedCommunity.value.members = (selectedCommunity.value?.members ?? []).filter(
+        (member2) => member2.user.id !== member2.user.id
+      );
+      selectedCommunity.notify();
+    }
+  };
+  return /* @__PURE__ */ h2("div", { className: "card" }, /* @__PURE__ */ h2("div", { className: "card-title flex gap justify-content-between" }, /* @__PURE__ */ h2("span", null, member.user.name), /* @__PURE__ */ h2("div", { className: "flex flex-wrap flex-column gap-sm" }, member.memberType === "moderator" ? /* @__PURE__ */ h2(
+    Button,
+    {
+      className: "btn btn-danger hover-animate btn-sm",
+      watch: loading2,
+      "bind:disabled": () => loading2.value,
+      onclick: demoteToMember
+    },
+    "Demote to member"
+  ) : /* @__PURE__ */ h2(Button, { className: "btn btn-secondary hover-animate btn-sm", onclick: promoteToModerator }, "Promote to moderator"), /* @__PURE__ */ h2(
+    Button,
+    {
+      className: "btn btn-danger hover-animate btn-sm",
+      watch: loading2,
+      "bind:disabled": () => loading2.value,
+      onclick: revokeMembership
+    },
+    "Revoke membership"
+  ))));
 };
 var MemberList = ({ members, title }) => {
   return /* @__PURE__ */ h2("section", null, /* @__PURE__ */ h2("h3", null, title), /* @__PURE__ */ h2(For, { each: members, template: (member) => /* @__PURE__ */ h2(MemberCard, { member }) }));
 };
 var CommunityMemberManager = () => {
-  return /* @__PURE__ */ h2(fragment, null, isCommunityAdmin() ? /* @__PURE__ */ h2(MemberList, { title: "Moderators", members: selectedCommunity.value?.moderators ?? [] }) : /* @__PURE__ */ h2(fragment, null), /* @__PURE__ */ h2(MemberList, { title: "Members", members: selectedCommunity.value?.members ?? [] }));
+  return /* @__PURE__ */ h2("div", { watch: selectedCommunity, "bind:children": true }, () => isCommunityOwner() ? /* @__PURE__ */ h2(MemberList, { title: "Moderators", members: selectedCommunity.value?.moderators ?? [] }) : /* @__PURE__ */ h2(fragment, null), () => /* @__PURE__ */ h2(MemberList, { title: "Members", members: selectedCommunity.value?.members ?? [] }));
 };
 
 // src/components/community/AdminMenu/AdminMenu.tsx
@@ -86713,7 +86820,17 @@ function CommunityPage({ params }) {
         onclick: () => communityLeaveModalOpen.value = true
       },
       "Leave this community"
-    )), /* @__PURE__ */ h2("br", null)) : /* @__PURE__ */ h2(fragment, null, " "), /* @__PURE__ */ h2("div", { className: "page-body" }, /* @__PURE__ */ h2("div", { className: "community-page-inner" }, /* @__PURE__ */ h2("section", { className: "flex flex-column community-page-posts" }, /* @__PURE__ */ h2("div", { className: "section-title" }, /* @__PURE__ */ h2("h3", null, "Posts"), /* @__PURE__ */ h2(AddPostButton, null)), /* @__PURE__ */ h2(CommunityPosts, { posts: data.posts ?? [] })), /* @__PURE__ */ h2("section", { className: "flex flex-column community-page-members" }, data.owners && data.owners[0] ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "section-title" }, /* @__PURE__ */ h2("h3", null, "Owner")), /* @__PURE__ */ h2("div", { className: "flex flex-column mb-3" }, /* @__PURE__ */ h2(CommunityMemberCard, { member: data.owners[0] }))) : /* @__PURE__ */ h2(fragment, null), data.members ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "section-title" }, /* @__PURE__ */ h2("h3", null, "Members")), /* @__PURE__ */ h2("div", { className: "flex flex-column" }, data.members.map((member) => /* @__PURE__ */ h2(CommunityMemberCard, { member })))) : /* @__PURE__ */ h2(fragment, null))))) : userStore.value ? /* @__PURE__ */ h2(
+    )), /* @__PURE__ */ h2("br", null)) : /* @__PURE__ */ h2(fragment, null, " "), /* @__PURE__ */ h2("div", { className: "page-body" }, /* @__PURE__ */ h2("div", { className: "community-page-inner" }, /* @__PURE__ */ h2("section", { className: "flex flex-column community-page-posts" }, /* @__PURE__ */ h2("div", { className: "section-title" }, /* @__PURE__ */ h2("h3", null, "Posts"), /* @__PURE__ */ h2(AddPostButton, null)), /* @__PURE__ */ h2(CommunityPosts, { posts: selectedCommunity.value?.posts ?? [] })), /* @__PURE__ */ h2(
+      "section",
+      {
+        watch: selectedCommunity,
+        "bind:children": true,
+        className: "flex flex-column community-page-members"
+      },
+      () => selectedCommunity.value?.owners && selectedCommunity.value.owners[0] ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "section-title" }, /* @__PURE__ */ h2("h3", null, "Owner")), /* @__PURE__ */ h2("div", { className: "flex flex-column mb-3" }, /* @__PURE__ */ h2(CommunityMemberCard, { member: selectedCommunity.value.owners[0] }))) : /* @__PURE__ */ h2(fragment, null),
+      () => selectedCommunity.value?.moderators ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "section-title" }, /* @__PURE__ */ h2("h3", null, "Moderators")), /* @__PURE__ */ h2("div", { className: "flex flex-column" }, selectedCommunity.value.moderators.map((member) => /* @__PURE__ */ h2(CommunityMemberCard, { member })))) : /* @__PURE__ */ h2(fragment, null),
+      () => selectedCommunity.value?.members ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "section-title" }, /* @__PURE__ */ h2("h3", null, "Members")), /* @__PURE__ */ h2("div", { className: "flex flex-column" }, selectedCommunity.value.members.map((member) => /* @__PURE__ */ h2(CommunityMemberCard, { member })))) : /* @__PURE__ */ h2(fragment, null)
+    )))) : userStore.value ? /* @__PURE__ */ h2(
       Button,
       {
         className: "btn btn-primary hover-animate btn-lg",
@@ -93528,6 +93645,16 @@ var communityService = {
       return;
     }
   },
+  async updateCommunityMemberType(communityId, userId, memberType) {
+    try {
+      return (await db.update(communityMembers).set({ memberType }).where(
+        and(eq(communityMembers.communityId, communityId), eq(communityMembers.userId, userId))
+      ).returning().execute()).at(0);
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+  },
   async getCommunityMember(communityId, userId) {
     try {
       return await db.query.communityMembers.findFirst({
@@ -93536,6 +93663,30 @@ var communityService = {
           eq2(member.userId, userId),
           eq2(member.disabled, false)
         )
+      });
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+  },
+  async getCommunityMemberData(communityId, userId) {
+    try {
+      return await db.query.communityMembers.findFirst({
+        where: (member, { and: and2, eq: eq2 }) => and2(
+          eq2(member.communityId, communityId),
+          eq2(member.userId, userId),
+          eq2(member.disabled, false)
+        ),
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+              createdAt: true
+            }
+          }
+        }
       });
     } catch (error) {
       console.error(error);
@@ -93679,6 +93830,43 @@ function configureCommunityRoutes(app2) {
       return res;
     }
   );
+  app2.patch("/api/communities/:id/members", async (req) => {
+    if (!req.params.id)
+      throw new InvalidRequestError();
+    if (!req.cookies.user_id)
+      throw new NotAuthenticatedError();
+    const member = await communityService.getCommunityMember(req.params.id, req.cookies.user_id);
+    if (!member || ["owner", "moderator", "member", "none"].indexOf(member.memberType) === -1)
+      throw new UnauthorizedError();
+    const targetMember = await communityService.getCommunityMember(req.params.id, req.body.userId);
+    if (!targetMember)
+      throw new NotFoundError();
+    if (req.body.memberType === targetMember.memberType)
+      return communityService.getCommunityMemberData(req.params.id, req.body.userId);
+    if (member.memberType === "moderator") {
+      if (req.body.memberType !== "none")
+        throw new UnauthorizedError();
+      if (targetMember.memberType !== "member")
+        throw new UnauthorizedError();
+    }
+    if (req.body.memberType === "none") {
+      const res = await communityService.leaveCommunity(req.params.id, req.body.userId);
+      if (!res)
+        throw new ServerError("Failed to leave community");
+      return { type: "removed" };
+    } else if (req.body.memberType === "owner") {
+      return;
+    } else {
+      const res = await communityService.updateCommunityMemberType(
+        req.params.id,
+        req.body.userId,
+        req.body.memberType
+      );
+      if (!res)
+        throw new ServerError("Failed to update member type");
+      return communityService.getCommunityMemberData(req.params.id, req.body.userId);
+    }
+  });
   app2.post("/api/communities/:id/join", async (req) => {
     if (!req.params.id)
       throw new InvalidRequestError();

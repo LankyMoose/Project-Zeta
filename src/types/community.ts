@@ -26,7 +26,7 @@ export type CommunityJoinRequestData = {
 }
 
 export type CommunityMemberUserData = {
-  avatarUrl?: string
+  avatarUrl?: string | null
   createdAt: string | Date
   id: string
   name: string
@@ -37,9 +37,9 @@ export type CommunityMemberData = {
   communityId: string
   userId: string
   user: CommunityMemberUserData
-  createdAt: string
+  createdAt: string | Date
   memberType: "member" | "moderator" | "owner"
-  disabled: boolean
+  disabled: boolean | null
 }
 
 export type CommunityData = {

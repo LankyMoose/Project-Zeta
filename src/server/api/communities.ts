@@ -83,6 +83,48 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
   )
 
+  app.patch<{
+    Params: { id?: string }
+    Body: { userId: string; memberType: "owner" | "moderator" | "member" | "none" }
+  }>("/api/communities/:id/members", async (req) => {
+    if (!req.params.id) throw new InvalidRequestError()
+    if (!req.cookies.user_id) throw new NotAuthenticatedError()
+
+    const member = await communityService.getCommunityMember(req.params.id, req.cookies.user_id)
+    if (!member || ["owner", "moderator", "member", "none"].indexOf(member.memberType) === -1)
+      throw new UnauthorizedError()
+
+    const targetMember = await communityService.getCommunityMember(req.params.id, req.body.userId)
+    if (!targetMember) throw new NotFoundError()
+
+    if (req.body.memberType === targetMember.memberType)
+      return communityService.getCommunityMemberData(req.params.id, req.body.userId)
+
+    // ensure mods can only remove members
+    if (member.memberType === "moderator") {
+      if (req.body.memberType !== "none") throw new UnauthorizedError()
+      if (targetMember.memberType !== "member") throw new UnauthorizedError()
+    }
+
+    if (req.body.memberType === "none") {
+      // delete member record for target member
+      const res = await communityService.leaveCommunity(req.params.id, req.body.userId)
+      if (!res) throw new ServerError("Failed to leave community")
+      return { type: "removed" }
+    } else if (req.body.memberType === "owner") {
+      // handle owner change
+      return
+    } else {
+      const res = await communityService.updateCommunityMemberType(
+        req.params.id,
+        req.body.userId,
+        req.body.memberType
+      )
+      if (!res) throw new ServerError("Failed to update member type")
+      return communityService.getCommunityMemberData(req.params.id, req.body.userId)
+    }
+  })
+
   app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
 

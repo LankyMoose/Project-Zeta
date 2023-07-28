@@ -21,6 +21,7 @@ import {
   CommunityJoinRequestData,
   CommunityLinkData,
   CommunityListData,
+  CommunityMemberData,
   CommunitySearchData,
   JoinResult,
   JoinResultType,
@@ -411,6 +412,28 @@ export const communityService = {
     }
   },
 
+  async updateCommunityMemberType(
+    communityId: string,
+    userId: string,
+    memberType: "member" | "moderator" | "owner"
+  ): Promise<CommunityMember | undefined> {
+    try {
+      return (
+        await db
+          .update(communityMembers)
+          .set({ memberType })
+          .where(
+            and(eq(communityMembers.communityId, communityId), eq(communityMembers.userId, userId))
+          )
+          .returning()
+          .execute()
+      ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
   async getCommunityMember(communityId: string, userId: string): Promise<CommunityMember | void> {
     try {
       return await db.query.communityMembers.findFirst({
@@ -420,6 +443,35 @@ export const communityService = {
             eq(member.userId, userId),
             eq(member.disabled, false)
           ),
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getCommunityMemberData(
+    communityId: string,
+    userId: string
+  ): Promise<CommunityMemberData | void> {
+    try {
+      return await db.query.communityMembers.findFirst({
+        where: (member, { and, eq }) =>
+          and(
+            eq(member.communityId, communityId),
+            eq(member.userId, userId),
+            eq(member.disabled, false)
+          ),
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+              createdAt: true,
+            },
+          },
+        },
       })
     } catch (error) {
       console.error(error)

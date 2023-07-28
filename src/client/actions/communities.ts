@@ -5,6 +5,7 @@ import {
   CommunityData,
   CommunityJoinRequestData,
   CommunityListData,
+  CommunityMemberData,
   CommunitySearchData,
   JoinResult,
   LeaveResult,
@@ -199,5 +200,29 @@ export const deleteCommunity = async (id: string): Promise<boolean> => {
       text: error.message,
     })
     return false
+  }
+}
+
+export const updateCommunityMemberType = async (
+  communityId: string,
+  userId: string,
+  memberType: "member" | "moderator" | "owner" | "none"
+): Promise<CommunityMemberData | { type: string } | void> => {
+  try {
+    const response = await fetch(`${API_URL}/communities/${communityId}/members`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, memberType }),
+    })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+    return data
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
   }
 }
