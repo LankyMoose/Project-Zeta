@@ -8,6 +8,11 @@ import { SlideInOut, Transition } from "cinnabun-transitions"
 import { MenuButton } from "../MenuButton"
 import { NavigationListener } from "cinnabun/listeners"
 
+const onBeforeNavigate = () => {
+  sidebarOpen.value = false
+  return true
+}
+
 export const Sidebar = () => {
   return (
     <>
@@ -32,13 +37,23 @@ export const Sidebar = () => {
         </header>
         <section className="sidebar-content">
           <div className="sidebar-content-item">
-            <Link to="/communities" store={pathStore} className="sidebar-link">
+            <Link
+              to="/communities"
+              onBeforeNavigate={onBeforeNavigate}
+              store={pathStore}
+              className="sidebar-link"
+            >
               <GlobeIcon />
               <span className="collapse-text">Communities</span>
             </Link>
           </div>
           <div className="sidebar-content-item">
-            <Link to="/users" store={pathStore} className="sidebar-link">
+            <Link
+              onBeforeNavigate={onBeforeNavigate}
+              to="/users"
+              store={pathStore}
+              className="sidebar-link"
+            >
               <UsersIcon />
               <span className="collapse-text">People</span>
             </Link>
@@ -46,7 +61,12 @@ export const Sidebar = () => {
         </section>
         <section className="sidebar-footer">
           <div className="sidebar-footer-item">
-            <Link to="/settings" store={pathStore} className="sidebar-link">
+            <Link
+              onBeforeNavigate={onBeforeNavigate}
+              to="/settings"
+              store={pathStore}
+              className="sidebar-link"
+            >
               <span className="collapse-text">Settings</span>
             </Link>
           </div>
