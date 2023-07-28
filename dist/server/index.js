@@ -84068,7 +84068,7 @@ var import_static = __toESM(require_static(), 1);
 var import_websocket = __toESM(require_websocket2(), 1);
 var import_oauth2 = __toESM(require_oauth2(), 1);
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/signal.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/signal.ts
 var LOG_NUM_SUBS = false;
 var Signal = class {
   _val;
@@ -84120,7 +84120,7 @@ function createSignal(initialValue) {
   return new Signal(initialValue);
 }
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/portal.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/portal.ts
 var portalRoots = {};
 var createPortal = (children, rootId) => {
   if (!Cinnabun.isClient)
@@ -84144,12 +84144,12 @@ var createPortal = (children, rootId) => {
   return res;
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/ref.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/ref.ts
 var useRef = () => {
   return createSignal(null);
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/index.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/index.ts
 var h2 = (tag, props, ...children) => {
   if (typeof tag === "function") {
     return tag({ ...props, children }, children);
@@ -84162,7 +84162,7 @@ function fragment(_, children) {
   return new FragmentComponent(children);
 }
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/utils.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/utils.ts
 var jsPropToHtmlProp = (prop) => {
   switch (prop) {
     case "className":
@@ -84210,7 +84210,7 @@ var generateUUID = () => {
   });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/domInterop.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/domInterop.ts
 var DomInterop = class {
   static updateElement(component) {
     if (!component.element)
@@ -84547,8 +84547,12 @@ var DomInterop = class {
       return { element: null, idx: -1 };
     for (let i2 = 0; i2 < component.parent.children.length; i2++) {
       const c = component.parent.children[i2];
-      if (c === component)
+      if (c === component) {
+        if (i2 === component.parent.children.length - 1) {
+          start++;
+        }
         break;
+      }
       start += DomInterop.getRenderedNodeCount(c);
     }
     if (component.parent.element)
@@ -84577,7 +84581,7 @@ var DomInterop = class {
   }
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/cinnabun.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/cinnabun.ts
 var _Cinnabun = class {
   //ssr instance
   serverComponentReferences = [];
@@ -84662,7 +84666,7 @@ __publicField(Cinnabun, "addComponentReference", (ref) => {
     _Cinnabun.logComponentRefCount(ref.component);
 });
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/component.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/component.ts
 var Component = class {
   constructor(tag, props = {}) {
     this.tag = tag;
@@ -84981,7 +84985,7 @@ var Suspense = ({ promise, cache, ...rest }, children) => {
   return new SuspenseComponent("", { promise, cache, children, ...rest });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/ssr.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/ssr.ts
 var _SSR = class {
   static async serverBake(app2, config) {
     let startTime = 0;
@@ -84993,9 +84997,8 @@ var _SSR = class {
     };
     const serialized = await _SSR.serialize(accumulator, app2, config);
     if (true) {
-      const renderTime = Number(performance.now() - startTime).toFixed(3);
       console.log(
-        `${config.cinnabunInstance.getServerRequestData("path")} | render time: ${renderTime}ms`
+        `render time: ${Number(performance.now() - startTime).toFixed(3)}ms`
       );
     }
     _SSR.render(
@@ -85228,7 +85231,7 @@ var Document = (App2) => {
   return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("head", null, /* @__PURE__ */ h2("meta", { charset: "utf-8" }), /* @__PURE__ */ h2("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), /* @__PURE__ */ h2("title", null, "SSR App"), /* @__PURE__ */ h2("link", { rel: "stylesheet", href: "/static/index.css" })), /* @__PURE__ */ h2("body", null, /* @__PURE__ */ h2("div", { id: "app" }, /* @__PURE__ */ h2(App2, null)), /* @__PURE__ */ h2("div", { id: "portal-root" })));
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/router/router.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/router/router.ts
 var RouteComponent = class extends Component {
   constructor(path2, component) {
     super("", {
@@ -85304,7 +85307,7 @@ var Router = ({ store }, children) => {
   return new RouterComponent(store, children);
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/router/link.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/router/link.ts
 var setHash = (store, newHash) => {
   if (store.value === newHash)
     return;
@@ -85353,7 +85356,7 @@ var Link = (props, children) => {
   });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/router/index.ts
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/router/index.ts
 function matchPath(path2, location) {
   let paramNames = [];
   let query = {};
@@ -86247,8 +86250,9 @@ var commentValidation = {
 var CommentItem = ({ comment }) => {
   return /* @__PURE__ */ h2("div", { className: "comment-item flex align-items-center gap", key: comment.id }, /* @__PURE__ */ h2("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h2("img", { className: "avatar", src: comment.user.avatarUrl, alt: comment.user.name })), /* @__PURE__ */ h2("div", { className: "flex flex-column gap-sm flex-grow text-sm" }, /* @__PURE__ */ h2("div", { className: "text-muted flex align-items-center gap justify-content-between" }, /* @__PURE__ */ h2(Link, { to: `/users/${comment.user.id}`, store: pathStore, className: "author" }, comment.user.name), /* @__PURE__ */ h2("span", null, formatUTCDate(comment.createdAt.toString()))), /* @__PURE__ */ h2("p", { className: "m-0 comment" }, comment.content)));
 };
-var CommentsList = ({ comments }) => {
-  return /* @__PURE__ */ h2("div", { className: "comments-list" }, /* @__PURE__ */ h2(
+var PostCardComments = ({ post }) => {
+  const comments = computed(post, () => post.value.comments);
+  return /* @__PURE__ */ h2("div", { className: "post-card-comments flex flex-column gap" }, /* @__PURE__ */ h2("div", { className: "comments-list" }, /* @__PURE__ */ h2(
     "p",
     {
       className: "text-muted m-0",
@@ -86256,11 +86260,7 @@ var CommentsList = ({ comments }) => {
       "bind:visible": () => comments.value.length === 0
     },
     /* @__PURE__ */ h2("small", null, /* @__PURE__ */ h2("i", null, "No comments yet."))
-  ), /* @__PURE__ */ h2(For, { each: comments, template: (comment) => /* @__PURE__ */ h2(CommentItem, { comment }) }));
-};
-var PostCardComments = ({ post }) => {
-  const comments = computed(post, () => post.value.comments);
-  return /* @__PURE__ */ h2("div", { className: "post-card-comments flex flex-column gap" }, /* @__PURE__ */ h2(CommentsList, { comments }), /* @__PURE__ */ h2(NewCommentForm, { post }));
+  ), /* @__PURE__ */ h2(For, { each: comments, template: (comment) => /* @__PURE__ */ h2(CommentItem, { comment }) })), /* @__PURE__ */ h2(NewCommentForm, { post }));
 };
 var NewCommentForm = ({ post }) => {
   const newComment = createSignal("");
@@ -86550,6 +86550,130 @@ var CommunityFixedHeader = () => {
   ));
 };
 
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/listeners/KeyboardListener.ts
+var KeyboardListener = (props, children) => {
+  const { keys, requireAll, onCapture } = props;
+  let currentKeys = [];
+  let self2;
+  const triggerCallback = (e2) => {
+    if (!self2 || self2.children.length === 0) {
+      onCapture(currentKeys, e2);
+      currentKeys = [];
+      return;
+    }
+    for (const c of self2.children) {
+      if (componentIsTarget(c, e2)) {
+        onCapture(currentKeys, e2);
+        currentKeys = [];
+        return;
+      }
+    }
+    for (const fc of self2.funcComponents) {
+      if (componentIsTarget(fc, e2)) {
+        onCapture(currentKeys, e2);
+        currentKeys = [];
+        return;
+      }
+    }
+  };
+  function componentIsTarget(c, e2) {
+    if (c instanceof Component) {
+      if (e2.target === c.element)
+        return true;
+      const childIsTarget = c.children.some(
+        (child) => componentIsTarget(child, e2)
+      );
+      if (childIsTarget)
+        return true;
+      const fChildIsTarget = c.funcComponents.some(
+        (child) => componentIsTarget(child, e2)
+      );
+      if (fChildIsTarget)
+        return true;
+    }
+    return false;
+  }
+  const handleKeyDown = (e2) => {
+    const { key } = e2;
+    if (keys.includes(key)) {
+      currentKeys.push(key);
+      if (!requireAll) {
+        return triggerCallback(e2);
+      }
+      if (currentKeys.length === keys.length)
+        triggerCallback(e2);
+    }
+  };
+  const handleKeyUp = (e2) => {
+    const { key } = e2;
+    if (keys.includes(key)) {
+      currentKeys.splice(currentKeys.indexOf(key), 1);
+    }
+  };
+  return new Component("", {
+    children,
+    onMounted(c) {
+      self2 = c;
+      window.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("keyup", handleKeyUp);
+    },
+    onUnmounted() {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    }
+  });
+};
+
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/listeners/NavigationListener.ts
+var NavigationListener = (props) => {
+  return new Component("", {
+    onMounted() {
+      if (!Cinnabun.isClient)
+        return;
+      window.addEventListener("popstate", props.onCapture);
+    },
+    onUnmounted() {
+      if (!Cinnabun.isClient)
+        return;
+      window.removeEventListener("popstate", props.onCapture);
+    }
+  });
+};
+
+// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/listeners/ClickOutsideListener.ts
+var ClickOutsideListener = ({
+  tag,
+  onCapture,
+  ...rest
+}) => {
+  const ref = useRef();
+  const handleClick = (e2) => {
+    const tgt = e2.target;
+    if (!ref.value)
+      return;
+    if (ref.value === tgt)
+      return;
+    if (ref.value.contains(tgt))
+      return;
+    console.log("click outside", tgt, ref.value);
+    onCapture();
+  };
+  return new Component(tag, {
+    ...rest,
+    ref,
+    onMounted() {
+      if (!Cinnabun.isClient)
+        return;
+      document.addEventListener("click", handleClick);
+    },
+    onUnmounted() {
+      if (!Cinnabun.isClient)
+        return;
+      document.removeEventListener("click", handleClick);
+    }
+  });
+};
+
 // src/components/community/PendingJoinRequests.tsx
 var JoinRequestCard = (joinReq) => {
   const { id, communityId } = joinReq;
@@ -86695,36 +86819,6 @@ var MemberList = ({ members, title }) => {
 };
 var CommunityMemberManager = () => {
   return /* @__PURE__ */ h2("div", { watch: selectedCommunity, "bind:children": true }, () => isCommunityOwner() ? /* @__PURE__ */ h2(MemberList, { title: "Moderators", members: selectedCommunity.value?.moderators ?? [] }) : /* @__PURE__ */ h2(fragment, null), () => /* @__PURE__ */ h2(MemberList, { title: "Members", members: selectedCommunity.value?.members ?? [] }));
-};
-
-// src/components/ClickOutsideListener.tsx
-var ClickOutsideListener = ({ tag, onCapture, ...rest }) => {
-  const ref = useRef();
-  const handleClick = (e2) => {
-    const tgt = e2.target;
-    if (!ref.value)
-      return;
-    if (ref.value === tgt)
-      return;
-    if (ref.value.contains(tgt))
-      return;
-    console.log("click outside", tgt, ref.value);
-    onCapture();
-  };
-  return new Component(tag, {
-    ...rest,
-    ref,
-    onMounted() {
-      if (!Cinnabun.isClient)
-        return;
-      document.addEventListener("click", handleClick);
-    },
-    onUnmounted() {
-      if (!Cinnabun.isClient)
-        return;
-      document.removeEventListener("click", handleClick);
-    }
-  });
 };
 
 // src/components/community/AdminMenu/AdminMenu.tsx
@@ -86979,96 +87073,6 @@ function UserPage({ params }) {
     /* @__PURE__ */ h2(MyCommunities, null)
   ));
 }
-
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/listeners/KeyboardListener.ts
-var KeyboardListener = (props, children) => {
-  const { keys, requireAll, onCapture } = props;
-  let currentKeys = [];
-  let self2;
-  const triggerCallback = (e2) => {
-    if (!self2 || self2.children.length === 0) {
-      onCapture(currentKeys, e2);
-      currentKeys = [];
-      return;
-    }
-    for (const c of self2.children) {
-      if (componentIsTarget(c, e2)) {
-        onCapture(currentKeys, e2);
-        currentKeys = [];
-        return;
-      }
-    }
-    for (const fc of self2.funcComponents) {
-      if (componentIsTarget(fc, e2)) {
-        onCapture(currentKeys, e2);
-        currentKeys = [];
-        return;
-      }
-    }
-  };
-  function componentIsTarget(c, e2) {
-    if (c instanceof Component) {
-      if (e2.target === c.element)
-        return true;
-      const childIsTarget = c.children.some(
-        (child) => componentIsTarget(child, e2)
-      );
-      if (childIsTarget)
-        return true;
-      const fChildIsTarget = c.funcComponents.some(
-        (child) => componentIsTarget(child, e2)
-      );
-      if (fChildIsTarget)
-        return true;
-    }
-    return false;
-  }
-  const handleKeyDown = (e2) => {
-    const { key } = e2;
-    if (keys.includes(key)) {
-      currentKeys.push(key);
-      if (!requireAll) {
-        return triggerCallback(e2);
-      }
-      if (currentKeys.length === keys.length)
-        triggerCallback(e2);
-    }
-  };
-  const handleKeyUp = (e2) => {
-    const { key } = e2;
-    if (keys.includes(key)) {
-      currentKeys.splice(currentKeys.indexOf(key), 1);
-    }
-  };
-  return new Component("", {
-    children,
-    onMounted(c) {
-      self2 = c;
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
-    },
-    onUnmounted() {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    }
-  });
-};
-
-// node_modules/.pnpm/cinnabun@0.1.50/node_modules/cinnabun/src/listeners/NavigationListener.ts
-var NavigationListener = (props) => {
-  return new Component("", {
-    onMounted() {
-      if (!Cinnabun.isClient)
-        return;
-      window.addEventListener("popstate", props.onCapture);
-    },
-    onUnmounted() {
-      if (!Cinnabun.isClient)
-        return;
-      window.removeEventListener("popstate", props.onCapture);
-    }
-  });
-};
 
 // src/components/modal/Modal.tsx
 var defaultGestures = {

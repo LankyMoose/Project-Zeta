@@ -1,4 +1,5 @@
 import * as Cinnabun from "cinnabun"
+import { ClickOutsideListener } from "cinnabun/listeners"
 import { IconButton } from "../../IconButton"
 import { MoreIcon } from "../../icons"
 import { SlideInOut } from "cinnabun-transitions"
@@ -13,7 +14,6 @@ import { getCommunityJoinRequests } from "../../../client/actions/communities"
 import { PendingJoinRequests } from "../PendingJoinRequests"
 import { EllipsisLoader } from "../../loaders/Ellipsis"
 import { CommunityMemberManager } from "../CommunityMemberManager"
-import { ClickOutsideListener } from "../../ClickOutsideListener"
 
 const loadRequests = async () => {
   const res = !!selectedCommunity.value?.id

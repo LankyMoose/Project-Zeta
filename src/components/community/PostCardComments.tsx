@@ -30,28 +30,22 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
   )
 }
 
-const CommentsList = ({ comments }: { comments: Cinnabun.Signal<CommunityPostComment[]> }) => {
-  return (
-    <div className="comments-list">
-      <p
-        className="text-muted m-0"
-        watch={comments}
-        bind:visible={() => comments.value.length === 0}
-      >
-        <small>
-          <i>No comments yet.</i>
-        </small>
-      </p>
-      <For each={comments} template={(comment) => <CommentItem comment={comment} />} />
-    </div>
-  )
-}
-
 export const PostCardComments = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) => {
   const comments = computed(post, () => post.value.comments)
   return (
     <div className="post-card-comments flex flex-column gap">
-      <CommentsList comments={comments} />
+      <div className="comments-list">
+        <p
+          className="text-muted m-0"
+          watch={comments}
+          bind:visible={() => comments.value.length === 0}
+        >
+          <small>
+            <i>No comments yet.</i>
+          </small>
+        </p>
+        <For each={comments} template={(comment) => <CommentItem comment={comment} />} />
+      </div>
       <NewCommentForm post={post} />
     </div>
   )
