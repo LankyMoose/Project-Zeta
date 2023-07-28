@@ -685,7 +685,6 @@ packages:
 
   /drizzle-kit@0.18.1:
     resolution: {integrity: sha512-Oqie227W2Dd7FuqX4pvQWeClSvnoPCIn2cO9JueeLWZqj3tpdBhnbgt4nLHhBbOdWRlTLYwXnkTDW3hYym/gGQ==}
-    hasBin: true
     dependencies:
       camelcase: 7.0.1
       chalk: 5.3.0
@@ -1036,7 +1035,6 @@ packages:
   /esbuild@0.15.18:
     resolution: {integrity: sha512-x/R72SmW3sSFRm5zrrIjAhCeQSAWoni3CmHEqfQrZIQTM3lVCdehdwuIqaOtfC2slvpdlLa62GYoN8SxT23m6Q==}
     engines: {node: '>=12'}
-    hasBin: true
     requiresBuild: true
     optionalDependencies:
       '@esbuild/android-arm': 0.15.18
@@ -1066,7 +1064,6 @@ packages:
   /esbuild@0.17.19:
     resolution: {integrity: sha512-XQ0jAPFkK/u3LcVRcvVHQcTIqD6E2H1fvZMA5dQPSOWb3suUbWbfbRf94pjc0bNzRYLfIrDRQXr7X+LHIm5oHw==}
     engines: {node: '>=12'}
-    hasBin: true
     requiresBuild: true
     optionalDependencies:
       '@esbuild/android-arm': 0.17.19
@@ -1271,7 +1268,6 @@ packages:
   /glob@10.3.3:
     resolution: {integrity: sha512-92vPiMb/iqpmEgsOoIDvTjc50wf9CCCvMzsi6W0JLPeUKE8TWP1a73PgqSrqy7iAZxaSD1YdzU7QZR5LF51MJw==}
     engines: {node: '>=16 || 14 >=14.17'}
-    hasBin: true
     dependencies:
       foreground-child: 3.1.1
       jackspeak: 2.2.1
@@ -1376,7 +1372,6 @@ packages:
 
   /json-diff@0.9.0:
     resolution: {integrity: sha512-cVnggDrVkAAA3OvFfHpFEhOnmcsUpleEKq4d4O8sQWWSH40MBrWstKigVB1kGrgLWzuom+7rRdaCsnBD6VyObQ==}
-    hasBin: true
     dependencies:
       cli-color: 2.0.3
       difflib: 0.2.4
@@ -1438,7 +1433,6 @@ packages:
   /mime@3.0.0:
     resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
     engines: {node: '>=10.0.0'}
-    hasBin: true
     dev: false
 
   /minimalistic-assert@1.0.1:
@@ -1561,7 +1555,6 @@ packages:
 
   /pino@8.14.1:
     resolution: {integrity: sha512-8LYNv7BKWXSfS+k6oEc6occy5La+q2sPwU3q2ljTX5AZk7v+5kND2o5W794FyRaqha6DJajmkNRsWtPpFyMUdw==}
-    hasBin: true
     dependencies:
       atomic-sleep: 1.0.0
       fast-redact: 3.2.0
@@ -1711,7 +1704,6 @@ packages:
   /semver@7.5.4:
     resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
     engines: {node: '>=10'}
-    hasBin: true
     dependencies:
       lru-cache: 6.0.0
     dev: false
@@ -1862,7 +1854,6 @@ packages:
 
   /tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
-    hasBin: true
     dev: false
 
   /type@1.2.0:
@@ -1891,7 +1882,6 @@ packages:
   /which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
-    hasBin: true
     dependencies:
       isexe: 2.0.0
     dev: false
