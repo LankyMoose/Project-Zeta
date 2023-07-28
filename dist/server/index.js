@@ -5578,7 +5578,7 @@ var require_browser = __commonJS({
       } catch (error) {
       }
       if (!r2 && typeof process !== "undefined" && "env" in process) {
-        r2 = false;
+        r2 = true;
       }
       return r2;
     }
@@ -5748,11 +5748,11 @@ var require_node = __commonJS({
       if (namespaces) {
         process.env.DEBUG = namespaces;
       } else {
-        delete false;
+        delete true;
       }
     }
     function load() {
-      return false;
+      return true;
     }
     function init(debug) {
       debug.inspectOpts = {};
@@ -84980,14 +84980,14 @@ var Suspense = ({ promise, cache, ...rest }, children) => {
 var _SSR = class {
   static async serverBake(app2, config) {
     let startTime = 0;
-    if (false)
+    if (true)
       startTime = performance.now();
     const accumulator = {
       promiseQueue: [],
       html: ""
     };
     const serialized = await _SSR.serialize(accumulator, app2, config);
-    if (false) {
+    if (true) {
       console.log(
         `render time: ${Number(performance.now() - startTime).toFixed(3)}ms`
       );
@@ -93650,7 +93650,7 @@ globalThis.fetch = async (input, init) => {
     throw error;
   }
 };
-var isDev = false;
+var isDev = true;
 var app = (0, import_fastify.default)();
 app.register(import_cookie.default);
 var cookieSettings = {

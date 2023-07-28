@@ -917,14 +917,14 @@ __publicField(Cinnabun, "addComponentReference", (ref) => {
 var _SSR = class {
   static async serverBake(app, config) {
     let startTime = 0;
-    if (false)
+    if (true)
       startTime = performance.now();
     const accumulator = {
       promiseQueue: [],
       html: ""
     };
     const serialized = await _SSR.serialize(accumulator, app, config);
-    if (false) {
+    if (true) {
       console.log(
         `render time: ${Number(performance.now() - startTime).toFixed(3)}ms`
       );
@@ -3727,7 +3727,7 @@ var createLiveSocket = () => {
 };
 
 // src/client/index.ts
-var env = "production";
+var env = "development";
 if ("__cbData" in window) {
   try {
     Cinnabun.registerRuntimeServices(createLiveSocket());
