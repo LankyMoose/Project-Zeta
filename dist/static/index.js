@@ -2809,10 +2809,10 @@ var CommunityTypeList = ({
   title,
   communities
 }) => {
-  return /* @__PURE__ */ h("section", null, /* @__PURE__ */ h("h2", null, title), /* @__PURE__ */ h(CommunityList, { communities }));
+  return /* @__PURE__ */ h("section", null, /* @__PURE__ */ h("h3", null, title), /* @__PURE__ */ h(CommunityList, { communities }));
 };
 var MyCommunities = () => {
-  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("h1", null, "My Communities"), /* @__PURE__ */ h(Suspense, { promise: getMyCommunities }, (loading2, data) => {
+  return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("h2", null, "My Communities"), /* @__PURE__ */ h(Suspense, { promise: getMyCommunities }, (loading2, data) => {
     if (loading2)
       return /* @__PURE__ */ h(DefaultLoader, null);
     if (!data)
@@ -2844,10 +2844,11 @@ function UserPage({ params }) {
       return Promise.resolve({
         user: userStore.value
       });
-    return getUser2(isOwnProfile() ? userStore.value.userId : params.userId);
+    const id = isOwnProfile() ? userStore.value.userId : params.userId;
+    console.log("loadUser", id);
+    return getUser2(id);
   };
   return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h(Suspense, { promise: loadUser }, (loading2, data) => {
-    console.log(data);
     if (loading2)
       return /* @__PURE__ */ h(DefaultLoader, null);
     if (!data?.user)

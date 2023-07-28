@@ -24,14 +24,15 @@ export default function UserPage({ params }: { params?: { userId?: string } }) {
         user: userStore.value,
       })
 
-    return getUser(isOwnProfile() ? userStore.value!.userId! : params.userId!)
+    const id = isOwnProfile() ? userStore.value!.userId! : params.userId!
+    console.log("loadUser", id)
+    return getUser(id)
   }
 
   return (
     <>
       <Suspense promise={loadUser}>
         {(loading: boolean, data: { user?: PublicUser }) => {
-          console.log(data)
           if (loading) return <DefaultLoader />
           if (!data?.user) return <></>
           return <h1>{data?.user.name}</h1>

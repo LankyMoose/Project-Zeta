@@ -14,7 +14,7 @@ const CommunityTypeList = ({
 }) => {
   return (
     <section>
-      <h2>{title}</h2>
+      <h3>{title}</h3>
       <CommunityList communities={communities} />
     </section>
   )
@@ -23,7 +23,7 @@ const CommunityTypeList = ({
 export const MyCommunities = () => {
   return (
     <>
-      <h1>My Communities</h1>
+      <h2>My Communities</h2>
       <Suspense promise={getMyCommunities}>
         {(loading: boolean, data?: MyCommunitiesData) => {
           if (loading) return <DefaultLoader />
