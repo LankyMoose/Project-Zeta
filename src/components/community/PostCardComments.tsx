@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal, computed } from "cinnabun"
 import { CommunityPostComment, CommunityPostData } from "../../types/post"
-import { authModalOpen, authModalState, userStore } from "../../state/global"
+import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
 import { isCommunityMember, communityJoinModalOpen } from "../../state/community"
 import { addPostComment } from "../../client/actions/posts"
 import { formatUTCDate } from "../../utils"
@@ -9,6 +9,7 @@ import { Button } from "../Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { commentValidation } from "../../db/validation"
 import { AuthModalCallback } from "../../types/auth"
+import { Link } from "cinnabun/router"
 
 const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
   return (
@@ -18,7 +19,9 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
       </div>
       <div className="flex flex-column gap-sm flex-grow text-sm">
         <div className="text-muted flex align-items-center gap justify-content-between">
-          <span className="author">{comment.user.name}</span>
+          <Link to={`/users/${comment.user.id}`} store={pathStore} className="author">
+            {comment.user.name}
+          </Link>
           <span>{formatUTCDate(comment.createdAt.toString())}</span>
         </div>
         <p className="m-0 comment">{comment.content}</p>

@@ -85944,7 +85944,7 @@ var AuthorTag = ({
   user,
   date: date2
 }) => {
-  return /* @__PURE__ */ h2("small", { className: "author text-muted" }, /* @__PURE__ */ h2("div", { className: "flex flex-column" }, /* @__PURE__ */ h2("span", null, user.name), date2 ? /* @__PURE__ */ h2("span", { className: "created-at" }, formatUTCDate(date2.toString())) : /* @__PURE__ */ h2(fragment, null)), /* @__PURE__ */ h2("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h2("img", { src: user.avatarUrl, className: "avatar", alt: user.name })));
+  return /* @__PURE__ */ h2("small", { className: "author text-muted" }, /* @__PURE__ */ h2("div", { className: "flex flex-column" }, /* @__PURE__ */ h2(Link, { to: `/users/${user.id}`, store: pathStore }, user.name), date2 ? /* @__PURE__ */ h2("span", { className: "created-at" }, formatUTCDate(date2.toString())) : /* @__PURE__ */ h2(fragment, null)), /* @__PURE__ */ h2("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h2("img", { src: user.avatarUrl, className: "avatar", alt: user.name })));
 };
 
 // src/pages/Home.tsx
@@ -86225,7 +86225,7 @@ var commentValidation = {
 
 // src/components/community/PostCardComments.tsx
 var CommentItem = ({ comment }) => {
-  return /* @__PURE__ */ h2("div", { className: "comment-item flex align-items-center gap", key: comment.id }, /* @__PURE__ */ h2("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h2("img", { className: "avatar", src: comment.user.avatarUrl, alt: comment.user.name })), /* @__PURE__ */ h2("div", { className: "flex flex-column gap-sm flex-grow text-sm" }, /* @__PURE__ */ h2("div", { className: "text-muted flex align-items-center gap justify-content-between" }, /* @__PURE__ */ h2("span", { className: "author" }, comment.user.name), /* @__PURE__ */ h2("span", null, formatUTCDate(comment.createdAt.toString()))), /* @__PURE__ */ h2("p", { className: "m-0 comment" }, comment.content)));
+  return /* @__PURE__ */ h2("div", { className: "comment-item flex align-items-center gap", key: comment.id }, /* @__PURE__ */ h2("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h2("img", { className: "avatar", src: comment.user.avatarUrl, alt: comment.user.name })), /* @__PURE__ */ h2("div", { className: "flex flex-column gap-sm flex-grow text-sm" }, /* @__PURE__ */ h2("div", { className: "text-muted flex align-items-center gap justify-content-between" }, /* @__PURE__ */ h2(Link, { to: `/users/${comment.user.id}`, store: pathStore, className: "author" }, comment.user.name), /* @__PURE__ */ h2("span", null, formatUTCDate(comment.createdAt.toString()))), /* @__PURE__ */ h2("p", { className: "m-0 comment" }, comment.content)));
 };
 var CommentsList = ({ comments }) => {
   return /* @__PURE__ */ h2("div", { className: "comments-list" }, /* @__PURE__ */ h2(

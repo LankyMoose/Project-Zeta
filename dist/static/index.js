@@ -2066,7 +2066,7 @@ var AuthorTag = ({
   user,
   date
 }) => {
-  return /* @__PURE__ */ h("small", { className: "author text-muted" }, /* @__PURE__ */ h("div", { className: "flex flex-column" }, /* @__PURE__ */ h("span", null, user.name), date ? /* @__PURE__ */ h("span", { className: "created-at" }, formatUTCDate(date.toString())) : /* @__PURE__ */ h(fragment, null)), /* @__PURE__ */ h("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h("img", { src: user.avatarUrl, className: "avatar", alt: user.name })));
+  return /* @__PURE__ */ h("small", { className: "author text-muted" }, /* @__PURE__ */ h("div", { className: "flex flex-column" }, /* @__PURE__ */ h(Link, { to: `/users/${user.id}`, store: pathStore }, user.name), date ? /* @__PURE__ */ h("span", { className: "created-at" }, formatUTCDate(date.toString())) : /* @__PURE__ */ h(fragment, null)), /* @__PURE__ */ h("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h("img", { src: user.avatarUrl, className: "avatar", alt: user.name })));
 };
 
 // src/pages/Home.tsx
@@ -2347,7 +2347,7 @@ var commentValidation = {
 
 // src/components/community/PostCardComments.tsx
 var CommentItem = ({ comment }) => {
-  return /* @__PURE__ */ h("div", { className: "comment-item flex align-items-center gap", key: comment.id }, /* @__PURE__ */ h("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h("img", { className: "avatar", src: comment.user.avatarUrl, alt: comment.user.name })), /* @__PURE__ */ h("div", { className: "flex flex-column gap-sm flex-grow text-sm" }, /* @__PURE__ */ h("div", { className: "text-muted flex align-items-center gap justify-content-between" }, /* @__PURE__ */ h("span", { className: "author" }, comment.user.name), /* @__PURE__ */ h("span", null, formatUTCDate(comment.createdAt.toString()))), /* @__PURE__ */ h("p", { className: "m-0 comment" }, comment.content)));
+  return /* @__PURE__ */ h("div", { className: "comment-item flex align-items-center gap", key: comment.id }, /* @__PURE__ */ h("div", { className: "avatar-wrapper sm" }, /* @__PURE__ */ h("img", { className: "avatar", src: comment.user.avatarUrl, alt: comment.user.name })), /* @__PURE__ */ h("div", { className: "flex flex-column gap-sm flex-grow text-sm" }, /* @__PURE__ */ h("div", { className: "text-muted flex align-items-center gap justify-content-between" }, /* @__PURE__ */ h(Link, { to: `/users/${comment.user.id}`, store: pathStore, className: "author" }, comment.user.name), /* @__PURE__ */ h("span", null, formatUTCDate(comment.createdAt.toString()))), /* @__PURE__ */ h("p", { className: "m-0 comment" }, comment.content)));
 };
 var CommentsList = ({ comments }) => {
   return /* @__PURE__ */ h("div", { className: "comments-list" }, /* @__PURE__ */ h(
