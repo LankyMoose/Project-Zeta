@@ -85323,12 +85323,12 @@ var Link = (props, children) => {
     className,
     activeClass,
     useHash,
-    onBeforeNavigate,
+    onBeforeNavigate: onBeforeNavigate2,
     ...rest
   } = props;
   const onclick = (e2) => {
     e2.preventDefault();
-    if (onBeforeNavigate && !onBeforeNavigate())
+    if (onBeforeNavigate2 && !onBeforeNavigate2())
       return;
     if (useHash)
       return setHash(store, to);
@@ -87450,6 +87450,10 @@ var MenuButton = ({ className }) => {
 };
 
 // src/components/sidebar/Sidebar.tsx
+var onBeforeNavigate = () => {
+  sidebarOpen.value = false;
+  return true;
+};
 var Sidebar = () => {
   return /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(
     Transition,
@@ -87470,8 +87474,37 @@ var Sidebar = () => {
     },
     /* @__PURE__ */ h2(NavigationListener, { onCapture: () => sidebarOpen.value = false }),
     /* @__PURE__ */ h2("header", { className: "sidebar-header" }, /* @__PURE__ */ h2("div", { className: "sidebar-header-item" }, /* @__PURE__ */ h2(MenuButton, null))),
-    /* @__PURE__ */ h2("section", { className: "sidebar-content" }, /* @__PURE__ */ h2("div", { className: "sidebar-content-item" }, /* @__PURE__ */ h2(Link, { to: "/communities", store: pathStore, className: "sidebar-link" }, /* @__PURE__ */ h2(GlobeIcon, null), /* @__PURE__ */ h2("span", { className: "collapse-text" }, "Communities"))), /* @__PURE__ */ h2("div", { className: "sidebar-content-item" }, /* @__PURE__ */ h2(Link, { to: "/users", store: pathStore, className: "sidebar-link" }, /* @__PURE__ */ h2(UsersIcon, null), /* @__PURE__ */ h2("span", { className: "collapse-text" }, "People")))),
-    /* @__PURE__ */ h2("section", { className: "sidebar-footer" }, /* @__PURE__ */ h2("div", { className: "sidebar-footer-item" }, /* @__PURE__ */ h2(Link, { to: "/settings", store: pathStore, className: "sidebar-link" }, /* @__PURE__ */ h2("span", { className: "collapse-text" }, "Settings"))))
+    /* @__PURE__ */ h2("section", { className: "sidebar-content" }, /* @__PURE__ */ h2("div", { className: "sidebar-content-item" }, /* @__PURE__ */ h2(
+      Link,
+      {
+        to: "/communities",
+        onBeforeNavigate,
+        store: pathStore,
+        className: "sidebar-link"
+      },
+      /* @__PURE__ */ h2(GlobeIcon, null),
+      /* @__PURE__ */ h2("span", { className: "collapse-text" }, "Communities")
+    )), /* @__PURE__ */ h2("div", { className: "sidebar-content-item" }, /* @__PURE__ */ h2(
+      Link,
+      {
+        onBeforeNavigate,
+        to: "/users",
+        store: pathStore,
+        className: "sidebar-link"
+      },
+      /* @__PURE__ */ h2(UsersIcon, null),
+      /* @__PURE__ */ h2("span", { className: "collapse-text" }, "People")
+    ))),
+    /* @__PURE__ */ h2("section", { className: "sidebar-footer" }, /* @__PURE__ */ h2("div", { className: "sidebar-footer-item" }, /* @__PURE__ */ h2(
+      Link,
+      {
+        onBeforeNavigate,
+        to: "/settings",
+        store: pathStore,
+        className: "sidebar-link"
+      },
+      /* @__PURE__ */ h2("span", { className: "collapse-text" }, "Settings")
+    )))
   ));
 };
 

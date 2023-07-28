@@ -10,6 +10,7 @@ import { NavigationListener } from "cinnabun/listeners"
 
 const onBeforeNavigate = () => {
   sidebarOpen.value = false
+
   return true
 }
 
