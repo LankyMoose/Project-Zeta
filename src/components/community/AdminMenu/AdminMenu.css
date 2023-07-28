@@ -1,0 +1,57 @@
+.admin-menu-wrapper {
+  position: absolute;
+  right: 0;
+}
+.admin-menu {
+  background-color: var(--content-area);
+}
+
+.admin-menu-button {
+  display:flex;
+  align-items:center;
+  gap:.25rem;
+}
+
+@media screen and (prefers-color-scheme:light) {
+  .admin-menu-button svg {
+    color: #222;
+  }
+}
+
+@media screen and (prefers-color-scheme:dark) {
+  .admin-menu-button.selected {
+    background-color: rgba(255, 255, 255, .075);
+  }
+  .admin-menu-button:hover {
+    background-color: rgba(255, 255, 255, .1);
+  }
+}
+
+.admin-menu ul {
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.admin-menu ul li {
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+}
+@media screen and (prefers-color-scheme:light) {
+  .admin-menu ul li {
+    border-bottom: 1px solid rgba(0, 0, 0, .025);
+  }
+}
+
+.admin-menu ul li:last-child {
+  border-bottom: none;
+}
+
+.admin-menu ul li a {
+  display: flex;
+  align-items:center;
+  gap:.5rem;
+  padding: 0.5rem 1rem;
+  color: var(--text-color);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-color);
+}

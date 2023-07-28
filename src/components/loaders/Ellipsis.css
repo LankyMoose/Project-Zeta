@@ -12,7 +12,7 @@
   width: calc(var(--size) *.1625);
   height: calc(var(--size) *.1625);
   border-radius: 50%;
-  background: #fff;
+  background: currentColor;
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
 

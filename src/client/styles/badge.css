@@ -4,6 +4,7 @@
   line-height: 1;
   padding: 0.25em 0.4em;
   border-radius: 0.25rem;
-  background-color: grey;
+  background-color: #4e4e4e;
   vertical-align: middle;
+  color: #fff;
 }

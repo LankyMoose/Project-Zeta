@@ -19,6 +19,7 @@
   --danger: #e34e4e;
   --success: #1e8e3e;
   --text-muted: #aaaaaa;
+  --text-color: var(--light);
   --content-area: #2e2e2e;
   --content-area-dark: #2a2a2a;
   --content-area-light: #333333;
@@ -43,6 +44,7 @@ button {
   :root {
     color: var(--dark);
     background-color: var(--light);
+    --text-color: var(--dark);
     --content-area: #f4f4f9;
     --content-area-dark: #f0f0f5;
     --content-area-light: #f8f8fa;

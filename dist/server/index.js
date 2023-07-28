@@ -86435,6 +86435,47 @@ var EditIcon = (props) => {
   );
 };
 
+// src/components/icons/MenuIcon.tsx
+var MenuIcon = () => {
+  return /* @__PURE__ */ h2(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "1rem",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      "stroke-width": "2",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round"
+    },
+    /* @__PURE__ */ h2("line", { x1: "4", x2: "20", y1: "12", y2: "12" }),
+    /* @__PURE__ */ h2("line", { x1: "4", x2: "20", y1: "6", y2: "6" }),
+    /* @__PURE__ */ h2("line", { x1: "4", x2: "20", y1: "18", y2: "18" })
+  );
+};
+
+// src/components/icons/MoreIcon.tsx
+var MoreIcon = () => {
+  return /* @__PURE__ */ h2(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "1rem",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      "stroke-width": "2",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      class: "lucide lucide-more-horizontal"
+    },
+    /* @__PURE__ */ h2("circle", { cx: "12", cy: "12", r: "1" }),
+    /* @__PURE__ */ h2("circle", { cx: "19", cy: "12", r: "1" }),
+    /* @__PURE__ */ h2("circle", { cx: "5", cy: "12", r: "1" })
+  );
+};
+
 // src/components/community/AddPostButton.tsx
 var AddPostButton = () => {
   const handleAddNewPost = () => {
@@ -86533,43 +86574,53 @@ var PendingJoinRequests = () => {
   return /* @__PURE__ */ h2("div", null, /* @__PURE__ */ h2(For, { each: pendingCommunityJoinRequests, template: JoinRequestCard }));
 };
 
-// src/components/community/PendingJoinRequestsButton.tsx
+// src/components/community/AdminMenu/AdminMenu.tsx
 var loadRequests = async () => {
   const res = !!selectedCommunity.value?.id ? await getCommunityJoinRequests(selectedCommunity.value.id) : [];
   pendingCommunityJoinRequests.value = res ?? [];
-  return res;
 };
-var handleClick = () => {
+var handlePendingRequestsClick = () => {
   communityDrawerState.value = {
     title: "Join Requests",
     componentFunc: PendingJoinRequests
   };
   communityDrawerOpen.value = true;
 };
-var PendingJoinRequestsButton = () => {
-  return /* @__PURE__ */ h2(Suspense, { promise: loadRequests }, (loading2) => {
-    if (loading2)
-      return /* @__PURE__ */ h2(Button, { disabled: true, className: "btn btn-primary hover-animate" }, "Join Requests", /* @__PURE__ */ h2(EllipsisLoader, null));
-    return /* @__PURE__ */ h2(
-      Button,
+var AdminMenu = () => {
+  const showMenu = createSignal(false);
+  const loadingRequests = createSignal(false);
+  const totalNotifications = () => pendingCommunityJoinRequests.value.length;
+  return /* @__PURE__ */ h2("div", { className: "ml-auto", onMounted: loadRequests }, /* @__PURE__ */ h2(
+    IconButton,
+    {
+      watch: [showMenu, pendingCommunityJoinRequests, loadingRequests],
+      "bind:className": () => `icon-button admin-menu-button ${showMenu.value ? "selected" : ""}`,
+      onclick: () => showMenu.value = !showMenu.value,
+      "bind:children": true
+    },
+    /* @__PURE__ */ h2(MoreIcon, null),
+    () => loadingRequests.value ? /* @__PURE__ */ h2(EllipsisLoader, { style: "color:var(--text-color); font-size: .75rem;" }) : totalNotifications() > 0 ? /* @__PURE__ */ h2("span", { className: "badge " }, totalNotifications()) : /* @__PURE__ */ h2(fragment, null)
+  ), /* @__PURE__ */ h2("div", { style: "position:relative" }, /* @__PURE__ */ h2("div", { className: "admin-menu-wrapper" }, /* @__PURE__ */ h2(
+    SlideInOut,
+    {
+      className: "admin-menu",
+      watch: showMenu,
+      settings: { from: "top" },
+      properties: [{ name: "opacity", from: 0, to: 1 }],
+      "bind:visible": () => showMenu.value
+    },
+    /* @__PURE__ */ h2("ul", null, /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2("a", { href: "javascript:void(0)" }, /* @__PURE__ */ h2("small", null, "Manage members"))), selectedCommunity.value?.private ? /* @__PURE__ */ h2("li", null, /* @__PURE__ */ h2(
+      "a",
       {
-        type: "button",
-        onclick: handleClick,
-        disabled: pendingCommunityJoinRequests.value.length === 0,
-        className: "btn btn-primary hover-animate"
+        href: "javascript:void(0)",
+        onclick: handlePendingRequestsClick,
+        watch: [pendingCommunityJoinRequests, loadingRequests],
+        "bind:children": true
       },
-      "Join Requests",
-      /* @__PURE__ */ h2(
-        "span",
-        {
-          watch: pendingCommunityJoinRequests,
-          "bind:children": true,
-          className: "badge bg-light text-dark ml-2"
-        },
-        () => pendingCommunityJoinRequests.value.length
-      )
-    );
-  });
+      /* @__PURE__ */ h2("small", null, "Join Requests"),
+      () => loadingRequests.value ? /* @__PURE__ */ h2(EllipsisLoader, { style: "color:var(--text-color); font-size: .75rem;" }) : /* @__PURE__ */ h2("span", { className: "badge " }, () => pendingCommunityJoinRequests.value.length)
+    )) : /* @__PURE__ */ h2(fragment, null))
+  ))));
 };
 
 // src/pages/Community/Page.tsx
@@ -86623,7 +86674,7 @@ function CommunityPage({ params }) {
   return /* @__PURE__ */ h2("div", null, /* @__PURE__ */ h2(Suspense, { promise: loadCommunity, cache: true }, (loading2, data) => {
     if (data && "message" in data)
       return data.message;
-    return /* @__PURE__ */ h2("div", { className: "page-wrapper" }, /* @__PURE__ */ h2("div", { className: "page-title" }, /* @__PURE__ */ h2("div", { className: "flex gap align-items-center" }, /* @__PURE__ */ h2("h1", { watch: selectedCommunity, "bind:children": true }, () => selectedCommunity.value?.title), isCommunityOwner() ? /* @__PURE__ */ h2(IconButton, { onclick: () => communityEditorModalOpen.value = true }, /* @__PURE__ */ h2(EditIcon, { color: "var(--primary)" })) : /* @__PURE__ */ h2(fragment, null), isCommunityAdmin() ? /* @__PURE__ */ h2("div", { className: "ml-auto" }, /* @__PURE__ */ h2(PendingJoinRequestsButton, null)) : /* @__PURE__ */ h2(fragment, null)), /* @__PURE__ */ h2("p", { watch: selectedCommunity, "bind:children": true, className: "page-description" }, () => selectedCommunity.value?.description ?? "")), loading2 ? /* @__PURE__ */ h2("div", { className: "page-body" }, /* @__PURE__ */ h2(DefaultLoader, null)) : canViewCommunityData(data) ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(CommunityFixedHeader, null), isCommunityOwner() ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "flex gap" }, /* @__PURE__ */ h2(
+    return /* @__PURE__ */ h2("div", { className: "page-wrapper" }, /* @__PURE__ */ h2("div", { className: "page-title" }, /* @__PURE__ */ h2("div", { className: "flex gap align-items-center" }, /* @__PURE__ */ h2("h1", { watch: selectedCommunity, "bind:children": true }, () => selectedCommunity.value?.title), isCommunityOwner() ? /* @__PURE__ */ h2(IconButton, { onclick: () => communityEditorModalOpen.value = true }, /* @__PURE__ */ h2(EditIcon, { color: "var(--primary)" })) : /* @__PURE__ */ h2(fragment, null), isCommunityAdmin() ? /* @__PURE__ */ h2(AdminMenu, null) : /* @__PURE__ */ h2(fragment, null)), /* @__PURE__ */ h2("p", { watch: selectedCommunity, "bind:children": true, className: "page-description" }, () => selectedCommunity.value?.description ?? "")), loading2 ? /* @__PURE__ */ h2("div", { className: "page-body" }, /* @__PURE__ */ h2(DefaultLoader, null)) : canViewCommunityData(data) ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2(CommunityFixedHeader, null), isCommunityOwner() ? /* @__PURE__ */ h2(fragment, null, /* @__PURE__ */ h2("div", { className: "flex gap" }, /* @__PURE__ */ h2(
       Button,
       {
         className: "btn btn-danger hover-animate btn-sm",
@@ -87414,26 +87465,6 @@ var GlobeIcon = () => {
     /* @__PURE__ */ h2("circle", { cx: "12", cy: "12", r: "10" }),
     /* @__PURE__ */ h2("line", { x1: "2", x2: "22", y1: "12", y2: "12" }),
     /* @__PURE__ */ h2("path", { d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" })
-  );
-};
-
-// src/components/icons/MenuIcon.tsx
-var MenuIcon = () => {
-  return /* @__PURE__ */ h2(
-    "svg",
-    {
-      xmlns: "http://www.w3.org/2000/svg",
-      width: "1rem",
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      "stroke-width": "2",
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round"
-    },
-    /* @__PURE__ */ h2("line", { x1: "4", x2: "20", y1: "12", y2: "12" }),
-    /* @__PURE__ */ h2("line", { x1: "4", x2: "20", y1: "6", y2: "6" }),
-    /* @__PURE__ */ h2("line", { x1: "4", x2: "20", y1: "18", y2: "18" })
   );
 };
 

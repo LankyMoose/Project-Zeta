@@ -25,7 +25,7 @@ import { AddPostButton } from "../../components/community/AddPostButton"
 import { addNotification } from "../../components/Notifications"
 import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../../components/Button"
-import { PendingJoinRequestsButton } from "../../components/community/PendingJoinRequestsButton"
+import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -100,13 +100,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   ) : (
                     <></>
                   )}
-                  {isCommunityAdmin() ? (
-                    <div className="ml-auto">
-                      <PendingJoinRequestsButton />
-                    </div>
-                  ) : (
-                    <></>
-                  )}
+                  {isCommunityAdmin() ? <AdminMenu /> : <></>}
                 </div>
                 <p watch={selectedCommunity} bind:children className="page-description">
                   {() => selectedCommunity.value?.description ?? ""}
