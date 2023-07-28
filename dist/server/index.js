@@ -86507,7 +86507,7 @@ var JoinRequestCard = (joinReq) => {
       communityDrawerOpen.value = false;
     }
   };
-  return /* @__PURE__ */ h2("div", { key: id, className: "card flex-row align-items-center" }, /* @__PURE__ */ h2("div", { className: "avatar-wrapper sm rounded-full border-none p-0 bg-primary-darkest" }, /* @__PURE__ */ h2("img", { className: "avatar", src: joinReq.user.avatarUrl, alt: "avatar" })), /* @__PURE__ */ h2("small", null, joinReq.user.name), /* @__PURE__ */ h2(
+  return /* @__PURE__ */ h2("div", { key: id, className: "card flex-row align-items-center" }, /* @__PURE__ */ h2("div", { className: "avatar-wrapper sm rounded-full border-none p-0 bg-primary-darkest" }, /* @__PURE__ */ h2("img", { className: "avatar", src: joinReq.user.avatarUrl, alt: "avatar" })), /* @__PURE__ */ h2("small", null, joinReq.user.name), /* @__PURE__ */ h2("div", { className: "flex flex-wrap gap align-items-center justify-content-end" }, /* @__PURE__ */ h2(
     "button",
     {
       type: "button",
@@ -86527,7 +86527,7 @@ var JoinRequestCard = (joinReq) => {
       onclick: () => respondToRequest(communityId, id, false)
     },
     "Reject"
-  ));
+  )));
 };
 var PendingJoinRequests = () => {
   return /* @__PURE__ */ h2("div", null, /* @__PURE__ */ h2(For, { each: pendingCommunityJoinRequests, template: JoinRequestCard }));
@@ -93400,7 +93400,10 @@ var communityService = {
   },
   async submitJoinRequest(communityId, userId) {
     try {
-      await db.insert(communityJoinRequests).values({ communityId, userId }).onConflictDoNothing().execute();
+      await db.insert(communityJoinRequests).values({ communityId, userId }).onConflictDoUpdate({
+        target: [communityJoinRequests.communityId, communityJoinRequests.userId],
+        set: { createdAt: sql`now_utc()`, response: null }
+      }).execute();
       return { type: 1 /* Pending */ };
     } catch (error) {
       console.error(error);

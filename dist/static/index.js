@@ -2629,7 +2629,7 @@ var JoinRequestCard = (joinReq) => {
       communityDrawerOpen.value = false;
     }
   };
-  return /* @__PURE__ */ h("div", { key: id, className: "card flex-row align-items-center" }, /* @__PURE__ */ h("div", { className: "avatar-wrapper sm rounded-full border-none p-0 bg-primary-darkest" }, /* @__PURE__ */ h("img", { className: "avatar", src: joinReq.user.avatarUrl, alt: "avatar" })), /* @__PURE__ */ h("small", null, joinReq.user.name), /* @__PURE__ */ h(
+  return /* @__PURE__ */ h("div", { key: id, className: "card flex-row align-items-center" }, /* @__PURE__ */ h("div", { className: "avatar-wrapper sm rounded-full border-none p-0 bg-primary-darkest" }, /* @__PURE__ */ h("img", { className: "avatar", src: joinReq.user.avatarUrl, alt: "avatar" })), /* @__PURE__ */ h("small", null, joinReq.user.name), /* @__PURE__ */ h("div", { className: "flex flex-wrap gap align-items-center justify-content-end" }, /* @__PURE__ */ h(
     "button",
     {
       type: "button",
@@ -2649,7 +2649,7 @@ var JoinRequestCard = (joinReq) => {
       onclick: () => respondToRequest(communityId, id, false)
     },
     "Reject"
-  ));
+  )));
 };
 var PendingJoinRequests = () => {
   return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(For, { each: pendingCommunityJoinRequests, template: JoinRequestCard }));

@@ -44,24 +44,26 @@ const JoinRequestCard = (joinReq: CommunityJoinRequestData) => {
         <img className="avatar" src={joinReq.user.avatarUrl} alt="avatar" />
       </div>
       <small>{joinReq.user.name}</small>
-      <button
-        type="button"
-        className="btn btn-primary"
-        watch={loading}
-        bind:disabled={() => loading.value}
-        onclick={() => respondToRequest(communityId, id, true)}
-      >
-        Accept
-      </button>
-      <button
-        type="button"
-        className="btn btn-danger"
-        watch={loading}
-        bind:disabled={() => loading.value}
-        onclick={() => respondToRequest(communityId, id, false)}
-      >
-        Reject
-      </button>
+      <div className="flex flex-wrap gap align-items-center justify-content-end">
+        <button
+          type="button"
+          className="btn btn-primary"
+          watch={loading}
+          bind:disabled={() => loading.value}
+          onclick={() => respondToRequest(communityId, id, true)}
+        >
+          Accept
+        </button>
+        <button
+          type="button"
+          className="btn btn-danger"
+          watch={loading}
+          bind:disabled={() => loading.value}
+          onclick={() => respondToRequest(communityId, id, false)}
+        >
+          Reject
+        </button>
+      </div>
     </div>
   )
 }

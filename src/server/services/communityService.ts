@@ -342,7 +342,10 @@ export const communityService = {
       await db
         .insert(communityJoinRequests)
         .values({ communityId, userId })
-        .onConflictDoNothing()
+        .onConflictDoUpdate({
+          target: [communityJoinRequests.communityId, communityJoinRequests.userId],
+          set: { createdAt: sql`now_utc()`, response: null },
+        })
         .execute()
 
       return { type: JoinResultType.Pending }
