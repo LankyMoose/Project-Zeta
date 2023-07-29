@@ -83,7 +83,7 @@
 }
 .btn:disabled * {
   opacity: 1;
-  color: var(--light)
+  
 }
 @media (prefers-color-scheme: light) {
   .btn.btn.btn-secondary:disabled * {

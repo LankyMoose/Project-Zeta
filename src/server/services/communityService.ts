@@ -211,7 +211,6 @@ export const communityService = {
 
   async getCommunityPosts(communityId: string, userId?: string, _page = 0) {
     const numPosts = 10
-    const numPostComments = 5
     try {
       const query = sql`
         with top_posts as (
@@ -260,26 +259,6 @@ export const communityService = {
             from ${postReactions}
             inner join top_posts on ${postReactions.postId} = top_posts.post_id
             where ${postReactions.ownerId} = ${userId}
-          ), post_comments as (
-            select
-              ${postComments.id} as comment_id,
-              ${postComments.content} as comment_content,
-              ${postComments.createdAt} as comment_created_at,
-              ${postComments.ownerId} as _comment_owner_id,
-              ${postComments.postId} as comment_post_id,
-              ROW_NUMBER() OVER (PARTITION BY ${postComments.postId} ORDER BY ${
-        postComments.createdAt
-      } DESC) as comment_post_index
-            from ${postComments}
-            inner join top_posts on ${postComments.postId} = top_posts.post_id
-            order by ${postComments.createdAt} desc
-          ), comment_owners as (
-            select
-              ${users.id} as comment_owner_id,
-              ${users.name} as comment_owner_name,
-              ${users.avatarUrl} as comment_owner_avatar_url
-            from ${users}
-            inner join post_comments on ${users.id} = post_comments._comment_owner_id
           ), total_comments as (
             select 
               count(${postComments.id}) as total_comments,
@@ -295,18 +274,13 @@ export const communityService = {
             post_reactions_positive.positive_reactions,
             post_reactions_negative.negative_reactions,
             user_reaction.reaction as user_reaction,
-            post_comments.*,
-            comment_owners.*,
             total_comments.total_comments
           from top_posts
           left join post_owners on top_posts.post_owner_id = post_owners.user_id
           left join post_reactions_positive on top_posts.post_id = post_reactions_positive.post_id
           left join post_reactions_negative on top_posts.post_id = post_reactions_negative.post_id
           left join user_reaction on top_posts.post_id = user_reaction.post_id
-          left join post_comments on top_posts.post_id = post_comments.comment_post_id
-          left join comment_owners on post_comments._comment_owner_id = comment_owners.comment_owner_id
           left join total_comments on top_posts.post_id = total_comments.post_id
-          where post_comments.comment_post_index < ${numPostComments + 1}
           order by top_posts.post_created_at desc
       `
       const data = (await db.execute(query)) as {
@@ -324,13 +298,6 @@ export const communityService = {
         positive_reactions: number
         negative_reactions: number
         user_reaction: boolean | null
-        comment_id: string
-        comment_content: string
-        comment_created_at: string
-        comment_owner_id: string
-        comment_post_id: string
-        comment_owner_name: string
-        comment_owner_avatar_url: string
         total_comments: number
       }[]
 
@@ -356,41 +323,12 @@ export const communityService = {
               positive: item.positive_reactions,
               negative: item.negative_reactions,
             },
-            comments: item.comment_id
-              ? [
-                  {
-                    id: item.comment_id,
-                    content: item.comment_content,
-                    createdAt: new Date(item.comment_created_at),
-                    user: {
-                      id: item.comment_owner_id,
-                      name: item.comment_owner_name,
-                      avatarUrl: item.comment_owner_avatar_url,
-                    },
-                  },
-                ]
-              : [],
             userReaction: item.user_reaction,
-            totalComments: item.total_comments.toString(),
+            totalComments: item.total_comments?.toString(),
           } as CommunityPostData
           acc.push(post)
           return acc
         }
-
-        if (item.comment_id && !post.comments.find((c) => c.id === item.comment_id)) {
-          const commentOwner = data.find((u) => u.comment_owner_id === item.comment_owner_id)
-          post.comments.push({
-            id: item.comment_id,
-            content: item.comment_content,
-            createdAt: new Date(item.comment_created_at),
-            user: {
-              id: commentOwner?.comment_owner_id ?? "",
-              name: commentOwner?.comment_owner_name ?? "",
-              avatarUrl: commentOwner?.comment_owner_avatar_url ?? "",
-            },
-          })
-        }
-
         return acc
       }, [] as CommunityPostData[])
     } catch (error) {

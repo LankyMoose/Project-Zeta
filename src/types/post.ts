@@ -21,7 +21,6 @@ export type CommunityPostData = Post & {
     name: string
     avatarUrl: string
   }
-  comments: CommunityPostComment[]
   reactions: {
     positive: number
     negative: number

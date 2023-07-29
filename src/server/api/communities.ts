@@ -72,7 +72,6 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       if (!communityId || !postId) throw new InvalidRequestError()
       if (isNaN(offset)) throw new InvalidRequestError()
 
-      console.log("getting post comments", communityId, postId, offset)
       const [community, post] = await Promise.all([
         communityService.getCommunity(communityId, true),
         postService.getPost(postId),
