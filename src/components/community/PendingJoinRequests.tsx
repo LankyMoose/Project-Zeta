@@ -1,6 +1,10 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal } from "cinnabun"
-import { communityDrawerOpen, pendingCommunityJoinRequests } from "../../state/community"
+import {
+  communityDrawerOpen,
+  pendingCommunityJoinRequests,
+  selectedCommunity,
+} from "../../state/community"
 import { CommunityJoinRequestData } from "../../types/community"
 import { respondToCommunityJoinRequest } from "../../client/actions/communities"
 import { addNotification } from "../Notifications"
@@ -17,6 +21,19 @@ const JoinRequestCard = (joinReq: CommunityJoinRequestData) => {
       loading.value = false
       return
     }
+    if (!selectedCommunity.value) {
+      addNotification({
+        text: "Something went wrong. Please try again later.",
+        type: "error",
+      })
+      return
+    }
+    if (!selectedCommunity.value.members) {
+      selectedCommunity.value.members = []
+    }
+    selectedCommunity.value?.members.push(res)
+    selectedCommunity.notify()
+
     const idx = pendingCommunityJoinRequests.value.findIndex((j) => j.id === joinRequestId)
     pendingCommunityJoinRequests.value.splice(idx, 1)
     pendingCommunityJoinRequests.notify()

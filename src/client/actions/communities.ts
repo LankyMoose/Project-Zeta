@@ -1,6 +1,6 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
-import { Community, CommunityMember, NewCommunity } from "../../db/schema"
+import { Community, NewCommunity } from "../../db/schema"
 import {
   CommunityData,
   CommunityJoinRequestData,
@@ -87,7 +87,7 @@ export const respondToCommunityJoinRequest = async (
   communityId: string,
   requestId: string,
   accepted: boolean
-): Promise<CommunityMember | void> => {
+): Promise<CommunityMemberData | void> => {
   try {
     const response = await fetch(`${API_URL}/communities/${communityId}/join-requests`, {
       method: "POST",

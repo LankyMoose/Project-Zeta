@@ -2,6 +2,7 @@ import { and, desc, eq, gte, isNull, sql } from "drizzle-orm"
 import { db } from "../../db"
 
 import {
+  CommunityJoinRequest,
   CommunityMember,
   NewCommunity,
   communities,
@@ -381,7 +382,7 @@ export const communityService = {
   async respondToJoinRequest(
     requestId: string,
     response: boolean
-  ): Promise<CommunityMember | ApiError | undefined> {
+  ): Promise<CommunityJoinRequest | ApiError | void> {
     try {
       const res = await db
         .update(communityJoinRequests)
@@ -394,21 +395,17 @@ export const communityService = {
       if (!response) return
 
       const { communityId, userId } = res[0]
-
-      return (
-        await db
-          .insert(communityMembers)
-          .values({
-            communityId,
-            userId,
-            memberType: "member",
-          })
-          .returning()
-          .execute()
-      ).at(0) as CommunityMember
+      await db
+        .insert(communityMembers)
+        .values({
+          communityId,
+          userId,
+          memberType: "member",
+        })
+        .execute()
+      return res[0]
     } catch (error) {
       console.error(error)
-      return
     }
   },
 

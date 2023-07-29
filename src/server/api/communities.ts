@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify"
 import { communityService } from "../services/communityService"
-import { CommunityMember, NewCommunity } from "../../db/schema"
+import { NewCommunity } from "../../db/schema"
 import { communityValidation } from "../../db/validation"
 import {
   ApiError,
@@ -79,7 +79,8 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       const res = await communityService.respondToJoinRequest(req.body.requestId, req.body.accepted)
       if (!res) throw new ServerError()
       if (res instanceof ApiError) throw res
-      return res as CommunityMember
+
+      return await communityService.getCommunityMemberData(req.params.id, res.userId)
     }
   )
 
