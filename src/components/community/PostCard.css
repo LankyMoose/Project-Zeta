@@ -23,7 +23,7 @@
 }
 
 .post-card .comments-list {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   background: rgba(0, 0, 0, .06);
 }
 @media (prefers-color-scheme: light) {
@@ -35,6 +35,17 @@
   }
 }
 
+.post-card .comment-item {
+  border-bottom: 1px solid rgba(0, 0, 0, .15);
+  padding: 0.5rem;
+}
+@media (prefers-color-scheme: light) {
+  .post-card .comment-item {
+    border-bottom: 1px solid rgba(0, 0, 0, .05);
+  }
+}
+
+
 .post-card .comment-item .comment {
   color: #ddd;
 }
@@ -43,16 +54,9 @@
     color: #333;
   }
 }
-.post-card .comment-item {
-  border-bottom: 1px solid rgba(0, 0, 0, .15);
-  padding: 0.5rem 0;
-}
 
-@media (prefers-color-scheme: light) {
-  .post-card .comment-item {
-    border-bottom: 1px solid rgba(0, 0, 0, .05);
-  }
-}
+
+
 
 .post-card .comment-item:last-child {
   margin-bottom: 0;
