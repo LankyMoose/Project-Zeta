@@ -84,7 +84,7 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
   }
 
   return (
-    <div className="card">
+    <div key={member.id} className="card">
       <div className="card-title flex gap justify-content-between">
         <span>{member.user.name}</span>
         <div className="flex flex-wrap flex-column gap-sm">
