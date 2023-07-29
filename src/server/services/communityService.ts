@@ -167,6 +167,22 @@ export const communityService = {
             eq(community.disabled, false),
             eq(community.deleted, false)
           ),
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getCommunityWithPostsAndMembers(titleOrId: string, useId: boolean = false) {
+    try {
+      return await db.query.communities.findFirst({
+        where: (community, { eq, and }) =>
+          and(
+            eq(useId ? community.id : community.url_title, titleOrId),
+            eq(community.disabled, false),
+            eq(community.deleted, false)
+          ),
         with: {
           posts: {
             limit: 10,
@@ -181,7 +197,8 @@ export const communityService = {
                 },
               },
               comments: {
-                orderBy: (comments, { asc }) => asc(comments.createdAt),
+                orderBy: (comments, { desc }) => desc(comments.createdAt),
+                limit: 3,
                 columns: {
                   id: true,
                   content: true,
