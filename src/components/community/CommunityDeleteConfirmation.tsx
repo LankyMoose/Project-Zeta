@@ -57,7 +57,9 @@ export const CommunityDeleteConfirmation = () => {
         {() =>
           communityHasMembers() ? (
             <>
-              <i>This community has members. Consider transferring ownership instead!</i>
+              <i className="text-muted">
+                This community has members. Consider transferring ownership instead!
+              </i>
             </>
           ) : (
             <></>
