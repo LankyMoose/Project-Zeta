@@ -5,7 +5,7 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/signal.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/signal.ts
 var LOG_NUM_SUBS = false;
 var Signal = class {
   _val;
@@ -57,7 +57,7 @@ function createSignal(initialValue) {
   return new Signal(initialValue);
 }
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/utils.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/utils.ts
 var jsPropToHtmlProp = (prop) => {
   switch (prop) {
     case "className":
@@ -105,7 +105,7 @@ var generateUUID = () => {
   });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/domInterop.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/domInterop.ts
 var DomInterop = class {
   static updateElement(component) {
     if (!component.element)
@@ -476,7 +476,7 @@ var DomInterop = class {
   }
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/component.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/component.ts
 var Component = class {
   constructor(tag, props = {}) {
     this.tag = tag;
@@ -795,7 +795,7 @@ var Suspense = ({ promise, cache, ...rest }, children) => {
   return new SuspenseComponent("", { promise, cache, children, ...rest });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/portal.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/portal.ts
 var portalRoots = {};
 var createPortal = (children, rootId) => {
   if (!Cinnabun.isClient)
@@ -819,12 +819,12 @@ var createPortal = (children, rootId) => {
   return res;
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/ref.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/ref.ts
 var useRef = () => {
   return createSignal(null);
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/index.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/index.ts
 var h = (tag, props, ...children) => {
   if (typeof tag === "function") {
     return tag({ ...props, children }, children);
@@ -837,7 +837,7 @@ function fragment(_, children) {
   return new FragmentComponent(children);
 }
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/cinnabun.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/cinnabun.ts
 var _Cinnabun = class {
   //ssr instance
   serverComponentReferences = [];
@@ -922,7 +922,7 @@ __publicField(Cinnabun, "addComponentReference", (ref) => {
     _Cinnabun.logComponentRefCount(ref.component);
 });
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/ssr.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/ssr.ts
 var _SSR = class {
   static async serverBake(app, config) {
     let startTime = 0;
@@ -1130,7 +1130,7 @@ __publicField(SSR, "deferredLoaderPrefix", "cb-deferred-loader");
 __publicField(SSR, "deferralEvtName", "deferral-complete");
 __publicField(SSR, "deferralScriptIdPrefix", "deferral-");
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/hydration.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/hydration.ts
 var Hydration = class {
   static validate(component) {
     if (component.tag && component.shouldRender()) {
@@ -1353,7 +1353,7 @@ var Document = (App2) => {
   return /* @__PURE__ */ h(fragment, null, /* @__PURE__ */ h("head", null, /* @__PURE__ */ h("meta", { charset: "utf-8" }), /* @__PURE__ */ h("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }), /* @__PURE__ */ h("title", null, "SSR App"), /* @__PURE__ */ h("link", { rel: "stylesheet", href: "/static/index.css" })), /* @__PURE__ */ h("body", null, /* @__PURE__ */ h("div", { id: "app" }, /* @__PURE__ */ h(App2, null)), /* @__PURE__ */ h("div", { id: "portal-root" })));
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/router/router.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/router/router.ts
 var RouteComponent = class extends Component {
   constructor(path, component) {
     super("", {
@@ -1429,7 +1429,7 @@ var Router = ({ store }, children) => {
   return new RouterComponent(store, children);
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/router/link.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/router/link.ts
 var setHash = (store, newHash) => {
   if (store.value === newHash)
     return;
@@ -1478,7 +1478,7 @@ var Link = (props, children) => {
   });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/router/index.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/router/index.ts
 function matchPath(path, location2) {
   let paramNames = [];
   let query = {};
@@ -2672,7 +2672,7 @@ var CommunityFixedHeader = () => {
   ));
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/listeners/KeyboardListener.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/listeners/KeyboardListener.ts
 var KeyboardListener = (props, children) => {
   const { keys, requireAll, onCapture } = props;
   let currentKeys = [];
@@ -2746,7 +2746,7 @@ var KeyboardListener = (props, children) => {
   });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/listeners/NavigationListener.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/listeners/NavigationListener.ts
 var NavigationListener = (props) => {
   return new Component("", {
     onMounted() {
@@ -2762,7 +2762,7 @@ var NavigationListener = (props) => {
   });
 };
 
-// node_modules/.pnpm/cinnabun@0.1.51/node_modules/cinnabun/src/listeners/ClickOutsideListener.ts
+// node_modules/.pnpm/cinnabun@0.1.52/node_modules/cinnabun/src/listeners/ClickOutsideListener.ts
 var ClickOutsideListener = ({
   tag,
   onCapture,
@@ -2777,7 +2777,6 @@ var ClickOutsideListener = ({
       return;
     if (ref.value.contains(tgt))
       return;
-    console.log("click outside", tgt, ref.value);
     onCapture();
   };
   return new Component(tag, {
