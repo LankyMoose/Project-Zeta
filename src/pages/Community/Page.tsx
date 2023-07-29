@@ -2,7 +2,6 @@ import * as Cinnabun from "cinnabun"
 import "./Page.css"
 import { getCommunity, getCommunityPosts } from "../../client/actions/communities"
 import { DefaultLoader } from "../../components/loaders/Default"
-import { setPath } from "cinnabun/router"
 import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
 import {
   communityDeleteModalOpen,
@@ -13,6 +12,7 @@ import {
   isCommunityMember,
   isCommunityOwner,
   selectedCommunity,
+  selectedCommunityPost,
 } from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
@@ -27,9 +27,20 @@ import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../../components/Button"
 import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
 import { CommunityPostData } from "../../types/post"
+import { setPath } from "cinnabun/router"
+import { PostModal } from "../../components/community/PostModal"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
+  const handleMount = () => {
+    if (Cinnabun.Cinnabun.isClient) {
+      const hash = window.location.hash
+      if (hash) {
+        const id = hash.substring(1)
+        selectedCommunityPost.value = id
+      }
+    }
+  }
 
   const showLoginPrompt = () => {
     authModalState.value = {
@@ -94,7 +105,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
   }
 
   return (
-    <div>
+    <div onMounted={handleMount}>
       <Cinnabun.Suspense promise={loadCommunity} cache>
         {(loading: boolean, data: Partial<CommunityData> | { message: string }) => {
           if (data && "message" in data) return data.message
@@ -248,6 +259,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
           )
         }}
       </Cinnabun.Suspense>
+      <PostModal />
     </div>
   )
 }

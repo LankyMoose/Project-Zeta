@@ -1,14 +1,18 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
-import { setPath } from "cinnabun/router"
 import { truncateText } from "../../utils"
 import { CommunityPostData } from "../../types/post"
 import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../client/actions/posts"
-import { isCommunityMember, communityJoinModalOpen, selectedCommunity } from "../../state/community"
-import { userStore, authModalState, authModalOpen, pathStore } from "../../state/global"
+import {
+  isCommunityMember,
+  communityJoinModalOpen,
+  selectedCommunityPost,
+  selectedCommunity,
+} from "../../state/community"
+import { userStore, authModalState, authModalOpen } from "../../state/global"
 
 import { AuthorTag } from "../AuthorTag"
 import "./PostCard.css"
@@ -54,17 +58,20 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
     reacting.value = false
   }
 
+  const viewPost = () => {
+    selectedCommunityPost.value = post.id
+    window.history.pushState(
+      null,
+      "",
+      `/communities/${selectedCommunity.value?.url_title}#${post.id}`
+    )
+  }
+
   return (
     <div className="card post-card flex flex-column" key={post.id}>
       <div className="flex justify-content-between gap align-items-start">
         <h4 className="m-0 title">
-          <a
-            href={`/communities/${selectedCommunity.value?.url_title}/${post.id}`}
-            onclick={(e: Event) => {
-              e.preventDefault()
-              setPath(pathStore, `/communities/${selectedCommunity.value?.url_title}/${post.id}`)
-            }}
-          >
+          <a href="javascript:void(0)" onclick={viewPost}>
             {post.title}
           </a>
         </h4>
@@ -72,7 +79,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       </div>
       <p className="post-card-content">{truncateText(post.content, 256)}</p>
       <div className="flex justify-content-between">
-        <button type="button" className="btn text-sm p-0">
+        <button type="button" className="btn text-sm p-0" onclick={viewPost}>
           <span className="text-muted flex gap-sm align-items-center justify-content-center">
             <CommentIcon />
             {post.totalComments ?? 0}
