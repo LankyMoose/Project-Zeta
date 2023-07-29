@@ -9,7 +9,7 @@ import {
   userStore,
 } from "../state/global"
 import { UserIcon } from "./icons/UserIcon"
-import { UserDropdown } from "./UserDropdown"
+import { ClickOutsideListener } from "cinnabun/listeners"
 
 export const UserAvatar = () => {
   const handleLoginClick = () => {
@@ -30,7 +30,11 @@ export const UserAvatar = () => {
     authModalOpen.value = true
   }
   return (
-    <div className="user-area flex">
+    <ClickOutsideListener
+      tag="div"
+      className="user-area"
+      onCapture={() => (userDropdownOpen.value = false)}
+    >
       <button
         type="button"
         className="avatar-wrapper sm rounded-full border-none p-0 bg-primary-darkest"
@@ -45,7 +49,6 @@ export const UserAvatar = () => {
           alt="avatar"
         />
       </button>
-      <UserDropdown />
-    </div>
+    </ClickOutsideListener>
   )
 }

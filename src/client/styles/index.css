@@ -19,6 +19,7 @@
   --danger: #e34e4e;
   --success: #1e8e3e;
   --text-muted: #aaaaaa;
+  --text-muted-light: #cccccc;
   --text-color: var(--light);
   --content-area: #2e2e2e;
   --content-area-dark: #2a2a2a;
@@ -50,6 +51,7 @@ button {
     --content-area-light: #f8f8fa;
     --border: rgba(0, 0, 0, .05);
     --text-muted: #666666;
+    --text-muted-light: #999999;
   }
 }
 

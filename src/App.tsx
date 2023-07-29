@@ -21,6 +21,7 @@ import { MenuButton } from "./components/MenuButton"
 import { CommunityDrawer } from "./components/community/CommunityDrawer"
 import { CommunityLeaveConfirmation } from "./components/community/CommunityLeaveConfirmation"
 import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation"
+import { UserDropdown } from "./components/UserDropdown"
 
 const Header = () => (
   <header>
@@ -53,6 +54,7 @@ export const App = () => {
   return (
     <>
       <Header />
+      <UserDropdown />
       <div className="app-main">
         <Sidebar />
         <main className="container">
