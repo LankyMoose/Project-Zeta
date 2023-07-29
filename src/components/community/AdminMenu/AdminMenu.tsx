@@ -63,16 +63,12 @@ export const AdminMenu = () => {
           }}
         >
           <MoreIcon />
-          <span watch={[pendingCommunityJoinRequests, loadingRequests]} bind:children>
-            {() =>
-              loadingRequests.value ? (
-                <EllipsisLoader style="color:var(--text-color); font-size: .75rem;" />
-              ) : totalNotifications() > 0 ? (
-                <span className="badge ">{totalNotifications()}</span>
-              ) : (
-                <></>
-              )
-            }
+          <span
+            watch={[pendingCommunityJoinRequests, loadingRequests]}
+            bind:visible={() => totalNotifications() > 0}
+            className="badge "
+          >
+            {totalNotifications()}
           </span>
         </IconButton>
         <div style="position:relative">
