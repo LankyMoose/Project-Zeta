@@ -35,6 +35,13 @@ export const PostCardComments = ({ post }: { post: Cinnabun.Signal<CommunityPost
   return (
     <div className="post-card-comments flex flex-column gap">
       <div className="comments-list">
+        <small className="view-previous-comments">
+          <i>
+            <a href="javascript:void(0)" className="block p-3 py-2 mb-3 text-center">
+              View previous comments
+            </a>
+          </i>
+        </small>
         <p
           className="text-muted m-0"
           watch={comments}

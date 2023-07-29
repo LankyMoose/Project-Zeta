@@ -10,7 +10,7 @@ import { Link } from "cinnabun/router"
 const PostCard = ({ post, community, user }: LatestPostsData) => {
   return (
     <div className="card" key={post.id}>
-      <div className="card-title flex justify-content-between">
+      <div className="card-title gap-lg flex justify-content-between">
         {post.title}
         <Link
           onBeforeNavigate={() => {

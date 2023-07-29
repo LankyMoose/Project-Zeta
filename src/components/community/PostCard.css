@@ -15,11 +15,21 @@
   }
 }
 
+.post-card .view-previous-comments {
+  background: rgba(0, 0, 0, .075);
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted)
+}
+
 .post-card .comments-list {
   padding: 0.5rem 1rem;
   background: rgba(0, 0, 0, .06);
 }
 @media (prefers-color-scheme: light) {
+  .post-card .view-previous-comments {
+    background: rgba(0, 0, 0, .025);
+  }
   .post-card .comments-list {
     background: rgba(0, 0, 0, .025);
   }

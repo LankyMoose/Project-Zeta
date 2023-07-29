@@ -22,7 +22,7 @@ const AuthModalProviderList = () => {
   }
 
   return (
-    <div className="flex gap flex-column text-center">
+    <div className="flex gap flex-column">
       {options.map((option) => (
         <a
           href={`/login/${option.title.toLowerCase()}`}
