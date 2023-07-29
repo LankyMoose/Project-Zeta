@@ -16,6 +16,13 @@ import "./PostCard.css"
 import { AuthModalCallback } from "../../types/auth"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
+  post.comments.sort((a, b) => {
+    const aDate = new Date(a.createdAt)
+    const bDate = new Date(b.createdAt)
+    if (aDate > bDate) return 1
+    if (aDate < bDate) return -1
+    return 0
+  })
   const state = createSignal(post)
   const reacting = createSignal(false)
   const userReaction = computed(state, () => {
