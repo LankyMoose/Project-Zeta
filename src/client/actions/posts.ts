@@ -1,6 +1,6 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
-import { NewPost } from "../../db/schema"
+import { NewPost, PostReaction } from "../../db/schema"
 
 export const getPost = async (postId: string) => {
   try {
@@ -38,7 +38,10 @@ export const addPostComment = async (postId: string, comment: string) => {
   }
 }
 
-export const addPostReaction = async (postId: string, reaction: boolean) => {
+export const addPostReaction = async (
+  postId: string,
+  reaction: boolean
+): Promise<PostReaction | void> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}/reactions`, {
       method: "POST",

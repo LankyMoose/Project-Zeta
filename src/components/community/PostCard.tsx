@@ -1,5 +1,5 @@
 import * as Cinnabun from "cinnabun"
-import { createSignal, computed } from "cinnabun"
+import { createSignal } from "cinnabun"
 import { setPath } from "cinnabun/router"
 import { truncateText } from "../../utils"
 import { CommunityPostData } from "../../types/post"
@@ -25,10 +25,6 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
   })
   const state = createSignal(post)
   const reacting = createSignal(false)
-  const userReaction = computed(state, () => {
-    if (!userStore.value) return undefined
-    return state.value.reactions.find((r) => r.ownerId === userStore.value?.userId)
-  })
 
   const addReaction = async (reaction: boolean) => {
     if (reacting.value) return
@@ -41,7 +37,6 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       authModalOpen.value = true
       return
     }
-    if (userReaction.value?.reaction === reaction) return
     if (!isCommunityMember()) {
       communityJoinModalOpen.value = true
       return
@@ -50,31 +45,21 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
     reacting.value = true
     const res = await addPostReaction(post.id, reaction)
     if (res) {
-      // find and remove previous reaction
-      const prevReaction = state.value.reactions.find((r) => r.ownerId === userStore?.value?.userId)
-      if (prevReaction) {
-        state.value.reactions.splice(state.value.reactions.indexOf(prevReaction), 1)
+      if (state.value.userReaction === true) {
+        state.value.reactions.positive--
+      } else if (state.value.userReaction === false) {
+        state.value.reactions.negative--
       }
-
-      state.value.reactions.push(res)
+      if (reaction === true) {
+        state.value.reactions.positive++
+      } else {
+        state.value.reactions.negative++
+      }
+      state.value.userReaction = reaction
       state.notify()
     }
     reacting.value = false
   }
-
-  const totalReactions = computed(state, () => {
-    return state.value.reactions.reduce(
-      (acc, reaction) => {
-        if (reaction.reaction) {
-          acc.positive++
-        } else {
-          acc.negative++
-        }
-        return acc
-      },
-      { positive: 0, negative: 0 }
-    )
-  })
 
   return (
     <div className="card post-card flex flex-column" key={post.id}>
@@ -98,10 +83,10 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
           onclick={() => addReaction(true)}
           bind:className={() =>
             `icon-button flex align-items-center gap-sm ${
-              userReaction.value?.reaction === true ? "selected" : ""
+              state.value?.userReaction === true ? "selected" : ""
             }`
           }
-          watch={[userStore, reacting, userReaction]}
+          watch={[userStore, reacting, state]}
           bind:disabled={() => reacting.value}
         >
           <ThumbsUpIcon
@@ -109,18 +94,18 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
             color:hover="var(--primary-light)"
             className="text-rg"
           />
-          <small className="text-muted" watch={totalReactions} bind:children>
-            {() => totalReactions.value.positive}
+          <small className="text-muted" watch={state} bind:children>
+            {() => state.value.reactions.positive ?? 0}
           </small>
         </IconButton>
         <IconButton
           onclick={() => addReaction(false)}
           bind:className={() =>
             `icon-button flex align-items-center gap-sm ${
-              userReaction.value?.reaction === false ? "selected" : ""
+              state.value?.userReaction === false ? "selected" : ""
             }`
           }
-          watch={[userStore, reacting, userReaction]}
+          watch={[userStore, reacting, state]}
           bind:disabled={() => reacting.value}
         >
           <ThumbsDownIcon
@@ -128,8 +113,8 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
             color:hover="var(--primary-light)"
             className="text-rg"
           />
-          <small className="text-muted" watch={totalReactions} bind:children>
-            {() => totalReactions.value.negative}
+          <small className="text-muted" watch={state} bind:children>
+            {() => state.value.reactions.negative ?? 0}
           </small>
         </IconButton>
       </div>

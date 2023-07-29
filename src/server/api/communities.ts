@@ -34,7 +34,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
-    const res = await communityService.getCommunityWithPostsAndMembers(req.params.id)
+    const res = await communityService.getCommunityWithMembers(req.params.id)
     if (!res) throw new NotFoundError()
     let member
     if (req.cookies.user_id) {
@@ -51,6 +51,16 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       }
 
     return { ...res, memberType: member.memberType }
+  })
+
+  app.get<{ Params: { id?: string } }>("/api/communities/:id/posts", async (req) => {
+    if (!req.params.id) throw new InvalidRequestError()
+    const community = await communityService.getCommunity(req.params.id)
+    if (!community) throw new NotFoundError()
+
+    const res = await communityService.getCommunityPosts(community.id, req.cookies.user_id)
+    if (!res) throw new ServerError()
+    return res
   })
 
   app.get<{ Params: { id?: string } }>("/api/communities/:id/join-requests", async (req) => {

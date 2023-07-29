@@ -8,6 +8,8 @@ import {
   communities,
   communityJoinRequests,
   communityMembers,
+  postComments,
+  postReactions,
   posts,
   users,
 } from "../../db/schema"
@@ -29,7 +31,7 @@ import {
   LeaveResult,
   LeaveResultType,
 } from "../../types/community"
-import { LatestPostsData } from "../../types/post"
+import { CommunityPostData, LatestPostsData } from "../../types/post"
 
 const latestPostColumns = sql`
 ${posts.id} as post_id,
@@ -174,7 +176,7 @@ export const communityService = {
     }
   },
 
-  async getCommunityWithPostsAndMembers(titleOrId: string, useId: boolean = false) {
+  async getCommunityWithMembers(titleOrId: string, useId: boolean = false) {
     try {
       return await db.query.communities.findFirst({
         where: (community, { eq, and }) =>
@@ -184,44 +186,6 @@ export const communityService = {
             eq(community.deleted, false)
           ),
         with: {
-          posts: {
-            limit: 10,
-            orderBy: (posts, { desc }) => desc(posts.createdAt),
-            where: (post, { eq }) => eq(post.disabled, false),
-            with: {
-              user: {
-                columns: {
-                  id: true,
-                  name: true,
-                  avatarUrl: true,
-                },
-              },
-              comments: {
-                orderBy: (comments, { desc }) => desc(comments.createdAt),
-                limit: 3,
-                columns: {
-                  id: true,
-                  content: true,
-                  createdAt: true,
-                },
-                with: {
-                  user: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      avatarUrl: true,
-                    },
-                  },
-                },
-              },
-              reactions: {
-                columns: {
-                  reaction: true,
-                  ownerId: true,
-                },
-              },
-            },
-          },
           owners: {
             limit: 1,
             where: (members, { eq }) => eq(members.memberType, "owner"),
@@ -239,6 +203,196 @@ export const communityService = {
           },
         },
       })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getCommunityPosts(communityId: string, userId?: string, _page = 0) {
+    const numPosts = 10
+    const numPostComments = 5
+    try {
+      const query = sql`
+        with top_posts as (
+          select
+            ${posts.id} as post_id,
+            ${posts.title} as post_title,
+            ${posts.content} as post_content,
+            ${posts.createdAt} as post_created_at,
+            ${posts.ownerId} as post_owner_id,
+            ${posts.communityId} as post_community_id,
+            ${posts.deleted} as post_deleted,
+            ${posts.disabled} as post_disabled
+            from ${posts} 
+            where ${posts.communityId} = ${communityId}
+            and ${posts.disabled} = false
+            and ${posts.deleted} = false
+            order by ${posts.createdAt} desc
+            limit ${numPosts} offset ${_page * numPosts}
+          ), post_owners as (
+            select
+              ${users.id} as user_id,
+              ${users.name} as user_name,
+              ${users.avatarUrl} as user_avatar_url
+            from ${users}
+            inner join top_posts on ${users.id} = top_posts.post_owner_id
+          ), post_reactions_positive as (
+            select
+              count(${postReactions.postId}) as positive_reactions,
+              ${postReactions.postId} as post_id
+            from ${postReactions}
+            inner join top_posts on ${postReactions.postId} = top_posts.post_id
+            where ${postReactions.reaction} = true
+            group by ${postReactions.postId}
+          ), post_reactions_negative as (
+            select
+              count(${postReactions.postId}) as negative_reactions,
+              ${postReactions.postId} as post_id
+            from ${postReactions}
+            inner join top_posts on ${postReactions.postId} = top_posts.post_id
+            where ${postReactions.reaction} = false
+            group by ${postReactions.postId}
+          ), user_reaction as (
+            select
+              ${postReactions.postId} as post_id,
+              ${postReactions.reaction} as reaction
+            from ${postReactions}
+            inner join top_posts on ${postReactions.postId} = top_posts.post_id
+            where ${postReactions.ownerId} = ${userId}
+          ), post_comments as (
+            select
+              ${postComments.id} as comment_id,
+              ${postComments.content} as comment_content,
+              ${postComments.createdAt} as comment_created_at,
+              ${postComments.ownerId} as _comment_owner_id,
+              ${postComments.postId} as comment_post_id,
+              ROW_NUMBER() OVER (PARTITION BY ${postComments.postId} ORDER BY ${
+        postComments.createdAt
+      } DESC) as comment_post_index
+            from ${postComments}
+            inner join top_posts on ${postComments.postId} = top_posts.post_id
+            order by ${postComments.createdAt} desc
+          ), comment_owners as (
+            select
+              ${users.id} as comment_owner_id,
+              ${users.name} as comment_owner_name,
+              ${users.avatarUrl} as comment_owner_avatar_url
+            from ${users}
+            inner join post_comments on ${users.id} = post_comments._comment_owner_id
+          ), total_comments as (
+            select 
+              count(${postComments.id}) as total_comments,
+              ${postComments.postId} as post_id
+            from ${postComments}
+            inner join top_posts on ${postComments.postId} = top_posts.post_id
+            group by ${postComments.postId}
+          )
+
+          select
+            top_posts.*,
+            post_owners.*,
+            post_reactions_positive.positive_reactions,
+            post_reactions_negative.negative_reactions,
+            user_reaction.reaction as user_reaction,
+            post_comments.*,
+            comment_owners.*,
+            total_comments.total_comments
+          from top_posts
+          left join post_owners on top_posts.post_owner_id = post_owners.user_id
+          left join post_reactions_positive on top_posts.post_id = post_reactions_positive.post_id
+          left join post_reactions_negative on top_posts.post_id = post_reactions_negative.post_id
+          left join user_reaction on top_posts.post_id = user_reaction.post_id
+          left join post_comments on top_posts.post_id = post_comments.comment_post_id
+          left join comment_owners on post_comments._comment_owner_id = comment_owners.comment_owner_id
+          left join total_comments on top_posts.post_id = total_comments.post_id
+          where post_comments.comment_post_index < ${numPostComments + 1}
+          order by top_posts.post_created_at desc
+      `
+      const data = (await db.execute(query)) as {
+        post_id: string
+        post_title: string
+        post_content: string
+        post_created_at: string
+        post_owner_id: string
+        post_community_id: string
+        post_deleted: boolean
+        post_disabled: boolean
+        user_id: string
+        user_name: string
+        user_avatar_url: string
+        positive_reactions: number
+        negative_reactions: number
+        user_reaction: boolean | null
+        comment_id: string
+        comment_content: string
+        comment_created_at: string
+        comment_owner_id: string
+        comment_post_id: string
+        comment_owner_name: string
+        comment_owner_avatar_url: string
+        total_comments: number
+      }[]
+
+      return data.reduce((acc, item) => {
+        let post = acc.find((p) => p.id === item.post_id)
+        if (!post) {
+          const user = data.find((u) => u.user_id === item.post_owner_id)
+          post = {
+            id: item.post_id,
+            title: item.post_title,
+            content: item.post_content,
+            createdAt: new Date(item.post_created_at),
+            ownerId: item.post_owner_id,
+            communityId: item.post_community_id,
+            deleted: item.post_deleted,
+            disabled: item.post_disabled,
+            user: {
+              id: user?.user_id ?? "",
+              name: user?.user_name ?? "",
+              avatarUrl: user?.user_avatar_url ?? "",
+            },
+            reactions: {
+              positive: item.positive_reactions,
+              negative: item.negative_reactions,
+            },
+            comments: item.comment_id
+              ? [
+                  {
+                    id: item.comment_id,
+                    content: item.comment_content,
+                    createdAt: new Date(item.comment_created_at),
+                    user: {
+                      id: item.comment_owner_id,
+                      name: item.comment_owner_name,
+                      avatarUrl: item.comment_owner_avatar_url,
+                    },
+                  },
+                ]
+              : [],
+            userReaction: item.user_reaction,
+            totalComments: item.total_comments.toString(),
+          } as CommunityPostData
+          acc.push(post)
+          return acc
+        }
+
+        if (item.comment_id && !post.comments.find((c) => c.id === item.comment_id)) {
+          const commentOwner = data.find((u) => u.comment_owner_id === item.comment_owner_id)
+          post.comments.push({
+            id: item.comment_id,
+            content: item.comment_content,
+            createdAt: new Date(item.comment_created_at),
+            user: {
+              id: commentOwner?.comment_owner_id ?? "",
+              name: commentOwner?.comment_owner_name ?? "",
+              avatarUrl: commentOwner?.comment_owner_avatar_url ?? "",
+            },
+          })
+        }
+
+        return acc
+      }, [] as CommunityPostData[])
     } catch (error) {
       console.error(error)
       return

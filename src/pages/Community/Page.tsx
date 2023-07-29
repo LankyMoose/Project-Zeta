@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import "./Page.css"
-import { getCommunity } from "../../client/actions/communities"
+import { getCommunity, getCommunityPosts } from "../../client/actions/communities"
 import { DefaultLoader } from "../../components/loaders/Default"
 import { setPath } from "cinnabun/router"
 import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
@@ -26,6 +26,7 @@ import { addNotification } from "../../components/Notifications"
 import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../../components/Button"
 import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
+import { CommunityPostData } from "../../types/post"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -38,6 +39,19 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       callbackAction: AuthModalCallback.ViewCommunity,
     }
     authModalOpen.value = true
+  }
+
+  const loadPosts = async (): Promise<CommunityPostData[] | { message: string }> => {
+    const res = await getCommunityPosts(params.url_title!)
+    if ("message" in res) {
+      addNotification({
+        type: "error",
+        text: res.message,
+      })
+      setPath(pathStore, "/communities")
+      return []
+    }
+    return res
   }
 
   const loadCommunity = async (): Promise<Partial<CommunityData> | { message: string }> => {
@@ -70,7 +84,6 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       memberType: res.memberType,
       members: res.members,
       owners: res.owners,
-      posts: res.posts,
       moderators: res.moderators,
     }
     return res
@@ -156,7 +169,13 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                           <h3>Posts</h3>
                           <AddPostButton />
                         </div>
-                        <CommunityPosts posts={selectedCommunity.value?.posts ?? []} />
+                        <Cinnabun.Suspense promise={loadPosts} cache>
+                          {(loading: boolean, posts?: CommunityPostData[]) => {
+                            if (loading) return <DefaultLoader />
+                            if (!posts) return <></>
+                            return <CommunityPosts posts={posts} />
+                          }}
+                        </Cinnabun.Suspense>
                       </section>
                       <section
                         watch={selectedCommunity}

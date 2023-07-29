@@ -32,10 +32,15 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
 
 export const PostCardComments = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) => {
   const comments = computed(post, () => post.value.comments)
+  console.log(post)
   return (
     <div className="post-card-comments flex flex-column gap">
       <div className="comments-list">
-        <small className="view-previous-comments">
+        <small
+          watch={post}
+          bind:visible={() => parseInt(post.value.totalComments) > post.value.comments.length}
+          className="view-previous-comments"
+        >
           <i>
             <a href="javascript:void(0)" className="block p-3 py-2 mb-3 text-center">
               View previous comments
@@ -85,6 +90,7 @@ const NewCommentForm = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) 
     const res = await addPostComment(post.value.id, newComment.value)
     if (res) {
       post.value.comments.push(res)
+      post.value.totalComments = (parseInt(post.value.totalComments) + 1).toString()
       post.notify()
       newComment.value = ""
     }

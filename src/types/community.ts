@@ -1,5 +1,4 @@
 import { Community, User } from "../db/schema"
-import { CommunityPostData } from "./post"
 
 export type CommunityLinkData = { title: string; url_title: string }
 export type CommunitySearchData = {
@@ -50,7 +49,6 @@ export type CommunityData = {
   members: CommunityMemberData[]
   moderators: CommunityMemberData[]
   owners: CommunityMemberData[]
-  posts: CommunityPostData[]
   title: string
   url_title: string
   private: boolean

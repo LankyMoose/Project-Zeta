@@ -22,7 +22,12 @@ export type CommunityPostData = Post & {
     avatarUrl: string
   }
   comments: CommunityPostComment[]
-  reactions: CommunityPostReaction[]
+  reactions: {
+    positive: number
+    negative: number
+  }
+  userReaction: boolean | null
+  totalComments: string
 }
 
 export type LatestPostsData = {

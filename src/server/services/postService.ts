@@ -79,20 +79,6 @@ export const postService = {
     }
   },
 
-  async getPosts(communityId: string, offset: number = 0): Promise<Post[] | undefined> {
-    try {
-      return await db
-        .select()
-        .from(posts)
-        .where(eq(posts.communityId, communityId))
-        .offset(offset)
-        .limit(this.pageSize)
-        .orderBy(posts.createdAt)
-    } catch (error) {
-      console.error(error)
-      return
-    }
-  },
   async createPost(post: NewPost): Promise<Post | undefined> {
     try {
       return (await db.insert(posts).values(post).returning()).at(0)
