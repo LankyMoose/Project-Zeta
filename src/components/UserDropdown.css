@@ -33,3 +33,8 @@
   padding: .35rem 1rem;
   font-size: 80%;
 }
+@media screen and (prefers-color-scheme: light) {
+  .user-dropdown-item a {
+    color: var(--text-muted-dark);
+  }
+}
