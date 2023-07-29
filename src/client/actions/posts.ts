@@ -1,10 +1,32 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
 import { NewPost, PostReaction } from "../../db/schema"
+import { CommunityPostComment } from "../../types/post"
 
 export const getPost = async (postId: string) => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}`)
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+
+    return data
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
+  }
+}
+
+export const getPostComments = async (
+  communityId: string,
+  postId: string,
+  offset: number
+): Promise<CommunityPostComment[] | void> => {
+  try {
+    const response = await fetch(
+      `${API_URL}/communities/${communityId}/posts/${postId}/comments?offset=${offset}`
+    )
     const data = await response.json()
     if (!response.ok) throw new Error(data?.message ?? response.statusText)
 

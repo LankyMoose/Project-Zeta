@@ -11,6 +11,7 @@ import {
   UnauthorizedError,
 } from "../../errors"
 import { JoinResultType } from "../../types/community"
+import { postService } from "../services/postService"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) => {
@@ -62,6 +63,37 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!res) throw new ServerError()
     return res
   })
+  app.get<{ Params: { id?: string; postId: string }; Querystring: { offset: string } }>(
+    "/api/communities/:id/posts/:postId/comments",
+    async (req) => {
+      const offset = parseInt(req.query.offset)
+      const communityId = req.params.id
+      const postId = req.params.postId
+      if (!communityId || !postId) throw new InvalidRequestError()
+      if (isNaN(offset)) throw new InvalidRequestError()
+
+      console.log("getting post comments", communityId, postId, offset)
+      const [community, post] = await Promise.all([
+        communityService.getCommunity(communityId, true),
+        postService.getPost(postId),
+      ])
+      if (!post || !community) throw new NotFoundError()
+
+      if (community.private) {
+        if (!req.cookies.user_id) throw new NotAuthenticatedError()
+
+        const error = await communityService.checkCommunityMemberValidity(
+          post.communityId,
+          req.cookies.user_id
+        )
+        if (error) throw error
+      }
+
+      const res = await postService.getPostComments(req.params.postId, offset)
+      if (!res) throw new ServerError()
+      return res
+    }
+  )
 
   app.get<{ Params: { id?: string } }>("/api/communities/:id/join-requests", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()

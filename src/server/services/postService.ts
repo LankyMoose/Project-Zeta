@@ -1,9 +1,10 @@
-import { eq } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { db } from "../../db"
 import { Post, posts, postReactions, PostReaction, NewPost, postComments } from "../../db/schema"
 import { CommunityPostComment } from "../../types/post"
 import { ServerError } from "../../errors"
 import { PublicUser } from "../../types/user"
+import { POST_COMMENT_PAGE_SIZE } from "../../constants"
 
 export const postService = {
   pageSize: 25,
@@ -73,6 +74,30 @@ export const postService = {
           })
           .returning()
       ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getPostComments(postId: string, offset: number): Promise<CommunityPostComment[] | void> {
+    try {
+      return await db.query.postComments.findMany({
+        where: (postComment, { eq, and }) =>
+          and(eq(postComment.postId, postId), eq(postComment.deleted, false)),
+        orderBy: [desc(postComments.createdAt)],
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+            },
+          },
+        },
+        limit: POST_COMMENT_PAGE_SIZE,
+        offset,
+      })
     } catch (error) {
       console.error(error)
       return

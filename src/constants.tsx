@@ -10,3 +10,5 @@ export enum API_ERROR {
   SERVER_ERROR = "Server error",
   COMMUNITY_NAME_NOT_AVAILABLE = "Community name not available",
 }
+
+export const POST_COMMENT_PAGE_SIZE = 5

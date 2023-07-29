@@ -3,13 +3,14 @@ import { For, createSignal, computed } from "cinnabun"
 import { CommunityPostComment, CommunityPostData } from "../../types/post"
 import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
 import { isCommunityMember, communityJoinModalOpen } from "../../state/community"
-import { addPostComment } from "../../client/actions/posts"
+import { addPostComment, getPostComments } from "../../client/actions/posts"
 import { formatUTCDate } from "../../utils"
 import { Button } from "../Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { commentValidation } from "../../db/validation"
 import { AuthModalCallback } from "../../types/auth"
 import { Link } from "cinnabun/router"
+import { POST_COMMENT_PAGE_SIZE } from "../../constants"
 
 const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
   return (
@@ -31,7 +32,24 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
 }
 
 export const PostCardComments = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) => {
+  let offset = POST_COMMENT_PAGE_SIZE
   const comments = computed(post, () => post.value.comments)
+
+  const loadMore = async () => {
+    const res = await getPostComments(post.value.communityId, post.value.id, offset)
+    if (!res) return
+    res.sort((a, b) => {
+      const aDate = new Date(a.createdAt)
+      const bDate = new Date(b.createdAt)
+      if (aDate > bDate) return 1
+      if (aDate < bDate) return -1
+      return 0
+    })
+    post.value.comments.unshift(...res)
+    post.notify()
+    offset += POST_COMMENT_PAGE_SIZE
+  }
+
   return (
     <div className="post-card-comments flex flex-column gap">
       <div className="comments-list">
@@ -41,7 +59,11 @@ export const PostCardComments = ({ post }: { post: Cinnabun.Signal<CommunityPost
           className="view-previous-comments"
         >
           <i>
-            <a href="javascript:void(0)" className="block p-3 py-2 mb-3 text-center">
+            <a
+              href="javascript:void(0)"
+              onclick={loadMore}
+              className="block p-3 py-2 mb-3 text-center"
+            >
               View previous comments
             </a>
           </i>
