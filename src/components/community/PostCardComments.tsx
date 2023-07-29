@@ -32,7 +32,6 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
 
 export const PostCardComments = ({ post }: { post: Cinnabun.Signal<CommunityPostData> }) => {
   const comments = computed(post, () => post.value.comments)
-  console.log(post)
   return (
     <div className="post-card-comments flex flex-column gap">
       <div className="comments-list">
