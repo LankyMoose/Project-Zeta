@@ -3,21 +3,25 @@
 }
 
 .avatar-wrapper {
+  --size: 46px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  min-width: 46px;
-  height: 46px;
+  width: var(--size);
+  min-width: var(--size);
+  height: var(--size);
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, .3);
 }
 
 .avatar-wrapper.sm {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  --size: 32px;
+}
+
+.avatar-wrapper.xs {
+  --size: 16px;
+  border-width: 1px;
 }
 
 @media (prefers-color-scheme: light) {

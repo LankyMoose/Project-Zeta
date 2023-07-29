@@ -14,7 +14,7 @@ import { Link } from "cinnabun/router"
 const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
   return (
     <div className="comment-item flex align-items-center gap" key={comment.id}>
-      <div className="avatar-wrapper sm">
+      <div className="avatar-wrapper xs">
         <img className="avatar" src={comment.user.avatarUrl} alt={comment.user.name} />
       </div>
       <div className="flex flex-column gap-sm flex-grow text-sm">
