@@ -70,7 +70,7 @@
 }
 @media (prefers-color-scheme: light) {
   .modal-body {
-    background-color: rgba(0, 0, 0, .0275);
+    background-color: rgba(0, 0, 0, .015);
   }
 }
 
