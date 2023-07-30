@@ -1,5 +1,4 @@
 import * as Cinnabun from "cinnabun"
-import { formatUTCDate } from "../utils"
 import { Link } from "cinnabun/router"
 import { pathStore } from "../state/global"
 
@@ -20,7 +19,7 @@ export const AuthorTag = ({
         <Link to={`/users/${user.id}`} store={pathStore}>
           {user.name}
         </Link>
-        {date ? <span className="created-at">{formatUTCDate(date.toString())}</span> : <></>}
+        {date ? <span className="created-at">{date}</span> : <></>}
       </div>
 
       <div className="avatar-wrapper sm">

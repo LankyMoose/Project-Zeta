@@ -17,6 +17,7 @@ import { commentValidation } from "../../db/validation"
 import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
+import { timeSinceDate } from "../../utils"
 
 const loading = createSignal(false)
 
@@ -26,20 +27,27 @@ const loadPost = async (communityId: string, postId: string) => {
   loading.value = true
   const res = await getPost(communityId, postId)
   if (!postModalOpen.value) return
-
-  selectedCommunityPost.value = res ?? null
-  loading.value = false
+  if (selectedCommunityPost.value) {
+    if (selectedCommunityPost.value.id === res?.id) {
+      selectedCommunityPost.value = res ?? null
+      loading.value = false
+      return
+    }
+  }
 }
 
 selectedCommunityPost.subscribe((post) => {
   if (post?.id && !postModalOpen.value) {
     postModalOpen.value = true
     loadPost(selectedCommunity.value!.id!, post.id)
+  } else if (!post?.id && postModalOpen.value) {
+    postModalOpen.value = false
   }
 })
 
 export const PostModal = () => {
   const handleClose = () => {
+    loading.value = false
     selectedCommunityPost.value = null
     postModalOpen.value = false
     window.history.pushState(null, "", `/communities/${selectedCommunity.value?.url_title}`)
@@ -59,7 +67,7 @@ export const PostModal = () => {
               <div className="ml-auto">
                 <AuthorTag
                   user={selectedCommunityPost.value.user!}
-                  date={selectedCommunityPost.value.createdAt!.toString()}
+                  date={timeSinceDate(new Date(selectedCommunityPost.value.createdAt))}
                 />
               </div>
             ) : (

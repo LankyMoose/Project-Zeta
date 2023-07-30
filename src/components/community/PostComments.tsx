@@ -3,7 +3,7 @@ import { For, createSignal, Cinnabun as cb } from "cinnabun"
 import { CommunityPostComment } from "../../types/post"
 import { pathStore } from "../../state/global"
 import { getPostComments } from "../../client/actions/posts"
-import { formatUTCDate } from "../../utils"
+import { timeSinceDate } from "../../utils"
 import { Link } from "cinnabun/router"
 import { POST_COMMENT_PAGE_SIZE } from "../../constants"
 import "./PostComments.css"
@@ -24,7 +24,7 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
           <Link to={`/users/${comment.user.id}`} store={pathStore} className="author">
             {comment.user.name}
           </Link>
-          <span>{formatUTCDate(comment.createdAt.toString())}</span>
+          <span>{timeSinceDate(new Date(comment.createdAt))}</span>
         </div>
         <p className="m-0 comment">{comment.content}</p>
       </div>
@@ -38,7 +38,6 @@ export const PostComments = () => {
     () => selectedCommunityPost.value?.comments ?? []
   )
   const loadMoreComments = async () => {
-    if (loadingMore.value) return
     if (!selectedCommunityPost.value || !selectedCommunityPost.value.communityId) return
     loadingMore.value = true
 

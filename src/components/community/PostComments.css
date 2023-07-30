@@ -1,23 +1,7 @@
-.view-previous-comments {
-  background: rgba(0, 0, 0, .075);
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text-muted)
-}
+
 
 .comments-list {
-  background: rgba(255, 255, 255, .0125);
-  padding: 0 1rem;
-}
-
-@media (prefers-color-scheme: light) {
-  .view-previous-comments {
-    background: rgba(0, 0, 0, .025);
-  }
-
-  .comments-list {
-    background: rgba(255, 255, 255, .72);
-  }
+  padding: 0;
 }
 
 .comment-item {

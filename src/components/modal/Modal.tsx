@@ -45,6 +45,7 @@ export const Modal = (
         }
         return visible.value
       }}
+      cancelExit={() => visible.value}
     >
       <ClickOutsideListener
         tag="div"
@@ -59,6 +60,7 @@ export const Modal = (
           properties={[{ name: "translate", from: "0 -5rem", to: "0 0", ms: 350 }]}
           watch={visible}
           bind:visible={() => visible.value}
+          cancelExit={() => visible.value}
         >
           <NavigationListener onCapture={(e) => closeOnNavigate && toggle(e)} />
           <KeyboardListener keys={["Escape"]} onCapture={(_, e) => closeOnEscape && toggle(e)} />
