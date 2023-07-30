@@ -44,7 +44,7 @@
 .modal-header {
   padding: var(--padding);
   border-bottom: 1px solid var(--border);
-  background-color: #212123;
+  background-color: #212122;
   position: sticky;
   top: 0;
   z-index: 100;

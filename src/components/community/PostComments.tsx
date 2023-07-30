@@ -7,10 +7,9 @@ import { timeSinceDate } from "../../utils"
 import { Link } from "cinnabun/router"
 import { POST_COMMENT_PAGE_SIZE } from "../../constants"
 import "./PostComments.css"
-import { selectedCommunityPost } from "../../state/community"
+import { postCommentsPage, selectedCommunityPost } from "../../state/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 
-const commentsPage = createSignal(0)
 const loadingMore = createSignal<boolean>(false)
 
 const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
@@ -44,7 +43,7 @@ export const PostComments = () => {
     const res = await getPostComments(
       selectedCommunityPost.value.communityId,
       selectedCommunityPost.value.id!,
-      commentsPage.value * POST_COMMENT_PAGE_SIZE
+      postCommentsPage.value * POST_COMMENT_PAGE_SIZE
     )
     if (!res) return
     selectedCommunityPost.value.comments?.push(...res)
@@ -52,26 +51,31 @@ export const PostComments = () => {
     loadingMore.value = false
   }
 
-  commentsPage.subscribe(() => {
-    if (!cb.isClient || commentsPage.value === 0) return
+  postCommentsPage.subscribe(() => {
+    if (!cb.isClient || postCommentsPage.value === 0) return
     loadMoreComments()
   })
 
-  const onScroll = () => {
+  const onScroll = (e: Event) => {
     if (loadingMore.value) return
+    const totalComments = parseInt(selectedCommunityPost.value?.totalComments ?? "0")
+    const commentsLength = selectedCommunityPost.value?.comments?.length ?? 0
+    if (totalComments <= commentsLength) return
+
     const bottomPadding = 200
-    const { scrollTop, scrollHeight, clientHeight } = document.scrollingElement!
+    const { scrollTop, scrollHeight, clientHeight } = e.target as HTMLDivElement
     if (scrollTop + clientHeight + bottomPadding >= scrollHeight) {
-      console.log("load more")
-      //commentsPage.value++
-      //commentsPage.notify()
+      loadingMore.value = true
+      postCommentsPage.value++
     }
   }
 
   return (
     <div
-      onMounted={() => window?.addEventListener("scroll", onScroll)}
-      onUnmounted={() => window?.removeEventListener("scroll", onScroll)}
+      onMounted={() => document.querySelector(".modal-outer")?.addEventListener("scroll", onScroll)}
+      onUnmounted={() =>
+        document.querySelector(".modal-outer")?.removeEventListener("scroll", onScroll)
+      }
       className="post-card-comments flex flex-column gap"
     >
       <div

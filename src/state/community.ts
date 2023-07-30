@@ -17,6 +17,8 @@ export const selectedCommunity = createSignal<Partial<CommunityData> | null>(nul
 export const selectedCommunityPost = createSignal<Partial<CommunityPostDataWithComments> | null>(
   null
 )
+export const postCommentsPage = createSignal(0)
+
 export const pendingCommunityJoinRequests = createSignal<CommunityJoinRequestData[]>([])
 
 export const communityDrawerOpen = createSignal(false)

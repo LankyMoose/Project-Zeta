@@ -6,6 +6,7 @@ import {
   postModalOpen,
   communityJoinModalOpen,
   isCommunityMember,
+  postCommentsPage,
 } from "../../state/community"
 import { Modal, ModalBody, ModalHeader } from "../modal/Modal"
 import { AuthorTag } from "../AuthorTag"
@@ -50,6 +51,7 @@ export const PostModal = () => {
     loading.value = false
     selectedCommunityPost.value = null
     postModalOpen.value = false
+    postCommentsPage.value = 0
     window.history.pushState(null, "", `/communities/${selectedCommunity.value?.url_title}`)
   }
 
