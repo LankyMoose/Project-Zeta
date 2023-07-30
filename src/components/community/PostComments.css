@@ -6,8 +6,8 @@
 }
 
 .comments-list {
-  padding: 0.5rem;
   background: rgba(0, 0, 0, .06);
+  padding: 0 1rem;
 }
 
 @media (prefers-color-scheme: light) {
@@ -22,7 +22,6 @@
 
 .comment-item {
   border-bottom: 1px solid rgba(0, 0, 0, .15);
-  padding: 0.5rem;
 }
 
 @media (prefers-color-scheme: light) {

@@ -6,6 +6,7 @@ import {
   postModalOpen,
   communityJoinModalOpen,
   isCommunityMember,
+  selectedPostComments,
 } from "../../state/community"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { AuthorTag } from "../AuthorTag"
@@ -19,7 +20,6 @@ import { Button } from "../Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 
 const loading = createSignal(false)
-const comments = createSignal<CommunityPostComment[]>([])
 
 const loadPost = async (communityId: string, postId: string) => {
   if (loading.value) return
@@ -73,10 +73,10 @@ export const PostModal = () => {
             {() => selectedCommunityPost.value?.content ?? ""}
           </p>
         </div>
-        <PostComments post={selectedCommunityPost} comments={comments} />
+        <PostComments post={selectedCommunityPost} />
       </ModalBody>
       <ModalFooter>
-        <NewCommentForm post={selectedCommunityPost} comments={comments} />
+        <NewCommentForm post={selectedCommunityPost} comments={selectedPostComments} />
       </ModalFooter>
     </Modal>
   )
