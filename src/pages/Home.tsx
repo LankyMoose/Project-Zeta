@@ -6,6 +6,7 @@ import { LatestPostsData } from "../types/post"
 import { DefaultLoader } from "../components/loaders/Default"
 import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
+import { timeSinceDate } from "../utils"
 
 const PostCard = ({ post, community, user }: LatestPostsData) => {
   return (
@@ -28,7 +29,7 @@ const PostCard = ({ post, community, user }: LatestPostsData) => {
       <div className="flex justify-content-between">
         <div></div>
         <div className="flex flex-column align-items-end">
-          <AuthorTag user={user} date={post.createdAt.toString()} />
+          <AuthorTag user={user} date={timeSinceDate(new Date(post.createdAt))} />
         </div>
       </div>
     </div>
