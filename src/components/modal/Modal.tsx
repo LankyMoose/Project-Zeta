@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { ComponentChildren, ComponentProps } from "cinnabun/types"
-import { KeyboardListener, NavigationListener } from "cinnabun/listeners"
+import { ClickOutsideListener, KeyboardListener, NavigationListener } from "cinnabun/listeners"
 import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
 import { bodyStyle } from "../../state/global"
@@ -18,7 +18,7 @@ const defaultGestures: ModalGestureProps = {
 
 type ModalProps = {
   visible: Cinnabun.Signal<boolean>
-  toggle: () => void
+  toggle: (e: Event) => void
   onclose?: () => void
   gestures?: ModalGestureProps
   large?: boolean
@@ -39,28 +39,32 @@ export const Modal = (
       bind:visible={() => {
         if (!visible.value && onclose) onclose()
         if (visible.value) {
-          bodyStyle.value = "overflow: hidden; padding-right:16px;"
+          bodyStyle.value = "overflow: hidden;"
         } else {
           bodyStyle.value = ""
         }
         return visible.value
       }}
-      onmouseup={(e: MouseEvent) => {
-        if (!visible.value || !closeOnClickOutside) return
-        const el = e.target as HTMLDivElement
-        if (el.className === "modal-outer") toggle()
-      }}
     >
-      <Transition
-        className={"modal" + (large ? " lg" : "")}
-        properties={[{ name: "translate", from: "0 -5rem", to: "0 0", ms: 350 }]}
-        watch={visible}
-        bind:visible={() => visible.value}
+      <ClickOutsideListener
+        tag="div"
+        className="modal-wrapper"
+        onCapture={(e) => {
+          if (e.defaultPrevented) return
+          closeOnClickOutside && toggle(e)
+        }}
       >
-        <NavigationListener onCapture={() => closeOnNavigate && toggle()} />
-        <KeyboardListener keys={["Escape"]} onCapture={() => closeOnEscape && toggle()} />
-        {children}
-      </Transition>
+        <Transition
+          className={"modal" + (large ? " lg" : "")}
+          properties={[{ name: "translate", from: "0 -5rem", to: "0 0", ms: 350 }]}
+          watch={visible}
+          bind:visible={() => visible.value}
+        >
+          <NavigationListener onCapture={(e) => closeOnNavigate && toggle(e)} />
+          <KeyboardListener keys={["Escape"]} onCapture={(_, e) => closeOnEscape && toggle(e)} />
+          {children}
+        </Transition>
+      </ClickOutsideListener>
     </FadeInOut>
   )
 }

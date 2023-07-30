@@ -18,7 +18,7 @@ const defaultGestures: DrawerGestureProps = {
 type DrawerProps = {
   visible: Cinnabun.Signal<boolean>
   side: "left" | "right" | "top" | "bottom"
-  toggle: () => void
+  toggle: (e: Event) => void
   onclose?: () => void
   gestures?: DrawerGestureProps
 }
@@ -39,10 +39,15 @@ export const Drawer = (
         if (!visible.value && onclose) onclose()
         return visible.value
       }}
-      onmouseup={(e: MouseEvent) => {
+      onclick={(e: MouseEvent) => {
         if (!visible.value || !closeOnClickOutside) return
         const el = e.target as HTMLDivElement
-        if (el.className === "drawer-outer") toggle()
+        if (el.className === "drawer-outer") {
+          e.preventDefault()
+          e.stopImmediatePropagation()
+          e.stopPropagation()
+          toggle(e)
+        }
       }}
     >
       <SlideInOut
@@ -51,8 +56,8 @@ export const Drawer = (
         bind:visible={() => visible.value}
         settings={{ from: side }}
       >
-        <NavigationListener onCapture={() => closeOnNavigate && toggle()} />
-        <KeyboardListener keys={["Escape"]} onCapture={() => closeOnEscape && toggle()} />
+        <NavigationListener onCapture={(e) => closeOnNavigate && toggle(e)} />
+        <KeyboardListener keys={["Escape"]} onCapture={(_, e) => closeOnEscape && toggle(e)} />
         {children}
       </SlideInOut>
     </FadeInOut>

@@ -1,16 +1,14 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal } from "cinnabun"
 import { CommunityPostComment, CommunityPostData } from "../../types/post"
-import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
-import { isCommunityMember, communityJoinModalOpen } from "../../state/community"
-import { addPostComment, getPostComments } from "../../client/actions/posts"
+import { pathStore } from "../../state/global"
+import { getPostComments } from "../../client/actions/posts"
 import { formatUTCDate } from "../../utils"
 import { Button } from "../Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
-import { commentValidation } from "../../db/validation"
-import { AuthModalCallback } from "../../types/auth"
 import { Link } from "cinnabun/router"
 import { POST_COMMENT_PAGE_SIZE } from "../../constants"
+import "./PostComments.css"
 
 const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
   return (
@@ -31,13 +29,14 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
   )
 }
 
-export const PostCardComments = ({
+export const PostComments = ({
   post,
+  comments,
 }: {
   post: Cinnabun.Signal<Partial<CommunityPostData> | null>
+  comments: Cinnabun.Signal<CommunityPostComment[]>
 }) => {
   let offset = 0
-  const comments = createSignal<CommunityPostComment[]>([])
   const loadingComments = createSignal(false)
 
   const loadMore = async () => {
@@ -87,87 +86,6 @@ export const PostCardComments = ({
         </p>
         <For each={comments} template={(comment) => <CommentItem comment={comment} />} />
       </div>
-      <NewCommentForm post={post} comments={comments} />
     </div>
-  )
-}
-
-const NewCommentForm = ({
-  post,
-  comments,
-}: {
-  post: Cinnabun.Signal<Partial<CommunityPostData> | null>
-  comments: Cinnabun.Signal<CommunityPostComment[]>
-}) => {
-  const newComment = createSignal("")
-  const loading = createSignal(false)
-
-  const handleSubmit = async (e: Event) => {
-    if (!post.value) return
-    if (!post.value.communityId || !post.value.id) return
-    e.preventDefault()
-    if (!userStore.value) {
-      if (!userStore.value) {
-        authModalState.value = {
-          title: "Log in to interact with this post",
-          message: "You must be logged in to interact with community posts.",
-          callbackAction: AuthModalCallback.ViewCommunity,
-        }
-        authModalOpen.value = true
-        return
-      }
-      return
-    }
-    if (!isCommunityMember()) {
-      communityJoinModalOpen.value = true
-      return
-    }
-    e.preventDefault()
-    loading.value = true
-    const res = await addPostComment(post.value.id, newComment.value)
-    if (res) {
-      comments.value.push(res)
-      comments.notify()
-      post.value.totalComments = (parseInt(post.value.totalComments ?? "0") + 1).toString()
-      post.notify()
-      newComment.value = ""
-    }
-    loading.value = false
-  }
-
-  const handleInput = (e: Event) => {
-    e.preventDefault()
-    newComment.value = (e.target as HTMLInputElement).value
-  }
-
-  return (
-    <form
-      className="flex align-items-center gap flex-wrap justify-content-end"
-      onsubmit={handleSubmit}
-    >
-      <div className="flex align-items-center gap flex-wrap flex-grow">
-        <div className="avatar-wrapper sm">
-          <img className="avatar" src={userStore.value?.picture} alt={userStore.value?.name} />
-        </div>
-        <div className="flex-grow">
-          <textarea
-            className="form-control"
-            placeholder="Write a comment..."
-            watch={newComment}
-            bind:value={() => newComment.value}
-            oninput={handleInput}
-          />
-        </div>
-      </div>
-      <Button
-        watch={[loading, newComment]}
-        bind:disabled={() => loading.value || !commentValidation.isCommentValid(newComment.value)}
-        type="submit"
-        className="btn btn-primary hover-animate"
-      >
-        Add Comment
-        <EllipsisLoader watch={loading} bind:visible={() => loading.value} />
-      </Button>
-    </form>
   )
 }

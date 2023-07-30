@@ -90,13 +90,8 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
 
     if (Cinnabun.Cinnabun.isClient && selectedCommunity.value?.id) {
       const hash = window.location.hash
-      console.log("hash", hash)
       if (hash) {
-        const id = hash.substring(1)
-        console.log("postId", id)
-        selectedCommunityPost.value = {
-          id,
-        }
+        selectedCommunityPost.value = { id: hash.substring(1) }
       }
     }
 

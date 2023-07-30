@@ -1,16 +1,14 @@
 .modal-outer {
   position: fixed;
   z-index: 100;
-  display: flex;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
   background: rgba(0, 0, 0, .5);
-  overflow: hidden;
-  padding: 1rem;
   max-height: 100%;
   overflow-y: auto;
+  display: flex;
 }
 @media (prefers-color-scheme: light) {
   .modal-outer {
@@ -18,12 +16,18 @@
   }
 }
 
+.modal-wrapper {
+  padding: .5rem;
+  margin: auto;
+}
+
 .modal {
   background-color: var(--dark);
-  overflow: hidden;
   margin: auto;
   flex-basis: 350px;
   --padding: 1.25rem 1.5rem;
+  width: 350px;
+  max-width: calc(100vw - 1rem);
 }
 @media (prefers-color-scheme: light) {
   .modal {
@@ -31,14 +35,23 @@
   }
 }
 .modal.lg {
+  width: 720px;
   flex-basis: 100%;
-  max-width: 720px;
 }
 
 
 .modal-header {
   padding: var(--padding);
   border-bottom: 1px solid var(--border);
+  background-color: var(--dark);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+@media (prefers-color-scheme: light) {
+  .modal-header {
+    background-color: #fafafa;
+  }
 }
 
 .modal-header h2 {
@@ -64,4 +77,8 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background-color: var(--dark);
 }
