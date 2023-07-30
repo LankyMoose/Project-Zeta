@@ -3,6 +3,7 @@ import { ComponentChildren, ComponentProps } from "cinnabun/types"
 import { KeyboardListener, NavigationListener } from "cinnabun/listeners"
 import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
+import { bodyStyle } from "../../state/global"
 
 type ModalGestureProps = {
   closeOnNavigate?: boolean
@@ -20,9 +21,10 @@ type ModalProps = {
   toggle: () => void
   onclose?: () => void
   gestures?: ModalGestureProps
+  large?: boolean
 }
 export const Modal = (
-  { visible, toggle, onclose, gestures = {} }: ModalProps,
+  { visible, toggle, onclose, gestures = {}, large }: ModalProps,
   children: ComponentChildren
 ) => {
   const _gestures = { ...defaultGestures, ...gestures }
@@ -36,6 +38,11 @@ export const Modal = (
       watch={visible}
       bind:visible={() => {
         if (!visible.value && onclose) onclose()
+        if (visible.value) {
+          bodyStyle.value = "overflow: hidden;"
+        } else {
+          bodyStyle.value = ""
+        }
         return visible.value
       }}
       onmouseup={(e: MouseEvent) => {
@@ -45,7 +52,7 @@ export const Modal = (
       }}
     >
       <Transition
-        className="modal"
+        className={"modal" + (large ? " lg" : "")}
         properties={[{ name: "translate", from: "0 -5rem", to: "0 0", ms: 350 }]}
         watch={visible}
         bind:visible={() => visible.value}
@@ -60,7 +67,7 @@ export const Modal = (
 
 export const ModalHeader = (props: ComponentProps, children: ComponentChildren) => {
   return (
-    <div className="modal-header" {...props}>
+    <div className={`modal-header ${props.className}`} {...props}>
       {children}
     </div>
   )
@@ -68,7 +75,7 @@ export const ModalHeader = (props: ComponentProps, children: ComponentChildren) 
 
 export const ModalBody = (props: ComponentProps, children: ComponentChildren) => {
   return (
-    <div className="modal-body" {...props}>
+    <div className={`modal-body ${props.className}`} {...props}>
       {children}
     </div>
   )
@@ -76,7 +83,7 @@ export const ModalBody = (props: ComponentProps, children: ComponentChildren) =>
 
 export const ModalFooter = (props: ComponentProps, children: ComponentChildren) => {
   return (
-    <div className="modal-footer" {...props}>
+    <div className={`modal-footer ${props.className}`} {...props}>
       {children}
     </div>
   )

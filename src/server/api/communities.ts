@@ -63,6 +63,39 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!res) throw new ServerError()
     return res
   })
+
+  app.get<{ Params: { id?: string; postId: string } }>(
+    "/api/communities/:id/posts/:postId",
+    async (req) => {
+      const communityId = req.params.id
+      const postId = req.params.postId
+      if (!communityId || !postId) throw new InvalidRequestError()
+
+      const [community, post] = await Promise.all([
+        communityService.getCommunity(communityId, true),
+        postService.getPost(postId),
+      ])
+      if (!post || !community) {
+        console.log("not found", postId)
+        throw new NotFoundError()
+      }
+
+      if (community.private) {
+        if (!req.cookies.user_id) throw new NotAuthenticatedError()
+
+        const error = await communityService.checkCommunityMemberValidity(
+          post.communityId,
+          req.cookies.user_id
+        )
+        if (error) throw error
+      }
+
+      const res = await communityService.getCommunityPost(postId, req.cookies.user_id)
+      if (!res) throw new ServerError()
+      return res
+    }
+  )
+
   app.get<{ Params: { id?: string; postId: string }; Querystring: { offset: string } }>(
     "/api/communities/:id/posts/:postId/comments",
     async (req) => {

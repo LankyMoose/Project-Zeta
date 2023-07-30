@@ -1,5 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { type Component } from "cinnabun"
+import { bodyStyle } from "./state/global"
 
 export const Document = (App: { (): Component }) => {
   return (
@@ -11,7 +12,7 @@ export const Document = (App: { (): Component }) => {
         <link rel="stylesheet" href="/static/index.css" />
       </head>
 
-      <body>
+      <body watch={bodyStyle} bind:style={() => bodyStyle.value}>
         <div id="app">
           <App />
         </div>

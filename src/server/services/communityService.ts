@@ -33,6 +33,24 @@ import {
 } from "../../types/community"
 import { CommunityPostData, LatestPostsData } from "../../types/post"
 
+type FlatCommunityPostData = {
+  post_id: string
+  post_title: string
+  post_content: string
+  post_created_at: string
+  post_owner_id: string
+  post_community_id: string
+  post_deleted: boolean
+  post_disabled: boolean
+  user_id: string
+  user_name: string
+  user_avatar_url: string
+  positive_reactions: number
+  negative_reactions: number
+  user_reaction: boolean | null
+  total_comments: number
+}
+
 const latestPostColumns = sql`
 ${posts.id} as post_id,
 ${posts.title} as post_title,
@@ -209,7 +227,7 @@ export const communityService = {
     }
   },
 
-  async getCommunityPosts(communityId: string, userId?: string, _page = 0) {
+  async getCommunityPosts(communityId: string, userId?: string, page = 0) {
     const numPosts = 10
     try {
       const query = sql`
@@ -228,7 +246,7 @@ export const communityService = {
             and ${posts.disabled} = false
             and ${posts.deleted} = false
             order by ${posts.createdAt} desc
-            limit ${numPosts} offset ${_page * numPosts}
+            limit ${numPosts} offset ${page * numPosts}
           ), post_owners as (
             select
               ${users.id} as user_id,
@@ -258,7 +276,7 @@ export const communityService = {
               ${postReactions.reaction} as reaction
             from ${postReactions}
             inner join top_posts on ${postReactions.postId} = top_posts.post_id
-            where ${postReactions.ownerId} = ${userId}
+            where ${userId ? `${postReactions.ownerId} = ${userId}` : `1 = 0`}
           ), total_comments as (
             select 
               count(${postComments.id}) as total_comments,
@@ -283,23 +301,7 @@ export const communityService = {
           left join total_comments on top_posts.post_id = total_comments.post_id
           order by top_posts.post_created_at desc
       `
-      const data = (await db.execute(query)) as {
-        post_id: string
-        post_title: string
-        post_content: string
-        post_created_at: string
-        post_owner_id: string
-        post_community_id: string
-        post_deleted: boolean
-        post_disabled: boolean
-        user_id: string
-        user_name: string
-        user_avatar_url: string
-        positive_reactions: number
-        negative_reactions: number
-        user_reaction: boolean | null
-        total_comments: number
-      }[]
+      const data = (await db.execute(query)) as FlatCommunityPostData[]
 
       return data.reduce((acc, item) => {
         let post = acc.find((p) => p.id === item.post_id)
@@ -331,6 +333,105 @@ export const communityService = {
         }
         return acc
       }, [] as CommunityPostData[])
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getCommunityPost(postId: string, userId?: string): Promise<CommunityPostData | void> {
+    try {
+      const query = sql`
+        with post as (
+          select
+            ${posts.id} as post_id,
+            ${posts.title} as post_title, 
+            ${posts.content} as post_content,
+            ${posts.createdAt} as post_created_at,
+            ${posts.ownerId} as post_owner_id,
+            ${posts.communityId} as post_community_id,
+            ${posts.deleted} as post_deleted,
+            ${posts.disabled} as post_disabled
+          from ${posts}
+          where ${posts.id} = ${postId}
+        ), post_owner as (
+          select
+            ${users.id} as user_id,
+            ${users.name} as user_name,
+            ${users.avatarUrl} as user_avatar_url
+          from ${users}
+          inner join post on ${users.id} = post_owner_id
+        ), post_reactions_positive as (
+          select
+            count(${postReactions.postId}) as positive_reactions,
+            ${postReactions.postId} as post_id  
+          from ${postReactions}
+          inner join post on ${postReactions.postId} = post.post_id
+          where ${postReactions.reaction} = true
+          group by ${postReactions.postId}
+        ), post_reactions_negative as (
+          select
+            count(${postReactions.postId}) as negative_reactions,
+            ${postReactions.postId} as post_id
+          from ${postReactions}
+          inner join post on ${postReactions.postId} = post.post_id
+          where ${postReactions.reaction} = false
+          group by ${postReactions.postId}
+        ), user_reaction as (
+          select
+            ${postReactions.postId} as post_id,
+            ${postReactions.reaction} as reaction
+          from ${postReactions}
+          inner join post on ${postReactions.postId} = post.post_id
+          where ${userId ? `${postReactions.ownerId} = ${userId}` : `1 = 0`}
+        ), total_comments as (
+          select
+            count(${postComments.id}) as total_comments,
+            ${postComments.postId} as post_id
+          from ${postComments}
+          inner join post on ${postComments.postId} = post.post_id
+          group by ${postComments.postId}
+        )
+
+        select
+          post.*,
+          post_owner.*,
+          post_reactions_positive.positive_reactions,
+          post_reactions_negative.negative_reactions,
+          user_reaction.reaction as user_reaction,
+          total_comments.total_comments
+        from post
+        left join post_owner on post.post_owner_id = post_owner.user_id
+        left join post_reactions_positive on post.post_id = post_reactions_positive.post_id
+        left join post_reactions_negative on post.post_id = post_reactions_negative.post_id
+        left join user_reaction on post.post_id = user_reaction.post_id
+        left join total_comments on post.post_id = total_comments.post_id
+      `
+      const data = (await db.execute(query)) as FlatCommunityPostData[]
+      if (data.length === 0) return
+
+      const item = data[0]
+      return {
+        id: item.post_id,
+        title: item.post_title,
+        content: item.post_content,
+        createdAt: new Date(item.post_created_at),
+        ownerId: item.post_owner_id,
+        communityId: item.post_community_id,
+        deleted: item.post_deleted,
+        disabled: item.post_disabled,
+        user: {
+          id: item.user_id,
+          name: item.user_name,
+          avatarUrl: item.user_avatar_url,
+        },
+        reactions: {
+          positive: item.positive_reactions,
+          negative: item.negative_reactions,
+        },
+        userReaction: item.user_reaction,
+        totalComments: item.total_comments?.toString(),
+      } as CommunityPostData
     } catch (error) {
       console.error(error)
       return

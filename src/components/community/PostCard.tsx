@@ -59,7 +59,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
   }
 
   const viewPost = () => {
-    selectedCommunityPost.value = post.id
+    selectedCommunityPost.value = post
     window.history.pushState(
       null,
       "",

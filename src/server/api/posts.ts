@@ -66,10 +66,4 @@ export function configurePostsRoutes(app: FastifyInstance) {
       return res
     }
   )
-
-  app.get<{ Params: { postId: string } }>("/api/posts/:postId", async (req) => {
-    const res = await postService.getPost(req.params.postId)
-    if (!res) throw new ServerError()
-    return res
-  })
 }

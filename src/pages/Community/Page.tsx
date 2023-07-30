@@ -12,7 +12,6 @@ import {
   isCommunityMember,
   isCommunityOwner,
   selectedCommunity,
-  selectedCommunityPost,
 } from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
@@ -32,15 +31,6 @@ import { PostModal } from "../../components/community/PostModal"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
-  const handleMount = () => {
-    if (Cinnabun.Cinnabun.isClient) {
-      const hash = window.location.hash
-      if (hash) {
-        const id = hash.substring(1)
-        selectedCommunityPost.value = id
-      }
-    }
-  }
 
   const showLoginPrompt = () => {
     authModalState.value = {
@@ -105,7 +95,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
   }
 
   return (
-    <div onMounted={handleMount}>
+    <div>
       <Cinnabun.Suspense promise={loadCommunity} cache>
         {(loading: boolean, data: Partial<CommunityData> | { message: string }) => {
           if (data && "message" in data) return data.message
