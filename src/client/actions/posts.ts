@@ -1,7 +1,7 @@
 import { addNotification } from "../../components/Notifications"
 import { API_URL } from "../../constants"
 import { NewPost, PostReaction } from "../../db/schema"
-import { CommunityPostComment, CommunityPostData } from "../../types/post"
+import { CommunityPostComment, CommunityPostDataWithComments } from "../../types/post"
 
 export const getPostComments = async (
   communityId: string,
@@ -109,7 +109,7 @@ export const getPosts = async (communityId: string, offset: number) => {
 export const getPost = async (
   communityId: string,
   postId: string
-): Promise<CommunityPostData | void> => {
+): Promise<CommunityPostDataWithComments | void> => {
   try {
     const response = await fetch(`${API_URL}/communities/${communityId}/posts/${postId}`)
     const data = await response.json()

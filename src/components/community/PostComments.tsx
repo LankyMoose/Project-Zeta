@@ -7,7 +7,8 @@ import { formatUTCDate } from "../../utils"
 import { Link } from "cinnabun/router"
 import { POST_COMMENT_PAGE_SIZE } from "../../constants"
 import "./PostComments.css"
-import { selectedCommunityPost, selectedPostComments } from "../../state/community"
+import { selectedCommunityPost } from "../../state/community"
+import { EllipsisLoader } from "../loaders/Ellipsis"
 
 const commentsPage = createSignal(0)
 const loadingMore = createSignal<boolean>(false)
@@ -32,6 +33,10 @@ const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
 }
 
 export const PostComments = () => {
+  const comments = Cinnabun.computed(
+    selectedCommunityPost,
+    () => selectedCommunityPost.value?.comments ?? []
+  )
   const loadMoreComments = async () => {
     if (loadingMore.value) return
     if (!selectedCommunityPost.value || !selectedCommunityPost.value.communityId) return
@@ -43,32 +48,24 @@ export const PostComments = () => {
       commentsPage.value * POST_COMMENT_PAGE_SIZE
     )
     if (!res) return
-    console.log(res)
-    selectedPostComments.value.push(...res)
-    selectedPostComments.notify()
+    selectedCommunityPost.value.comments?.push(...res)
+    comments.notify()
     loadingMore.value = false
   }
 
   commentsPage.subscribe(() => {
-    if (!cb.isClient) return
+    if (!cb.isClient || commentsPage.value === 0) return
     loadMoreComments()
-  })
-
-  selectedCommunityPost.subscribe(() => {
-    if (!cb.isClient) return
-    selectedPostComments.value = []
-    commentsPage.value = 0
-    //loadMoreComments()
   })
 
   const onScroll = () => {
     if (loadingMore.value) return
-    debugger
     const bottomPadding = 200
     const { scrollTop, scrollHeight, clientHeight } = document.scrollingElement!
     if (scrollTop + clientHeight + bottomPadding >= scrollHeight) {
-      commentsPage.value++
-      commentsPage.notify()
+      console.log("load more")
+      //commentsPage.value++
+      //commentsPage.notify()
     }
   }
 
@@ -78,18 +75,30 @@ export const PostComments = () => {
       onUnmounted={() => window?.removeEventListener("scroll", onScroll)}
       className="post-card-comments flex flex-column gap"
     >
-      <div className="comments-list">
-        <p
-          className="text-muted m-0"
-          watch={selectedPostComments}
-          bind:visible={() => selectedPostComments.value.length === 0}
-        >
+      <div
+        watch={comments}
+        bind:visible={() => comments.value.length > 0}
+        className="comments-list"
+      >
+        <For each={comments} template={(comment) => <CommentItem comment={comment} />} />
+      </div>
+
+      <div
+        watch={[loadingMore, selectedCommunityPost]}
+        bind:visible={() => loadingMore.value || !selectedCommunityPost.value?.comments}
+        className="flex justify-content-center"
+      >
+        <EllipsisLoader />
+      </div>
+
+      <div
+        watch={selectedCommunityPost}
+        bind:visible={() => selectedCommunityPost.value?.comments?.length === 0}
+        className="flex justify-content-center"
+      >
+        <p className="text-muted m-0">
           <i>No comments yet.</i>
         </p>
-        <For
-          each={selectedPostComments}
-          template={(comment) => <CommentItem comment={comment} />}
-        />
       </div>
     </div>
   )

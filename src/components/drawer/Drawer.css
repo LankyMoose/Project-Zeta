@@ -48,7 +48,14 @@
 .drawer-header {
     padding: var(--padding);
     border-bottom: 1px solid var(--border);
+    background-color: #212123;
 }
+@media (prefers-color-scheme: light) {
+    .drawer-header {
+        background-color: #fafafa;
+    }
+}
+
 
 .drawer-header h2 {
     margin: 0;

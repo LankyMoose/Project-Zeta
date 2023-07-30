@@ -71,28 +71,31 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       const postId = req.params.postId
       if (!communityId || !postId) throw new InvalidRequestError()
 
-      const [community, post] = await Promise.all([
-        communityService.getCommunity(communityId, true),
-        postService.getPost(postId),
-      ])
-      if (!post || !community) {
+      const community = await communityService.getCommunity(communityId, true)
+      if (!community) {
         console.log("not found", postId)
         throw new NotFoundError()
       }
 
       if (community.private) {
         if (!req.cookies.user_id) throw new NotAuthenticatedError()
-
         const error = await communityService.checkCommunityMemberValidity(
-          post.communityId,
+          community.id,
           req.cookies.user_id
         )
         if (error) throw error
       }
 
-      const res = await communityService.getCommunityPost(postId, req.cookies.user_id)
-      if (!res) throw new ServerError()
-      return res
+      const [postData, comments] = await Promise.all([
+        communityService.getCommunityPost(postId, req.cookies.user_id),
+        postService.getPostComments(postId, 0),
+      ])
+
+      if (!postData || !comments) throw new ServerError()
+      return {
+        ...postData,
+        comments,
+      }
     }
   )
 
@@ -105,17 +108,14 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       if (!communityId || !postId) throw new InvalidRequestError()
       if (isNaN(offset)) throw new InvalidRequestError()
 
-      const [community, post] = await Promise.all([
-        communityService.getCommunity(communityId, true),
-        postService.getPost(postId),
-      ])
-      if (!post || !community) throw new NotFoundError()
+      const community = await communityService.getCommunity(communityId, true)
+      if (!community) throw new NotFoundError()
 
       if (community.private) {
         if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
         const error = await communityService.checkCommunityMemberValidity(
-          post.communityId,
+          community.id,
           req.cookies.user_id
         )
         if (error) throw error

@@ -6,13 +6,12 @@ import {
   postModalOpen,
   communityJoinModalOpen,
   isCommunityMember,
-  selectedPostComments,
 } from "../../state/community"
-import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
+import { Modal, ModalBody, ModalHeader } from "../modal/Modal"
 import { AuthorTag } from "../AuthorTag"
 import { addPostComment, getPost } from "../../client/actions/posts"
 import { PostComments } from "./PostComments"
-import { CommunityPostComment, CommunityPostData } from "../../types/post"
+import { CommunityPostDataWithComments } from "../../types/post"
 import { authModalOpen, authModalState, userStore } from "../../state/global"
 import { commentValidation } from "../../db/validation"
 import { AuthModalCallback } from "../../types/auth"
@@ -49,45 +48,48 @@ export const PostModal = () => {
   return (
     <Modal large visible={postModalOpen} toggle={handleClose}>
       <ModalHeader
-        className="modal-header flex gap-lg align-items-start"
+        className="modal-header flex flex-column gap-lg"
         watch={selectedCommunityPost}
         bind:children
       >
-        <h2>{() => selectedCommunityPost.value?.title ?? ""}</h2>
-        {() =>
-          selectedCommunityPost.value?.user && selectedCommunityPost.value.createdAt ? (
-            <div className="ml-auto">
-              <AuthorTag
-                user={selectedCommunityPost.value.user!}
-                date={selectedCommunityPost.value.createdAt!.toString()}
-              />
-            </div>
-          ) : (
-            <></>
-          )
-        }
-      </ModalHeader>
-      <ModalBody>
+        <div className="flex gap-lg align-items-start">
+          <h2>{() => selectedCommunityPost.value?.title ?? ""}</h2>
+          {() =>
+            selectedCommunityPost.value?.user && selectedCommunityPost.value.createdAt ? (
+              <div className="ml-auto">
+                <AuthorTag
+                  user={selectedCommunityPost.value.user!}
+                  date={selectedCommunityPost.value.createdAt!.toString()}
+                />
+              </div>
+            ) : (
+              <></>
+            )
+          }
+        </div>
         <div className="post-content">
-          <p watch={selectedCommunityPost} bind:children>
+          <p watch={selectedCommunityPost} bind:children className="m-0">
             {() => selectedCommunityPost.value?.content ?? ""}
           </p>
         </div>
+        <div
+          watch={selectedCommunityPost}
+          bind:visible={() => !!selectedCommunityPost.value?.comments}
+        >
+          <NewCommentForm post={selectedCommunityPost} />
+        </div>
+      </ModalHeader>
+      <ModalBody>
         <PostComments post={selectedCommunityPost} />
       </ModalBody>
-      <ModalFooter>
-        <NewCommentForm post={selectedCommunityPost} comments={selectedPostComments} />
-      </ModalFooter>
     </Modal>
   )
 }
 
 const NewCommentForm = ({
   post,
-  comments,
 }: {
-  post: Cinnabun.Signal<Partial<CommunityPostData> | null>
-  comments: Cinnabun.Signal<CommunityPostComment[]>
+  post: Cinnabun.Signal<Partial<CommunityPostDataWithComments> | null>
 }) => {
   const newComment = createSignal("")
   const loading = createSignal(false)
@@ -116,8 +118,8 @@ const NewCommentForm = ({
     loading.value = true
     const res = await addPostComment(post.value.id, newComment.value)
     if (res) {
-      comments.value.push(res)
-      comments.notify()
+      if (!post.value.comments) post.value.comments = []
+      post.value.comments.unshift(res)
       post.value.totalComments = (parseInt(post.value.totalComments ?? "0") + 1).toString()
       post.notify()
       newComment.value = ""

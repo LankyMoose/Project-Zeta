@@ -40,6 +40,7 @@
 }
 button {
   color: var(--light);
+  cursor: pointer;
 }
 
 @media (prefers-color-scheme: light) {
@@ -62,8 +63,8 @@ body {
   min-height: 100vh;
 }
 
-button {
-  cursor: pointer;
+p {
+  margin: 0;
 }
 
 a {

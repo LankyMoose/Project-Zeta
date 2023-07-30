@@ -18,9 +18,9 @@
 
 @media (prefers-color-scheme: light) {
   .btn {
-    background-color: #f9f9f9;
+    background-color: transparent;
     color: var(--primary);
-    border: 1px solid #f9f9f9;
+    border: 1px solid transparent;
   }
 }
 

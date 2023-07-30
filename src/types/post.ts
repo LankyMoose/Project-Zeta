@@ -28,6 +28,9 @@ export type CommunityPostData = Post & {
   userReaction: boolean | null
   totalComments: string
 }
+export type CommunityPostDataWithComments = CommunityPostData & {
+  comments: CommunityPostComment[]
+}
 
 export type LatestPostsData = {
   post: {
