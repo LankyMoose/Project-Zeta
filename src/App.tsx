@@ -22,6 +22,7 @@ import { CommunityDrawer } from "./components/community/CommunityDrawer"
 import { CommunityLeaveConfirmation } from "./components/community/CommunityLeaveConfirmation"
 import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation"
 import { UserDropdown } from "./components/UserDropdown"
+import { PostModal } from "./components/community/PostModal"
 
 const Header = () => (
   <header>
@@ -77,6 +78,7 @@ export const App = () => {
         <CommunityDrawer />
         <CommunityLeaveConfirmation />
         <CommunityDeleteConfirmation />
+        <PostModal />
       </Portal>
     </>
   )

@@ -60,6 +60,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
 
   const viewPost = () => {
     selectedCommunityPost.value = post
+    //postModalOpen.value = true
     window.history.pushState(
       null,
       "",

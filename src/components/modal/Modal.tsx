@@ -39,7 +39,7 @@ export const Modal = (
       bind:visible={() => {
         if (!visible.value && onclose) onclose()
         if (visible.value) {
-          bodyStyle.value = "overflow: hidden;"
+          bodyStyle.value = "overflow: hidden; padding-right:16px;"
         } else {
           bodyStyle.value = ""
         }

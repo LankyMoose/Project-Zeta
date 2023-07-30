@@ -12,6 +12,7 @@ import {
   isCommunityMember,
   isCommunityOwner,
   selectedCommunity,
+  selectedCommunityPost,
 } from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
@@ -27,7 +28,6 @@ import { Button } from "../../components/Button"
 import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
 import { CommunityPostData } from "../../types/post"
 import { setPath } from "cinnabun/router"
-import { PostModal } from "../../components/community/PostModal"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
@@ -87,6 +87,19 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       owners: res.owners,
       moderators: res.moderators,
     }
+
+    if (Cinnabun.Cinnabun.isClient && selectedCommunity.value?.id) {
+      const hash = window.location.hash
+      console.log("hash", hash)
+      if (hash) {
+        const id = hash.substring(1)
+        console.log("postId", id)
+        selectedCommunityPost.value = {
+          id,
+        }
+      }
+    }
+
     return res
   }
 
@@ -249,7 +262,6 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
           )
         }}
       </Cinnabun.Suspense>
-      <PostModal />
     </div>
   )
 }

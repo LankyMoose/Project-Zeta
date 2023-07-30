@@ -11,6 +11,8 @@ export const communityLeaveModalOpen = createSignal(false)
 export const communityDeleteModalOpen = createSignal(false)
 export const communityOwnershipTransferModalOpen = createSignal(false)
 
+export const postModalOpen = createSignal(false)
+
 export const selectedCommunity = createSignal<Partial<CommunityData> | null>(null)
 export const selectedCommunityPost = createSignal<Partial<CommunityPostData> | null>(null)
 export const pendingCommunityJoinRequests = createSignal<CommunityJoinRequestData[]>([])
