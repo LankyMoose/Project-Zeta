@@ -43,6 +43,12 @@
 .mr-auto {
   margin-right: auto;
 }
+.mt-auto {
+  margin-top: auto;
+}
+.mb-auto {
+  margin-bottom: auto;
+}
 
 .p-0 {
   padding: 0 !important;
@@ -279,6 +285,12 @@
 
 .text-center {
   text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
 }
 
 .border-none {

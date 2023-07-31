@@ -22,19 +22,16 @@ export default function UserPage({ params }: { params?: { userId?: string } }) {
   }
 
   const loadUser = async () => {
-    if (isSelfView() && userStore.value) {
+    if (isSelfView()) {
+      if (!userStore.value) return 
       title.value = `${userStore.value.name} | Project Zeta`
-      return Promise.resolve({
-        user: userStore.value,
-      })
-    } else if (isSelfView()) {
-      return Promise.resolve({})
+      return userStore.value
     }
+
     const res = await getUser(params.userId!)
-    if (res) {
-      title.value = `${res.name} | Project Zeta`
-    }
-    return Promise.resolve(res)
+    if (res) title.value = `${res.name} | Project Zeta`
+
+    return res
   }
 
   return (

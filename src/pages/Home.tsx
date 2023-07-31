@@ -46,23 +46,27 @@ const PostCard = ({ post, community, user }: LatestPostsData) => {
   return (
     <div className="card" key={post.id}>
       <div className="card-title gap-lg flex justify-content-between">
-        <a href="javascript:void(0)" onclick={viewPost}>
-          {post.title}
-        </a>
-        <Link
-          onBeforeNavigate={() => {
-            selectedCommunity.value = { ...community }
-            return true
-          }}
-          store={pathStore}
-          to={`/communities/${community.url_title}`}
-          className="text-primary"
-        >
-          {community.title}
-        </Link>
+        <h4 className="m-0 title flex-grow w-100">
+          <a href="javascript:void(0)" onclick={viewPost}>
+            {post.title}
+          </a>
+        </h4>
+        <small className="text-right">
+          <Link
+            onBeforeNavigate={() => {
+              selectedCommunity.value = { ...community }
+              return true
+            }}
+            store={pathStore}
+            to={`/communities/${community.url_title}`}
+            className="text-primary nowrap"
+          >
+            {community.title}
+          </Link>
+        </small>
       </div>
       <div className="card-body">{post.content}</div>
-      <div className="flex justify-content-between">
+      <div className="flex justify-content-between mt-auto">
         <div></div>
         <div className="flex flex-column align-items-end">
           <AuthorTag user={user} date={timeSinceDate(new Date(post.createdAt))} />
