@@ -7,8 +7,10 @@ import { DefaultLoader } from "../components/loaders/Default"
 import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
 import { timeSinceDate } from "../utils"
+import { title } from "../Document"
 
 export default function Home() {
+  title.value = "Project Zeta"
   return (
     <div className="flex gap flex-wrap">
       <section>

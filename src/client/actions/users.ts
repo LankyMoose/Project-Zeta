@@ -1,8 +1,7 @@
 import { API_URL } from "../../constants"
 import { User } from "../../db/schema"
 
-export type UserListResponse = { users: User[] }
-export const getUsers = async (page: number = 0): Promise<UserListResponse | void> => {
+export const getUsers = async (page: number = 0): Promise<User[] | void> => {
   try {
     const res = await fetch(`${API_URL}/users?page=${page}`)
     if (!res.ok) throw new Error("Failed to fetch users")

@@ -1,6 +1,8 @@
 import * as Cinnabun from "cinnabun"
-import { type Component } from "cinnabun"
+import { type Component, createSignal } from "cinnabun"
 import { bodyStyle } from "./state/global"
+
+export const title = createSignal("Project Zeta")
 
 export const Document = (App: { (): Component }) => {
   return (
@@ -8,7 +10,7 @@ export const Document = (App: { (): Component }) => {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>SSR App</title>
+        <title>{title}</title>
         <link rel="stylesheet" href="/static/index.css" />
       </head>
 

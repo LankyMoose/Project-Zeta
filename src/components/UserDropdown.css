@@ -9,6 +9,7 @@
   position: absolute;
   right: 0;
   background-color: #1e1e1e;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, .15);
   margin:0.25rem
 }
 

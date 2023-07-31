@@ -9,6 +9,7 @@ import HomePage from "./pages/Home"
 import CommunitiesPage from "./pages/Communities"
 import CommunityPage from "./pages/Community/Page"
 import UserPage from "./pages/User/Page"
+import UsersPage from "./pages/Users"
 
 import { CommunityCreator } from "./components/communities/CommunityCreator"
 import { PostCreator } from "./components/community/PostCreator"
@@ -74,7 +75,7 @@ export const App = () => {
             <Route path="/" component={HomePage} />
             <Route path="/communities" component={CommunitiesPage} />
             <Route path="/communities/:url_title" component={CommunityPage} />
-            <Route path="/users" component={<div>Users</div>} />
+            <Route path="/users" component={UsersPage} />
             <Route path="/users/:userId" component={UserPage} />
           </Router>
         </main>

@@ -27,9 +27,11 @@ import { Button } from "../../components/Button"
 import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
 import { CommunityPostData } from "../../types/post"
 import { setPath } from "cinnabun/router"
+import { title } from "../../Document"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
+  title.value = params.url_title + " | Project Zeta"
 
   const showLoginPrompt = () => {
     authModalState.value = {
@@ -64,6 +66,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       setPath(pathStore, "/communities")
       return res
     }
+    title.value = res.title + " | Project Zeta"
 
     if (!canViewCommunityData(res)) {
       if (userStore.value) {

@@ -6,6 +6,7 @@ import { MyCommunities } from "../../components/user/MyCommunities"
 import { getUser } from "../../client/actions/users"
 import { PublicUser } from "../../types/user"
 import { DefaultLoader } from "../../components/loaders/Default"
+import { title } from "../../Document"
 
 export default function UserPage({ params }: { params?: { userId?: string } }) {
   if (!params?.userId) return setPath(pathStore, "/users")
@@ -20,24 +21,37 @@ export default function UserPage({ params }: { params?: { userId?: string } }) {
     if (!userStore.value && isSelfView()) setPath(pathStore, `/`)
   }
 
-  const loadUser = () => {
+  const loadUser = async () => {
     if (isSelfView() && userStore.value) {
+      title.value = `${userStore.value.name} | Project Zeta`
       return Promise.resolve({
         user: userStore.value,
       })
     } else if (isSelfView()) {
       return Promise.resolve({})
     }
-    return getUser(params.userId!)
+    const res = await getUser(params.userId!)
+    if (res) {
+      title.value = `${res.name} | Project Zeta`
+    }
+    return Promise.resolve(res)
   }
 
   return (
     <div onMounted={handleMount}>
       <Suspense promise={loadUser}>
-        {(loading: boolean, data?: { user?: PublicUser }) => {
+        {(loading: boolean, data?: PublicUser) => {
           if (loading) return <DefaultLoader />
-          if (!data?.user) return <></>
-          return <h1>{data?.user.name}</h1>
+          if (!data) return <></>
+
+          return (
+            <div className="page-title flex gap align-items-center">
+              <div className="avatar-wrapper">
+                <img src={data.picture} alt={data.name} className="avatar" width="48" height="48" />
+              </div>
+              <h1>{data.name}</h1>
+            </div>
+          )
         }}
       </Suspense>
       <div

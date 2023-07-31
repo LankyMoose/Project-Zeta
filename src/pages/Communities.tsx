@@ -7,8 +7,10 @@ import { userStore, authModalOpen, authModalState } from "../state/global"
 import { communityCreatorModalOpen } from "../state/community"
 import { AuthModalCallback } from "../types/auth"
 import { CommunityListData } from "../types/community"
+import { title } from "../Document"
 
 export default function Communities() {
+  title.value = "Communities | Project Zeta"
   const handleCreateCommunityClick = () => {
     if (!userStore.value) {
       authModalState.value = {

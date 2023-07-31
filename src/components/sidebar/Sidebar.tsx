@@ -56,7 +56,7 @@ export const Sidebar = () => {
               className="sidebar-link"
             >
               <UsersIcon />
-              <span className="collapse-text">People</span>
+              <span className="collapse-text">Users</span>
             </Link>
           </div>
         </section>
