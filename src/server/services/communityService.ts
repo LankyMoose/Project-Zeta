@@ -27,6 +27,7 @@ import {
   LeaveResultType,
 } from "../../types/community"
 import { CommunityPostData, FlatCommunityPostData, LatestPostsData } from "../../types/post"
+import { alias } from "drizzle-orm/pg-core"
 
 const latestPostColumns = sql`
 ${posts.id} as post_id,
@@ -320,12 +321,13 @@ export const communityService = {
     }
   },
 
-  async getOwnedCommunitiesByUser(userId: string): Promise<CommunityListData[]> {
+  async getUserCommunitiesByMemberType(userId: string, memberType: 'member' | 'moderator' | 'owner'): Promise<CommunityListData[]> {
     try {
+      const cm = alias(communityMembers, "cm")
       return await db
         .select({
           community: communities,
-          members: sql<number>`count(${communityMembers.id})`,
+          members: sql<number>`count(${cm.id})`,
         })
         .from(communities)
         .where(eq(communities.disabled, false))
@@ -333,63 +335,17 @@ export const communityService = {
           communityMembers,
           and(
             eq(communityMembers.communityId, communities.id),
-            eq(communityMembers.memberType, "owner")
+            eq(communityMembers.memberType, memberType)
           )
+      ).leftJoin(
+        cm,
+          eq(cm.communityId, communities.id),
         )
         .where(eq(communityMembers.userId, userId))
         .groupBy(communities.id)
         .orderBy(({ members }) => desc(members))
         .execute()
-    } catch (error) {
-      console.error(error)
-      return []
-    }
-  },
-  async getModeratedCommunitiesByUser(userId: string): Promise<CommunityListData[]> {
-    try {
-      return await db
-        .select({
-          community: communities,
-          members: sql<number>`count(${communityMembers.id})`,
-        })
-        .from(communities)
-        .where(and(eq(communities.disabled, false), eq(communities.deleted, false)))
-        .innerJoin(
-          communityMembers,
-          and(
-            eq(communityMembers.communityId, communities.id),
-            eq(communityMembers.memberType, "moderator")
-          )
-        )
-        .where(eq(communityMembers.userId, userId))
-        .groupBy(communities.id)
-        .orderBy(({ members }) => desc(members))
-        .execute()
-    } catch (error) {
-      console.error(error)
-      return []
-    }
-  },
-  async getMemberCommunitiesByUser(userId: string): Promise<CommunityListData[]> {
-    try {
-      return await db
-        .select({
-          community: communities,
-          members: sql<number>`count(${communityMembers.id})`,
-        })
-        .from(communities)
-        .where(and(eq(communities.disabled, false), eq(communities.deleted, false)))
-        .innerJoin(
-          communityMembers,
-          and(
-            eq(communityMembers.communityId, communities.id),
-            eq(communityMembers.memberType, "member")
-          )
-        )
-        .where(eq(communityMembers.userId, userId))
-        .groupBy(communities.id)
-        .orderBy(({ members }) => desc(members))
-        .execute()
+      
     } catch (error) {
       console.error(error)
       return []

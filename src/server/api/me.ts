@@ -7,9 +7,9 @@ export function configureMeRoutes(app: FastifyInstance) {
     const userId = getUserIdOrDie(req)
 
     const [owned, moderated, member] = await Promise.all([
-      communityService.getOwnedCommunitiesByUser(userId),
-      communityService.getModeratedCommunitiesByUser(userId),
-      communityService.getMemberCommunitiesByUser(userId),
+      communityService.getUserCommunitiesByMemberType(userId, "owner"),
+      communityService.getUserCommunitiesByMemberType(userId, "moderator"),
+      communityService.getUserCommunitiesByMemberType(userId, "member"),
     ])
     return {
       owned,
