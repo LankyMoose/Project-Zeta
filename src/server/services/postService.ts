@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { db } from "../../db"
 import {
   Post,
@@ -9,7 +9,12 @@ import {
   postComments,
   users,
 } from "../../db/schema"
-import { CommunityPostComment, CommunityPostData, FlatCommunityPostData } from "../../types/post"
+import {
+  CommunityPostComment,
+  CommunityPostData,
+  FlatCommunityPostComment,
+  FlatCommunityPostData,
+} from "../../types/post"
 import { ServerError } from "../../errors"
 import { PublicUser } from "../../types/user"
 import { POST_COMMENT_PAGE_SIZE } from "../../constants"
@@ -97,11 +102,12 @@ export const postService = {
       if (data.length === 0) return
 
       const item = data[0]
+      //@ts-ignore
       return {
         id: item.post_id,
         title: item.post_title,
         content: item.post_content,
-        createdAt: new Date(item.post_created_at),
+        createdAt: item.post_created_at,
         ownerId: item.post_owner_id,
         communityId: item.post_community_id,
         deleted: item.post_deleted,
@@ -189,22 +195,66 @@ export const postService = {
 
   async getPostComments(postId: string, offset: number): Promise<CommunityPostComment[] | void> {
     try {
-      return await db.query.postComments.findMany({
-        where: (postComment, { eq, and }) =>
-          and(eq(postComment.postId, postId), eq(postComment.deleted, false)),
-        orderBy: [desc(postComments.createdAt)],
-        with: {
-          user: {
-            columns: {
-              id: true,
-              name: true,
-              avatarUrl: true,
-            },
-          },
+      const query = sql`
+        with post_comments as (
+          select
+            ${postComments.id} as comment_id,
+            ${postComments.content} as comment_content, 
+            ${postComments.createdAt} as comment_created_at,
+            ${postComments.ownerId} as comment_owner_id,
+            ${postComments.postId} as comment_post_id,
+            ${postComments.deleted} as comment_deleted
+          from ${postComments}
+          where ${postComments.postId} = ${postId}
+          and ${postComments.deleted} = false
+          order by ${postComments.createdAt} desc
+          limit ${POST_COMMENT_PAGE_SIZE}
+          offset ${offset}
+        ), comment_owner as (
+          select
+            ${users.id} as user_id,
+            ${users.name} as user_name,
+            ${users.avatarUrl} as user_avatar_url
+          from ${users}
+          inner join post_comments on ${users.id} = post_comments.comment_owner_id
+        )
+
+        select
+          post_comments.*,
+          comment_owner.*
+        from post_comments
+        left join comment_owner on post_comments.comment_owner_id = comment_owner.user_id
+      `
+
+      const data = (await db.execute(query)) as FlatCommunityPostComment[]
+
+      return data.map((item) => ({
+        id: item.comment_id,
+        content: item.comment_content,
+        createdAt: item.comment_created_at,
+        user: {
+          id: item.user_id,
+          name: item.user_name,
+          avatarUrl: item.user_avatar_url,
         },
-        limit: POST_COMMENT_PAGE_SIZE,
-        offset,
-      })
+      }))
+
+      // return await db.query.postComments.findMany({
+      //   where: (postComment, { eq, and }) =>
+      //     and(eq(postComment.postId, postId), eq(postComment.deleted, false)),
+      //   orderBy: [desc(postComments.createdAt)],
+      //   with: {
+      //     user: {
+      //       columns: {
+      //         id: true,
+      //         name: true,
+      //         avatarUrl: true,
+      //       },
+      //     },
+      //   },
+      //   limit: POST_COMMENT_PAGE_SIZE,
+      //   offset,
+      // })
     } catch (error) {
       console.error(error)
       return

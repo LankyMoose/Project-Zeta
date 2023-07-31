@@ -17,7 +17,7 @@ import { commentValidation } from "../../db/validation"
 import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
-import { timeSinceDate } from "../../utils"
+import { timeSinceUTCDate } from "../../utils"
 
 const loading = createSignal(false)
 
@@ -68,7 +68,7 @@ export const PostModal = () => {
               <div className="ml-auto">
                 <AuthorTag
                   user={selectedCommunityPost.value.user!}
-                  date={timeSinceDate(new Date(selectedCommunityPost.value.createdAt))}
+                  date={timeSinceUTCDate(selectedCommunityPost.value.createdAt)}
                 />
               </div>
             ) : (

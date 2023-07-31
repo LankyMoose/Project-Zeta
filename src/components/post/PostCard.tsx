@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
-import { timeSinceDate, truncateText } from "../../utils"
+import { timeSinceUTCDate, truncateText } from "../../utils"
 import { CommunityPostData } from "../../types/post"
 import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
@@ -70,7 +70,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
             {post.title}
           </a>
         </h4>
-        <AuthorTag user={post.user} date={timeSinceDate(new Date(post.createdAt))} />
+        <AuthorTag user={post.user} date={timeSinceUTCDate(post.createdAt)} />
       </div>
       <p className="post-card-content">{truncateText(post.content, 256)}</p>
       <div className="flex justify-content-between">

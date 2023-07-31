@@ -6,7 +6,7 @@ import { LatestPostsData } from "../types/post"
 import { DefaultLoader } from "../components/loaders/Default"
 import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
-import { timeSinceDate } from "../utils"
+import { timeSinceUTCDate } from "../utils"
 import { title } from "../Document"
 import { CommentIcon } from "../components/icons/CommentIcon"
 
@@ -77,7 +77,7 @@ const PostCard = ({ post, community, user }: LatestPostsData) => {
         </button>
         </div>
         <div className="flex flex-column align-items-end">
-          <AuthorTag user={user} date={timeSinceDate(new Date(post.createdAt))} />
+          <AuthorTag user={user} date={timeSinceUTCDate(post.createdAt)} />
         </div>
       </div>
     </div>

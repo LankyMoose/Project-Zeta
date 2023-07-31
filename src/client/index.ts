@@ -13,6 +13,8 @@ import { SSRProps } from "cinnabun/src/types"
 import { App } from "../App"
 import { Cinnabun } from "cinnabun"
 import { createLiveSocket } from "./liveSocket"
+import { selectedCommunityPost } from "../state/community"
+import { isUuid } from "../utils"
 
 const env = process.env.NODE_ENV ?? "development"
 
@@ -20,6 +22,11 @@ if ("__cbData" in window) {
   try {
     Cinnabun.registerRuntimeServices(createLiveSocket())
     Hydration.hydrate(Document(App), window.__cbData as SSRProps)
+    const params = new URLSearchParams(window.location.search)
+    const postId = params.get("post")
+    if (postId && isUuid(postId)) {
+      selectedCommunityPost.value = { id: postId }
+    }
   } catch (error) {
     console.error(error)
   }

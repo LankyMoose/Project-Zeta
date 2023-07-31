@@ -49,10 +49,28 @@ export const timeSinceDate = (date: Date) => {
   if (interval > 1) {
     return `${Math.floor(interval)} minute${usePlural(interval) ? "s" : ""} ago`
   }
-  return Math.floor(interval) <= 30 ? "just now" : `${Math.floor(interval)} seconds ago`
+  console.log(interval)
+  return `${Math.floor(interval)} seconds ago`
+}
+export const convertUTCDateToLocalDate = (date: Date) => {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
+}
+export const timeSinceUTCDate = (date: Date | string) => {
+  const utc = convertUTCDateToLocalDate(new Date(date))
+  return timeSinceDate(utc)
+}
+
+export const isEmail = (str: string) => {
+  const emailRegex = /\S+@\S+\.\S+/
+  return emailRegex.test(str)
 }
 
 export const isUuid = (str: string) => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(str)
+}
+
+export const isUrl = (str: string) => {
+  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/
+  return urlRegex.test(str)
 }

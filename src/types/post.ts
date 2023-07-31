@@ -15,6 +15,15 @@ export type CommunityPostComment = {
   }
 }
 
+export type FlatCommunityPostComment = {
+  comment_id: string
+  comment_content: string
+  comment_created_at: string
+  user_id: string
+  user_name: string
+  user_avatar_url: string | null
+}
+
 export type CommunityPostData = Post & {
   user: {
     id: string
