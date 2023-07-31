@@ -52,7 +52,7 @@ export const PostModal = () => {
     selectedCommunityPost.value = null
     postModalOpen.value = false
     postCommentsPage.value = 0
-    window.history.pushState(null, "", `/communities/${selectedCommunity.value?.url_title}`)
+    window.history.pushState(null, "", window.location.pathname)
   }
 
   return (

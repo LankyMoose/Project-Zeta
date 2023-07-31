@@ -3,7 +3,9 @@ ul.card-list {
   padding: 0;
   list-style: none;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 
@@ -18,10 +20,14 @@ ul.card-list {
   gap: 1rem;
   border: 1px solid var(--border);
   break-inside: avoid;
-  margin-bottom: 1rem;
+  flex-grow: 1;
+  flex-basis: calc(50% - 0.5rem);
+  min-width: 280px;
 }
-.card:last-child {
-  margin-bottom: 0;
+@media screen and (min-width: 768px) {
+  .card {
+    flex-basis: calc(33.333% - 1rem);
+  }
 }
 
 

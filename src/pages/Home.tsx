@@ -8,6 +8,30 @@ import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
 import { timeSinceDate } from "../utils"
 
+export default function Home() {
+  return (
+    <div className="flex gap flex-wrap">
+      <section>
+        <div className="section-header">
+          <h2>Latest posts</h2>
+        </div>
+        <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
+          {(loading: boolean, data?: LatestPostsData[]) => {
+            if (loading) return <DefaultLoader />
+            if (!data) return <div className="text-muted">No posts yet.</div>
+            //return data.map((item) => <PostCard {...item} />)
+            return (
+              <ul className="card-list">
+                <Cinnabun.For each={data} template={(item) => <PostCard {...item} />} />
+              </ul>
+            )
+          }}
+        </Cinnabun.Suspense>
+      </section>
+    </div>
+  )
+}
+
 const PostCard = ({ post, community, user }: LatestPostsData) => {
   return (
     <div className="card" key={post.id}>
@@ -32,25 +56,6 @@ const PostCard = ({ post, community, user }: LatestPostsData) => {
           <AuthorTag user={user} date={timeSinceDate(new Date(post.createdAt))} />
         </div>
       </div>
-    </div>
-  )
-}
-
-export default function Home() {
-  return (
-    <div className="flex gap flex-wrap">
-      <section>
-        <div className="section-header">
-          <h2>Latest posts</h2>
-        </div>
-        <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
-          {(loading: boolean, data?: LatestPostsData[]) => {
-            if (loading) return <DefaultLoader />
-            if (!data) return <div className="text-muted">No posts yet.</div>
-            return <Cinnabun.For each={data} template={(item) => <PostCard {...item} />} />
-          }}
-        </Cinnabun.Suspense>
-      </section>
     </div>
   )
 }
