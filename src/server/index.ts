@@ -301,8 +301,6 @@ app.get("/*", async (req, res) => {
   const reqUser = req.cookies["user"]
   const reqUserId = req.cookies["user_id"]
 
-  console.log(req.url)
-
   const cinnabunInstance = new Cinnabun()
   cinnabunInstance.setServerRequestData({
     path: req.url,

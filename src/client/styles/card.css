@@ -21,10 +21,14 @@ ul.card-list {
   border: 1px solid var(--border);
   break-inside: avoid;
   flex-grow: 1;
-  flex-basis: calc(50% - 0.5rem);
-  min-width: 280px;
+  width:100%;
 }
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 980px) {
+  .card {
+    flex-basis: calc(50% - 0.5rem);
+  }
+}
+@media screen and (min-width: 1440px) {
   .card {
     flex-basis: calc(33.333% - 1rem);
   }
