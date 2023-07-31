@@ -197,33 +197,20 @@ export const postService = {
   async getPostComments(postId: string, offset: number): Promise<CommunityPostComment[] | void> {
     try {
       const query = sql`
-        with post_comments as (
-          select
-            ${postComments.id} as comment_id,
-            ${postComments.content} as comment_content, 
-            ${postComments.createdAt} as comment_created_at,
-            ${postComments.ownerId} as comment_owner_id,
-            ${postComments.postId} as comment_post_id,
-            ${postComments.deleted} as comment_deleted
-          from ${postComments}
-          where ${postComments.postId} = ${postId}
-          and ${postComments.deleted} = false
-          order by ${postComments.createdAt} desc
-          limit ${POST_COMMENT_PAGE_SIZE}
-          offset ${offset}
-        ), comment_owner as (
-          select
-            post_comments.*,
-            ${users.id} as user_id,
-            ${users.name} as user_name,
-            ${users.avatarUrl} as user_avatar_url
-          from post_comments
-          left join ${users} on ${users.id} = post_comments.comment_owner_id
-        )
-
         select
-          *
-        from comment_owner
+          ${postComments.id} as comment_id,
+          ${postComments.content} as comment_content, 
+          ${postComments.createdAt} as comment_created_at,
+          ${users.id} as user_id,
+          ${users.name} as user_name,
+          ${users.avatarUrl} as user_avatar_url
+        from ${postComments}
+        inner join ${users} on ${users.id} = ${postComments.ownerId}
+        where ${postComments.postId} = ${postId}
+        and ${postComments.deleted} = false
+        order by ${postComments.createdAt} desc
+        limit ${POST_COMMENT_PAGE_SIZE}
+        offset ${offset}
       `
 
       const data = (await db.execute(query)) as FlatCommunityPostComment[]
@@ -238,23 +225,6 @@ export const postService = {
           avatarUrl: item.user_avatar_url,
         },
       }))
-
-      // return await db.query.postComments.findMany({
-      //   where: (postComment, { eq, and }) =>
-      //     and(eq(postComment.postId, postId), eq(postComment.deleted, false)),
-      //   orderBy: [desc(postComments.createdAt)],
-      //   with: {
-      //     user: {
-      //       columns: {
-      //         id: true,
-      //         name: true,
-      //         avatarUrl: true,
-      //       },
-      //     },
-      //   },
-      //   limit: POST_COMMENT_PAGE_SIZE,
-      //   offset,
-      // })
     } catch (error) {
       console.error(error)
       return
