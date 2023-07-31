@@ -12,6 +12,7 @@ import {
 } from "../../errors"
 import { JoinResultType } from "../../types/community"
 import { getActiveMemberOrDie, getUserIdOrDie } from "./util"
+import { isUuid } from "../../utils"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) => {
@@ -82,7 +83,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   app.post<{ Params: { id?: string }; Body: { requestId: string; accepted: boolean } }>(
     "/api/communities/:id/join-requests",
     async (req) => {
-      if (!req.params.id) throw new InvalidRequestError()
+      if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
 
       const member = await getActiveMemberOrDie(req, req.params.id)
       if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
@@ -99,7 +100,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     Params: { id?: string }
     Body: { userId: string; memberType: "owner" | "moderator" | "member" | "none" }
   }>("/api/communities/:id/members", async (req) => {
-    if (!req.params.id) throw new InvalidRequestError()
+    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
 
     const member = await getActiveMemberOrDie(req, req.params.id)
     if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
@@ -137,7 +138,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   })
 
   app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
-    if (!req.params.id) throw new InvalidRequestError()
+    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
     const userId = getUserIdOrDie(req)
 
     const community = await communityService.getCommunity(req.params.id, true)
@@ -156,7 +157,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   })
 
   app.post<{ Params: { id?: string } }>("/api/communities/:id/leave", async (req) => {
-    if (!req.params.id) throw new InvalidRequestError()
+    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
     const userId = getUserIdOrDie(req)
 
     const res = await communityService.leaveCommunity(req.params.id, userId)
@@ -187,7 +188,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   app.patch<{ Body: Partial<NewCommunity>; Params: { id?: string } }>(
     "/api/communities/:id",
     async (req) => {
-      if (!req.params.id) throw new InvalidRequestError()
+      if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
       if (req.body.url_title) delete req.body.url_title
       const { title, description, private: _private } = req.body
 
@@ -210,7 +211,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
   )
   app.delete<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
-    if (!req.params.id) throw new InvalidRequestError()
+    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
 
     const member = await getActiveMemberOrDie(req, req.params.id)
     if (member.memberType !== "owner") throw new UnauthorizedError()

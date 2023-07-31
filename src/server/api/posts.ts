@@ -5,6 +5,7 @@ import { postValidation } from "../../db/validation"
 import { InvalidRequestError, NotFoundError, ServerError, UnauthorizedError } from "../../errors"
 import { getActiveMemberOrDie, getUserIdOrDie, getUserOrDie } from "./util"
 import { communityService } from "../services/communityService"
+import { isUuid } from "../../utils"
 
 export function configurePostsRoutes(app: FastifyInstance) {
   app.post<{ Body: NewPost }>("/api/posts", async (req) => {
@@ -22,16 +23,13 @@ export function configurePostsRoutes(app: FastifyInstance) {
   })
 
   app.get<{ Params: { postId: string } }>("/api/posts/:postId", async (req) => {
-    const postId = req.params.postId
-
-    if (!postId) throw new InvalidRequestError()
+    if (!req.params.postId || !isUuid(req.params.postId)) throw new InvalidRequestError()
 
     const [postData, comments] = await Promise.all([
-      postService.getPostWithMetadata(postId, req.cookies.user_id),
-      postService.getPostComments(postId, 0),
+      postService.getPostWithMetadata(req.params.postId, req.cookies.user_id),
+      postService.getPostComments(req.params.postId, 0),
     ])
     if (!postData || !comments) throw new NotFoundError()
-    console.log("loaded post")
 
     const communityId = postData.communityId
     if (!communityId) throw new ServerError()
@@ -49,11 +47,11 @@ export function configurePostsRoutes(app: FastifyInstance) {
     "/api/posts/:postId/comments",
     async (req) => {
       const offset = parseInt(req.query.offset)
-      const postId = req.params.postId
+      if (!req.params.postId || !isUuid(req.params.postId)) throw new InvalidRequestError()
 
       if (isNaN(offset)) throw new InvalidRequestError()
 
-      const post = await postService.getPost(postId)
+      const post = await postService.getPost(req.params.postId)
       if (!post) throw new NotFoundError()
 
       const community = await communityService.getCommunity(post.communityId, true)

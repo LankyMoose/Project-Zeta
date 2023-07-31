@@ -12,7 +12,6 @@ import {
   isCommunityMember,
   isCommunityOwner,
   selectedCommunity,
-  selectedCommunityPost,
 } from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../types/community"
@@ -86,13 +85,6 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       members: res.members,
       owners: res.owners,
       moderators: res.moderators,
-    }
-
-    if (Cinnabun.Cinnabun.isClient && selectedCommunity.value?.id) {
-      const hash = window.location.hash
-      if (hash) {
-        selectedCommunityPost.value = { id: hash.substring(1) }
-      }
     }
 
     return res

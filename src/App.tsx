@@ -23,6 +23,8 @@ import { CommunityLeaveConfirmation } from "./components/community/CommunityLeav
 import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation"
 import { UserDropdown } from "./components/UserDropdown"
 import { PostModal } from "./components/post/PostModal"
+import { selectedCommunityPost } from "./state/community"
+import { isUuid } from "./utils"
 
 const Header = () => (
   <header>
@@ -52,6 +54,15 @@ const Header = () => (
 )
 
 export const App = () => {
+  if (Cinnabun.Cinnabun.isClient) {
+    const params = new URLSearchParams(window.location.search)
+    const postId = params.get("post")
+    if (postId && isUuid(postId)) {
+      selectedCommunityPost.value = {
+        id: postId,
+      }
+    }
+  }
   return (
     <>
       <Header />
