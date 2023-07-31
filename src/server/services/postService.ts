@@ -136,6 +136,7 @@ export const postService = {
     comment: string
   ): Promise<CommunityPostComment | undefined> {
     try {
+      const createdAt = new Date().toISOString()
       const newComment = (
         await db
           .insert(postComments)
@@ -152,7 +153,7 @@ export const postService = {
       return {
         id: newComment.id,
         content: newComment.content,
-        createdAt: newComment.createdAt,
+        createdAt,
         user: {
           id: user.userId,
           name: user.name,
@@ -212,18 +213,17 @@ export const postService = {
           offset ${offset}
         ), comment_owner as (
           select
+            post_comments.*,
             ${users.id} as user_id,
             ${users.name} as user_name,
             ${users.avatarUrl} as user_avatar_url
-          from ${users}
-          inner join post_comments on ${users.id} = post_comments.comment_owner_id
+          from post_comments
+          left join ${users} on ${users.id} = post_comments.comment_owner_id
         )
 
         select
-          post_comments.*,
-          comment_owner.*
-        from post_comments
-        left join comment_owner on post_comments.comment_owner_id = comment_owner.user_id
+          *
+        from comment_owner
       `
 
       const data = (await db.execute(query)) as FlatCommunityPostComment[]

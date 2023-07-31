@@ -29,6 +29,9 @@ const usePlural = (num: number) => Math.floor(num) !== 1
 
 export const timeSinceDate = (date: Date) => {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
+  if (seconds < 5) return "just now"
+  if (seconds < 60) return `${seconds} seconds ago`
+
   let interval = seconds / 31536000
   if (interval > 1) {
     return `${Math.floor(interval)} year${usePlural(interval) ? "s" : ""} ago`
@@ -49,8 +52,8 @@ export const timeSinceDate = (date: Date) => {
   if (interval > 1) {
     return `${Math.floor(interval)} minute${usePlural(interval) ? "s" : ""} ago`
   }
-  console.log(interval)
-  return `${Math.floor(interval)} seconds ago`
+
+  return `${Math.floor(seconds)} second${usePlural(seconds) ? "s" : ""} ago`
 }
 export const convertUTCDateToLocalDate = (date: Date) => {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
