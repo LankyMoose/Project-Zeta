@@ -93,7 +93,7 @@ export const PostModal = () => {
       </ModalBody>
       <ModalFooter className="modal-footer p-2">
         <Button
-          className="btn w-100 flex justify-content-center py-3 text-muted"
+          className="btn w-100 flex justify-content-center py-3 text-muted text-rg"
           onclick={handleClose}
         >
           Close

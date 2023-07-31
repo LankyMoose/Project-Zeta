@@ -3,7 +3,7 @@ import { ComponentChildren, ComponentProps } from "cinnabun/types"
 import { ClickOutsideListener, KeyboardListener, NavigationListener } from "cinnabun/listeners"
 import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
-import { bodyStyle } from "../../state/global"
+import { bodyStyle, pathStore } from "../../state/global"
 
 type ModalGestureProps = {
   closeOnNavigate?: boolean
@@ -29,6 +29,10 @@ export const Modal = (
 ) => {
   const _gestures = { ...defaultGestures, ...gestures }
   const { closeOnNavigate, closeOnClickOutside, closeOnEscape } = _gestures
+
+  pathStore.subscribe(() => {
+    if (closeOnNavigate && visible.value) toggle(new Event("click"))
+  })
 
   return (
     <FadeInOut

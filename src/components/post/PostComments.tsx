@@ -45,7 +45,10 @@ export const PostComments = () => {
       postCommentsPage.value * POST_COMMENT_PAGE_SIZE
     )
     if (!res) return
-    selectedCommunityPost.value.comments?.push(...res)
+    if (!selectedCommunityPost.value) return
+
+    if (!selectedCommunityPost.value.comments) selectedCommunityPost.value.comments = []
+    selectedCommunityPost.value.comments.push(...res)
     comments.notify()
     loadingMore.value = false
   }
