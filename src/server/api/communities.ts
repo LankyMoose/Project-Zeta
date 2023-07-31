@@ -12,6 +12,7 @@ import {
 } from "../../errors"
 import { JoinResultType } from "../../types/community"
 import { postService } from "../services/postService"
+import { getActiveMemberOrDie, getUserIdOrDie } from "./util"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) => {
@@ -33,9 +34,9 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     return res
   })
 
-  app.get<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
-    if (!req.params.id) throw new InvalidRequestError()
-    const res = await communityService.getCommunityWithMembers(req.params.id)
+  app.get<{ Params: { url_title?: string } }>("/api/communities/:url_title", async (req) => {
+    if (!req.params.url_title) throw new InvalidRequestError()
+    const res = await communityService.getCommunityWithMembers(req.params.url_title)
     if (!res) throw new NotFoundError()
     let member
     if (req.cookies.user_id) {
@@ -51,13 +52,17 @@ export function configureCommunityRoutes(app: FastifyInstance) {
         description: res.description,
       }
 
+    if (member.disabled) return { ...res, memberType: "guest" }
+
     return { ...res, memberType: member.memberType }
   })
 
-  app.get<{ Params: { id?: string } }>("/api/communities/:id/posts", async (req) => {
-    if (!req.params.id) throw new InvalidRequestError()
-    const community = await communityService.getCommunity(req.params.id)
+  app.get<{ Params: { url_title?: string } }>("/api/communities/:url_title/posts", async (req) => {
+    if (!req.params.url_title) throw new InvalidRequestError()
+
+    const community = await communityService.getCommunity(req.params.url_title)
     if (!community) throw new NotFoundError()
+    if (community.private) await getActiveMemberOrDie(req, community.id)
 
     const res = await communityService.getCommunityPosts(community.id, req.cookies.user_id)
     if (!res) throw new ServerError()
@@ -69,22 +74,12 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     async (req) => {
       const communityId = req.params.id
       const postId = req.params.postId
+
       if (!communityId || !postId) throw new InvalidRequestError()
 
       const community = await communityService.getCommunity(communityId, true)
-      if (!community) {
-        console.log("not found", postId)
-        throw new NotFoundError()
-      }
-
-      if (community.private) {
-        if (!req.cookies.user_id) throw new NotAuthenticatedError()
-        const error = await communityService.checkCommunityMemberValidity(
-          community.id,
-          req.cookies.user_id
-        )
-        if (error) throw error
-      }
+      if (!community) throw new NotFoundError()
+      if (community.private) await getActiveMemberOrDie(req, community.id)
 
       const [postData, comments] = await Promise.all([
         communityService.getCommunityPost(postId, req.cookies.user_id),
@@ -105,21 +100,13 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       const offset = parseInt(req.query.offset)
       const communityId = req.params.id
       const postId = req.params.postId
+
       if (!communityId || !postId) throw new InvalidRequestError()
       if (isNaN(offset)) throw new InvalidRequestError()
 
       const community = await communityService.getCommunity(communityId, true)
       if (!community) throw new NotFoundError()
-
-      if (community.private) {
-        if (!req.cookies.user_id) throw new NotAuthenticatedError()
-
-        const error = await communityService.checkCommunityMemberValidity(
-          community.id,
-          req.cookies.user_id
-        )
-        if (error) throw error
-      }
+      if (community.private) await getActiveMemberOrDie(req, community.id)
 
       const res = await postService.getPostComments(req.params.postId, offset)
       if (!res) throw new ServerError()
@@ -129,11 +116,9 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { id?: string } }>("/api/communities/:id/join-requests", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
-    const member = await communityService.getCommunityMember(req.params.id, req.cookies.user_id)
-    if (!member || ["owner", "moderator"].indexOf(member.memberType) === -1)
-      throw new UnauthorizedError()
+    const member = await getActiveMemberOrDie(req, req.params.id)
+    if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
 
     const res = await communityService.getJoinRequests(req.params.id)
     if (!res) throw new ServerError()
@@ -144,11 +129,9 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     "/api/communities/:id/join-requests",
     async (req) => {
       if (!req.params.id) throw new InvalidRequestError()
-      if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
-      const member = await communityService.getCommunityMember(req.params.id, req.cookies.user_id)
-      if (!member || ["owner", "moderator"].indexOf(member.memberType) === -1)
-        throw new UnauthorizedError()
+      const member = await getActiveMemberOrDie(req, req.params.id)
+      if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
 
       const res = await communityService.respondToJoinRequest(req.body.requestId, req.body.accepted)
       if (!res) throw new ServerError()
@@ -163,11 +146,9 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     Body: { userId: string; memberType: "owner" | "moderator" | "member" | "none" }
   }>("/api/communities/:id/members", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
-    const member = await communityService.getCommunityMember(req.params.id, req.cookies.user_id)
-    if (!member || ["owner", "moderator", "member", "none"].indexOf(member.memberType) === -1)
-      throw new UnauthorizedError()
+    const member = await getActiveMemberOrDie(req, req.params.id)
+    if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
 
     const targetMember = await communityService.getCommunityMember(req.params.id, req.body.userId)
     if (!targetMember) throw new NotFoundError()
@@ -188,6 +169,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       return { type: "removed" }
     } else if (req.body.memberType === "owner") {
       // handle owner change
+      throw new Error("Not implemented")
       return
     } else {
       const res = await communityService.updateCommunityMemberType(
@@ -202,18 +184,18 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
   app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
+    const userId = getUserIdOrDie(req)
 
-    const community = await communityService.getCommunity(req.params.id)
+    const community = await communityService.getCommunity(req.params.id, true)
     if (!community) throw new NotFoundError()
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
 
-    const member = await communityService.getCommunityMember(community.id, req.cookies.user_id)
+    const member = await communityService.getCommunityMember(community.id, userId)
     if (member)
       return { type: member.disabled ? JoinResultType.Banned : JoinResultType.AlreadyJoined }
 
     const res = community.private
-      ? await communityService.submitJoinRequest(community.id, req.cookies.user_id)
-      : await communityService.joinCommunity(community.id, req.cookies.user_id)
+      ? await communityService.submitJoinRequest(community.id, userId)
+      : await communityService.joinCommunity(community.id, userId)
 
     if (!res) throw new ServerError("Failed to join community")
     return res
@@ -221,18 +203,17 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
   app.post<{ Params: { id?: string } }>("/api/communities/:id/leave", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
+    const userId = getUserIdOrDie(req)
 
-    const res = await communityService.leaveCommunity(req.params.id, req.cookies.user_id)
+    const res = await communityService.leaveCommunity(req.params.id, userId)
     if (!res) throw new ServerError("Failed to leave community")
     return res
   })
 
   app.post<{ Body: NewCommunity }>("/api/communities", async (req) => {
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
+    const userId = getUserIdOrDie(req)
 
     const { title, description } = req.body
-    const userId = req.cookies.user_id
 
     if (!communityValidation.isCommunityValid(title, description)) throw new InvalidRequestError()
     if (req.body.url_title) delete req.body.url_title
@@ -252,18 +233,14 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   app.patch<{ Body: Partial<NewCommunity>; Params: { id?: string } }>(
     "/api/communities/:id",
     async (req) => {
-      if (!req.cookies.user_id) throw new NotAuthenticatedError()
       if (!req.params.id) throw new InvalidRequestError()
       if (req.body.url_title) delete req.body.url_title
-
-      const communityId = req.params.id
-      const userId = req.cookies.user_id
-
       const { title, description, private: _private } = req.body
+
       if (!communityValidation.isCommunityValid(title, description)) throw new InvalidRequestError()
 
-      const member = await communityService.getCommunityMember(communityId, userId)
-      if (!member || member.memberType !== "owner") throw new NotAuthenticatedError()
+      const member = await getActiveMemberOrDie(req, req.params.id)
+      if (member.memberType !== "owner") throw new NotAuthenticatedError()
 
       const res = await communityService.updateCommunity(
         {
@@ -271,7 +248,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
           description,
           private: _private,
         },
-        communityId
+        req.params.id
       )
       if (res instanceof ApiError) throw res
       if (!res) throw new ServerError("Failed to update community")
@@ -279,16 +256,12 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
   )
   app.delete<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
     if (!req.params.id) throw new InvalidRequestError()
 
-    const communityId = req.params.id
-    const userId = req.cookies.user_id
+    const member = await getActiveMemberOrDie(req, req.params.id)
+    if (member.memberType !== "owner") throw new UnauthorizedError()
 
-    const member = await communityService.getCommunityMember(communityId, userId)
-    if (!member || member.memberType !== "owner") throw new UnauthorizedError()
-
-    const res = await communityService.deleteCommunity(communityId)
+    const res = await communityService.deleteCommunity(req.params.id)
     if (!res) throw new ServerError("Failed to delete community")
     return res
   })

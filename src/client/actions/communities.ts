@@ -42,18 +42,20 @@ export const getCommunities = async (page = 0): Promise<CommunityListData[] | vo
   }
 }
 
-export const getCommunity = async (id: string): Promise<Partial<CommunityData> | Error> => {
+export const getCommunity = async (url_title: string): Promise<Partial<CommunityData> | Error> => {
   try {
-    const response = await fetch(`${API_URL}/communities/${id}`)
+    const response = await fetch(`${API_URL}/communities/${url_title}`)
     return await response.json()
   } catch (error: any) {
     return new Error(error.message)
   }
 }
 
-export const getCommunityPosts = async (id: string): Promise<CommunityPostData[] | Error> => {
+export const getCommunityPosts = async (
+  url_title: string
+): Promise<CommunityPostData[] | Error> => {
   try {
-    const response = await fetch(`${API_URL}/communities/${id}/posts`)
+    const response = await fetch(`${API_URL}/communities/${url_title}/posts`)
     return await response.json()
   } catch (error: any) {
     return new Error(error.message)
@@ -161,9 +163,9 @@ export const updateCommunity = async (community: NewCommunity): Promise<Communit
   }
 }
 
-export const joinCommunity = async (url_title: string): Promise<JoinResult | void> => {
+export const joinCommunity = async (id: string): Promise<JoinResult | void> => {
   try {
-    const response = await fetch(`${API_URL}/communities/${url_title}/join`, {
+    const response = await fetch(`${API_URL}/communities/${id}/join`, {
       method: "POST",
     })
     const data = await response.json()

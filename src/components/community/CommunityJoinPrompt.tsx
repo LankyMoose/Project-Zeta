@@ -22,10 +22,10 @@ export const CommunityJoinPrompt = () => {
   }
 
   const join = async () => {
-    const communityTitle = selectedCommunity.value?.url_title
-    if (!communityTitle) return addNotification({ type: "error", text: "No community selected." })
+    const communityId = selectedCommunity.value?.id
+    if (!communityId) return addNotification({ type: "error", text: "No community selected." })
     loading.value = true
-    const res = await joinCommunity(communityTitle)
+    const res = await joinCommunity(communityId)
     loading.value = false
     if (!res) return
 

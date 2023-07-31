@@ -2,6 +2,7 @@ import { and, desc, eq, gte, isNull, sql } from "drizzle-orm"
 import { db } from "../../db"
 
 import {
+  Community,
   CommunityJoinRequest,
   CommunityMember,
   NewCommunity,
@@ -13,13 +14,7 @@ import {
   posts,
   users,
 } from "../../db/schema"
-import {
-  ApiError,
-  ForbiddenError,
-  NotFoundError,
-  ServerError,
-  UnauthorizedError,
-} from "../../errors"
+import { ApiError, NotFoundError, ServerError } from "../../errors"
 import {
   CommunityJoinRequestData,
   CommunityLinkData,
@@ -178,7 +173,7 @@ export const communityService = {
     }
   },
 
-  async getCommunity(titleOrId: string, useId: boolean = false) {
+  async getCommunity(titleOrId: string, useId: boolean = false): Promise<Community | void> {
     try {
       return await db.query.communities.findFirst({
         where: (community, { eq, and }) =>
@@ -227,7 +222,11 @@ export const communityService = {
     }
   },
 
-  async getCommunityPosts(communityId: string, userId?: string, page = 0) {
+  async getCommunityPosts(
+    communityId: string,
+    userId?: string,
+    page = 0
+  ): Promise<CommunityPostData[] | void> {
     const numPosts = 10
     try {
       const query = sql`
@@ -641,15 +640,30 @@ export const communityService = {
     }
   },
 
-  async getCommunityMember(communityId: string, userId: string): Promise<CommunityMember | void> {
+  async getCommunityMember(
+    communityId: string,
+    userId: string
+  ): Promise<
+    | (CommunityMember & {
+        community: {
+          disabled: boolean | null
+          deleted: boolean | null
+        }
+      })
+    | void
+  > {
     try {
       return await db.query.communityMembers.findFirst({
         where: (member, { and, eq }) =>
-          and(
-            eq(member.communityId, communityId),
-            eq(member.userId, userId),
-            eq(member.disabled, false)
-          ),
+          and(eq(member.communityId, communityId), eq(member.userId, userId)),
+        with: {
+          community: {
+            columns: {
+              disabled: true,
+              deleted: true,
+            },
+          },
+        },
       })
     } catch (error) {
       console.error(error)
@@ -684,12 +698,6 @@ export const communityService = {
       console.error(error)
       return
     }
-  },
-
-  async checkCommunityMemberValidity(communityId: string, userId: string): Promise<Error | void> {
-    const member = await communityService.getCommunityMember(communityId, userId)
-    if (!member) return new UnauthorizedError()
-    if (member.disabled) return new ForbiddenError()
   },
 
   async getPage(page = 0): Promise<CommunityListData[] | void> {
