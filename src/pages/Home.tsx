@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { getLatestPostsCommunities } from "../client/actions/communities"
 import { pathStore } from "../state/global"
-import { selectedCommunity } from "../state/community"
+import { selectedCommunity, selectedCommunityPost } from "../state/community"
 import { LatestPostsData } from "../types/post"
 import { DefaultLoader } from "../components/loaders/Default"
 import { AuthorTag } from "../components/AuthorTag"
@@ -33,10 +33,20 @@ export default function Home() {
 }
 
 const PostCard = ({ post, community, user }: LatestPostsData) => {
+  const viewPost = () => {
+    selectedCommunityPost.value = {
+      ...post,
+      createdAt: new Date(post.createdAt),
+    }
+    window.history.pushState(null, "", `${window.location.pathname}?post=${post.id}`)
+  }
+
   return (
     <div className="card" key={post.id}>
       <div className="card-title gap-lg flex justify-content-between">
-        {post.title}
+        <a href="javascript:void(0)" onclick={viewPost}>
+          {post.title}
+        </a>
         <Link
           onBeforeNavigate={() => {
             selectedCommunity.value = { ...community }

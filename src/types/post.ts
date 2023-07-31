@@ -50,3 +50,21 @@ export type LatestPostsData = {
     avatarUrl: string | undefined | null
   }
 }
+
+export type FlatCommunityPostData = {
+  post_id: string
+  post_title: string
+  post_content: string
+  post_created_at: string
+  post_owner_id: string
+  post_community_id: string
+  post_deleted: boolean
+  post_disabled: boolean
+  user_id: string
+  user_name: string
+  user_avatar_url: string
+  positive_reactions: number
+  negative_reactions: number
+  user_reaction: boolean | null
+  total_comments: number
+}

@@ -2,8 +2,9 @@ import { FastifyInstance } from "fastify"
 import { postService } from "../services/postService"
 import { NewPost } from "../../db/schema"
 import { postValidation } from "../../db/validation"
-import { InvalidRequestError, ServerError, UnauthorizedError } from "../../errors"
+import { InvalidRequestError, NotFoundError, ServerError, UnauthorizedError } from "../../errors"
 import { getActiveMemberOrDie, getUserIdOrDie, getUserOrDie } from "./util"
+import { communityService } from "../services/communityService"
 
 export function configurePostsRoutes(app: FastifyInstance) {
   app.post<{ Body: NewPost }>("/api/posts", async (req) => {
@@ -19,6 +20,51 @@ export function configurePostsRoutes(app: FastifyInstance) {
     if (!res) throw new ServerError()
     return res
   })
+
+  app.get<{ Params: { postId: string } }>("/api/posts/:postId", async (req) => {
+    const postId = req.params.postId
+
+    if (!postId) throw new InvalidRequestError()
+
+    const [postData, comments] = await Promise.all([
+      postService.getPostWithMetadata(postId, req.cookies.user_id),
+      postService.getPostComments(postId, 0),
+    ])
+    if (!postData || !comments) throw new NotFoundError()
+    console.log("loaded post")
+
+    const communityId = postData.communityId
+    if (!communityId) throw new ServerError()
+    const community = await communityService.getCommunity(communityId, true)
+    if (!community) throw new NotFoundError()
+    if (community.private) await getActiveMemberOrDie(req, community.id)
+
+    return {
+      ...postData,
+      comments,
+    }
+  })
+
+  app.get<{ Params: { postId: string }; Querystring: { offset: string } }>(
+    "/api/posts/:postId/comments",
+    async (req) => {
+      const offset = parseInt(req.query.offset)
+      const postId = req.params.postId
+
+      if (isNaN(offset)) throw new InvalidRequestError()
+
+      const post = await postService.getPost(postId)
+      if (!post) throw new NotFoundError()
+
+      const community = await communityService.getCommunity(post.communityId, true)
+      if (!community) throw new NotFoundError()
+      if (community.private) await getActiveMemberOrDie(req, community.id)
+
+      const res = await postService.getPostComments(req.params.postId, offset)
+      if (!res) throw new ServerError()
+      return res
+    }
+  )
 
   app.post<{ Params: { postId: string }; Body: { comment: string } }>(
     "/api/posts/:postId/comments",

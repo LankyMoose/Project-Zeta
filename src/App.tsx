@@ -22,7 +22,7 @@ import { CommunityDrawer } from "./components/community/CommunityDrawer"
 import { CommunityLeaveConfirmation } from "./components/community/CommunityLeaveConfirmation"
 import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation"
 import { UserDropdown } from "./components/UserDropdown"
-import { PostModal } from "./components/community/PostModal"
+import { PostModal } from "./components/post/PostModal"
 
 const Header = () => (
   <header>

@@ -11,7 +11,6 @@ import {
   UnauthorizedError,
 } from "../../errors"
 import { JoinResultType } from "../../types/community"
-import { postService } from "../services/postService"
 import { getActiveMemberOrDie, getUserIdOrDie } from "./util"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
@@ -68,51 +67,6 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!res) throw new ServerError()
     return res
   })
-
-  app.get<{ Params: { id?: string; postId: string } }>(
-    "/api/communities/:id/posts/:postId",
-    async (req) => {
-      const communityId = req.params.id
-      const postId = req.params.postId
-
-      if (!communityId || !postId) throw new InvalidRequestError()
-
-      const community = await communityService.getCommunity(communityId, true)
-      if (!community) throw new NotFoundError()
-      if (community.private) await getActiveMemberOrDie(req, community.id)
-
-      const [postData, comments] = await Promise.all([
-        communityService.getCommunityPost(postId, req.cookies.user_id),
-        postService.getPostComments(postId, 0),
-      ])
-
-      if (!postData || !comments) throw new ServerError()
-      return {
-        ...postData,
-        comments,
-      }
-    }
-  )
-
-  app.get<{ Params: { id?: string; postId: string }; Querystring: { offset: string } }>(
-    "/api/communities/:id/posts/:postId/comments",
-    async (req) => {
-      const offset = parseInt(req.query.offset)
-      const communityId = req.params.id
-      const postId = req.params.postId
-
-      if (!communityId || !postId) throw new InvalidRequestError()
-      if (isNaN(offset)) throw new InvalidRequestError()
-
-      const community = await communityService.getCommunity(communityId, true)
-      if (!community) throw new NotFoundError()
-      if (community.private) await getActiveMemberOrDie(req, community.id)
-
-      const res = await postService.getPostComments(req.params.postId, offset)
-      if (!res) throw new ServerError()
-      return res
-    }
-  )
 
   app.get<{ Params: { id?: string } }>("/api/communities/:id/join-requests", async (req) => {
     if (!req.params.id) throw new InvalidRequestError()

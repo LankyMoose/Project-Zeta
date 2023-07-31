@@ -2,7 +2,6 @@ import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import {
   selectedCommunityPost,
-  selectedCommunity,
   postModalOpen,
   communityJoinModalOpen,
   isCommunityMember,
@@ -22,11 +21,11 @@ import { timeSinceDate } from "../../utils"
 
 const loading = createSignal(false)
 
-const loadPost = async (communityId: string, postId: string) => {
+const loadPost = async (postId: string) => {
   if (loading.value) return
   if (!postModalOpen.value) return
   loading.value = true
-  const res = await getPost(communityId, postId)
+  const res = await getPost(postId)
   if (!postModalOpen.value) return
   if (selectedCommunityPost.value) {
     if (selectedCommunityPost.value.id === res?.id) {
@@ -40,7 +39,7 @@ const loadPost = async (communityId: string, postId: string) => {
 selectedCommunityPost.subscribe((post) => {
   if (post?.id && !postModalOpen.value) {
     postModalOpen.value = true
-    loadPost(selectedCommunity.value!.id!, post.id)
+    loadPost(post.id)
   } else if (!post?.id && postModalOpen.value) {
     postModalOpen.value = false
   }

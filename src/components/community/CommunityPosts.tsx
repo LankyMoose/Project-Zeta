@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { For } from "cinnabun"
-import { PostCard } from "./PostCard"
+import { PostCard } from "../post/PostCard"
 import { CommunityPostData } from "../../types/post"
 
 export const CommunityPosts = ({ posts }: { posts: CommunityPostData[] }) => {

@@ -41,7 +41,6 @@ export const PostComments = () => {
     loadingMore.value = true
 
     const res = await getPostComments(
-      selectedCommunityPost.value.communityId,
       selectedCommunityPost.value.id!,
       postCommentsPage.value * POST_COMMENT_PAGE_SIZE
     )

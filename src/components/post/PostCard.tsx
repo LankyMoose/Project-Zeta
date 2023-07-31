@@ -10,7 +10,6 @@ import {
   isCommunityMember,
   communityJoinModalOpen,
   selectedCommunityPost,
-  selectedCommunity,
 } from "../../state/community"
 import { userStore, authModalState, authModalOpen } from "../../state/global"
 
@@ -60,12 +59,7 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
 
   const viewPost = () => {
     selectedCommunityPost.value = post
-    //postModalOpen.value = true
-    window.history.pushState(
-      null,
-      "",
-      `/communities/${selectedCommunity.value?.url_title}#${post.id}`
-    )
+    window.history.pushState(null, "", `${window.location.pathname}?post=${post.id}`)
   }
 
   return (
