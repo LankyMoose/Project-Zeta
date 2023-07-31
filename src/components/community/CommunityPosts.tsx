@@ -7,7 +7,7 @@ export const CommunityPosts = ({ posts }: { posts: CommunityPostData[] }) => {
   return (
     <div className="flex flex-column">
       {posts.length ? (
-        <div className="flex flex-column">
+        <div className="flex flex-column gap">
           <For each={posts} template={(post) => <PostCard post={post} />} />
         </div>
       ) : (
