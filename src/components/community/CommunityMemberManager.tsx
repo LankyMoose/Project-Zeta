@@ -97,10 +97,12 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
             >
               Demote to member
             </Button>
-          ) : (
+          ) : isCommunityOwner() ? (
             <Button className="btn btn-secondary hover-animate btn-sm" onclick={promoteToModerator}>
               Promote to moderator
             </Button>
+          ) : (
+            <></>
           )}
           <Button
             className="btn btn-danger hover-animate btn-sm"
