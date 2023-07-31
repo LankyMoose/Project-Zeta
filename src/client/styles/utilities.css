@@ -48,13 +48,13 @@
   padding: 0 !important;
 }
 .p-1 {
-  padding: .25rem;
+  padding: .25rem !important;
 }
 .p-2 {
-  padding: .5rem;
+  padding: .5rem !important;
 }
 .p-3 {
-  padding: 1rem;
+  padding: 1rem !important;
 }
 .py-0 {
   padding-top: 0;

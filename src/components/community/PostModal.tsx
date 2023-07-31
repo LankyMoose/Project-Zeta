@@ -8,7 +8,7 @@ import {
   isCommunityMember,
   postCommentsPage,
 } from "../../state/community"
-import { Modal, ModalBody, ModalHeader } from "../modal/Modal"
+import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { AuthorTag } from "../AuthorTag"
 import { addPostComment, getPost } from "../../client/actions/posts"
 import { PostComments } from "./PostComments"
@@ -92,6 +92,14 @@ export const PostModal = () => {
       <ModalBody>
         <PostComments post={selectedCommunityPost} />
       </ModalBody>
+      <ModalFooter className="modal-footer p-2">
+        <Button
+          className="btn w-100 flex justify-content-center py-3 text-muted"
+          onclick={handleClose}
+        >
+          Close
+        </Button>
+      </ModalFooter>
     </Modal>
   )
 }
