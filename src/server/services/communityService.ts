@@ -34,6 +34,7 @@ ${posts.id} as post_id,
 ${posts.title} as post_title,
 ${posts.content} as post_content,
 ${posts.createdAt} as post_created_at,
+count(${postComments.id}) as total_comments,
 ${communities.id} as community_id,
 ${communities.title} as community_title,
 ${communities.url_title} as community_url_title,
@@ -54,12 +55,14 @@ export const communityService = {
           from ${posts}
             inner join ${communities} on ${posts.communityId} = ${communities.id}
             inner join ${users} on ${posts.ownerId} = ${users.id}
+            left join ${postComments} on ${postComments.postId} = ${posts.id}
           where
             ${posts.disabled} = false
             and ${posts.deleted} = false
             and ${communities.disabled} = false
             and ${communities.deleted} = false
-            and ${communities.private} = false
+            and ${communities.private} = false 
+          group by ${posts.id}, ${communities.id}, ${users.id}
         `
       if (userId) {
         query.append(sql` UNION
@@ -68,6 +71,7 @@ export const communityService = {
           from ${posts}
             inner join ${communities} on ${posts.communityId} = ${communities.id}
             inner join ${users} on ${posts.ownerId} = ${users.id}
+            left join ${postComments} on ${postComments.postId} = ${posts.id}
             inner join ${communityMembers} on 
                   ${communityMembers.communityId} = ${communities.id}
               and ${communityMembers.userId} = ${userId}
@@ -77,10 +81,14 @@ export const communityService = {
             and ${posts.deleted} = false
             and ${communities.disabled} = false
             and ${communities.deleted} = false
-            and ${communities.private} = true `)
+            and ${communities.private} = true 
+          group by ${posts.id}, ${communities.id}, ${users.id}`)
       }
       query.append(
-        sql`order by post_created_at desc limit ${this.pageSize} offset ${_page * this.pageSize}`
+        sql` 
+        order by post_created_at desc
+        limit ${this.pageSize} 
+        offset ${_page * this.pageSize}`
       )
 
       return (await db.execute(query)).map((item) => ({
@@ -89,6 +97,7 @@ export const communityService = {
           title: item.post_title as string,
           content: item.post_content as string,
           createdAt: item.post_created_at as string,
+          totalComments: item.total_comments as string,
         },
         community: {
           id: item.community_id as string,

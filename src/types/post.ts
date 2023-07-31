@@ -38,6 +38,7 @@ export type LatestPostsData = {
     title: string
     content: string
     createdAt: Date | string
+    totalComments: string
   }
   community: {
     id: string

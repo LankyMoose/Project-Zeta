@@ -8,6 +8,7 @@ import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
 import { timeSinceDate } from "../utils"
 import { title } from "../Document"
+import { CommentIcon } from "../components/icons/CommentIcon"
 
 export default function Home() {
   title.value = "Project Zeta"
@@ -66,8 +67,15 @@ const PostCard = ({ post, community, user }: LatestPostsData) => {
         </small>
       </div>
       <div className="card-body">{post.content}</div>
-      <div className="flex justify-content-between mt-auto">
-        <div></div>
+      <div className="flex justify-content-between align-items-end mt-auto">
+        <div>
+          <button type="button" className="btn text-sm p-0" onclick={viewPost}>
+          <span className="text-muted flex gap-sm align-items-center justify-content-center">
+            <CommentIcon />
+            {post.totalComments ?? 0}
+          </span>
+        </button>
+        </div>
         <div className="flex flex-column align-items-end">
           <AuthorTag user={user} date={timeSinceDate(new Date(post.createdAt))} />
         </div>
