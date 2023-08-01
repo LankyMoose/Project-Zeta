@@ -3,8 +3,12 @@ import { postService } from "../services/postService"
 import { NewPost } from "../../db/schema"
 import { postValidation } from "../../db/validation"
 import { InvalidRequestError, NotFoundError, ServerError, UnauthorizedError } from "../../errors"
-import { getActiveMemberOrDie, getUserIdOrDie, getUserOrDie } from "./util"
-import { communityService } from "../services/communityService"
+import {
+  ensureCommunityMemberIfPrivate,
+  getActiveMemberOrDie,
+  getUserIdOrDie,
+  getUserOrDie,
+} from "./util"
 import { isUuid } from "../../utils"
 
 export function configurePostsRoutes(app: FastifyInstance) {
@@ -31,11 +35,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
     ])
     if (!postData || !comments) throw new NotFoundError()
 
-    const communityId = postData.communityId
-    if (!communityId) throw new ServerError()
-    const community = await communityService.getCommunity(communityId, true)
-    if (!community) throw new NotFoundError()
-    if (community.private) await getActiveMemberOrDie(req, community.id)
+    await ensureCommunityMemberIfPrivate(req, postData.communityId)
 
     return {
       ...postData,
@@ -54,9 +54,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const post = await postService.getPost(req.params.postId)
       if (!post) throw new NotFoundError()
 
-      const community = await communityService.getCommunity(post.communityId, true)
-      if (!community) throw new NotFoundError()
-      if (community.private) await getActiveMemberOrDie(req, community.id)
+      await ensureCommunityMemberIfPrivate(req, post.communityId)
 
       const res = await postService.getPostComments(req.params.postId, offset)
       if (!res) throw new ServerError()
@@ -72,7 +70,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const post = await postService.getPost(req.params.postId)
       if (!post) throw new InvalidRequestError()
 
-      await getActiveMemberOrDie(req, post.communityId)
+      await ensureCommunityMemberIfPrivate(req, post.communityId)
 
       const res = await postService.addPostComment(req.params.postId, user, req.body.comment)
       if (!res) throw new ServerError()
@@ -88,7 +86,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const post = await postService.getPost(req.params.postId)
       if (!post) throw new InvalidRequestError()
 
-      await getActiveMemberOrDie(req, post.communityId)
+      await ensureCommunityMemberIfPrivate(req, post.communityId)
 
       const res = await postService.addPostReaction(req.params.postId, userId, req.body.reaction)
       if (!res) throw new ServerError()

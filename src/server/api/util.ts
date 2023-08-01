@@ -26,3 +26,9 @@ export const getActiveMemberOrDie = async (
   if (member.community.deleted) throw new NotFoundError()
   return member
 }
+
+export const ensureCommunityMemberIfPrivate = async (req: FastifyRequest, communityId: string) => {
+  const community = await communityService.getCommunity(communityId, true)
+  if (!community) throw new NotFoundError()
+  if (community.private) await getActiveMemberOrDie(req, community.id)
+}

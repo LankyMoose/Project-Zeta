@@ -6,17 +6,14 @@ import { IconButton } from "../IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../client/actions/posts"
-import {
-  isCommunityMember,
-  communityJoinModalOpen,
-  selectedCommunityPost,
-} from "../../state/community"
+import { communityJoinModalOpen, selectedCommunityPost } from "../../state/community"
 import { userStore, authModalState, authModalOpen } from "../../state/global"
 
 import { AuthorTag } from "../AuthorTag"
 import "./PostCard.css"
 import { AuthModalCallback } from "../../types/auth"
 import { CommentIcon } from "../icons/CommentIcon"
+import { API_ERROR } from "../../constants"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)
@@ -33,14 +30,16 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       authModalOpen.value = true
       return
     }
-    if (!isCommunityMember()) {
-      communityJoinModalOpen.value = true
-      return
-    }
 
     reacting.value = true
     const res = await addPostReaction(post.id, reaction)
-    if (res) {
+    if (res && "message" in res) {
+      if (res.message === API_ERROR.UNAUTHORIZED) {
+        communityJoinModalOpen.value = true
+        reacting.value = false
+        return
+      }
+    } else if (res) {
       if (state.value.userReaction === true) {
         state.value.reactions.positive--
       } else if (state.value.userReaction === false) {

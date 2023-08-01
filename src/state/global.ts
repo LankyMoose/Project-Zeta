@@ -27,7 +27,6 @@ export const userStore = createSignal<PublicUser | null>(isClient ? getUserDataF
 export const bodyStyle = createSignal("")
 export const openModalCount = createSignal(0)
 openModalCount.subscribe((count) => {
-  console.log("openModalCount", count)
   if (!Cinnabun.isClient) return
   if (count > 0) {
     bodyStyle.value = "overflow-y: hidden;"

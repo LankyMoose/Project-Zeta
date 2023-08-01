@@ -68,7 +68,7 @@ export const CommunityJoinPrompt = () => {
                 isPrivate() ? (
                   <i>This private community requires membership to view information.</i>
                 ) : (
-                  <i>Joining this community will allow you to post and comment.</i>
+                  <i>Joining this community will allow you to post.</i>
                 )
               }
             </small>

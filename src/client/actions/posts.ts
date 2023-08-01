@@ -45,7 +45,7 @@ export const addPostComment = async (postId: string, comment: string) => {
 export const addPostReaction = async (
   postId: string,
   reaction: boolean
-): Promise<PostReaction | void> => {
+): Promise<PostReaction | Error> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}/reactions`, {
       method: "POST",
@@ -59,10 +59,7 @@ export const addPostReaction = async (
 
     return data
   } catch (error: any) {
-    addNotification({
-      type: "error",
-      text: error.message,
-    })
+    return error
   }
 }
 

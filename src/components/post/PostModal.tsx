@@ -20,6 +20,7 @@ import { EllipsisLoader } from "../loaders/Ellipsis"
 import { timeSinceUTCDate } from "../../utils"
 import { IconButton } from "../IconButton"
 import { ThumbsUpIcon, ThumbsDownIcon } from "../icons"
+import { API_ERROR } from "../../constants"
 
 const loading = createSignal(false)
 
@@ -81,18 +82,21 @@ export const PostModal = () => {
       authModalOpen.value = true
       return
     }
-    if (!isCommunityMember()) {
-      communityJoinModalOpen.value = true
-      return
-    }
 
     reacting.value = true
     const res = await addPostReaction(selectedCommunityPost.value.id, reaction)
-    if (res) {
-      if (!selectedCommunityPost.value) {
+    if (!selectedCommunityPost.value) {
+      reacting.value = false
+      return
+    }
+
+    if ("message" in res) {
+      if (res.message === API_ERROR.UNAUTHORIZED) {
+        communityJoinModalOpen.value = true
         reacting.value = false
         return
       }
+    } else {
       if (!selectedCommunityPost.value.reactions)
         selectedCommunityPost.value.reactions = {
           positive: 0,
@@ -112,6 +116,7 @@ export const PostModal = () => {
       selectedCommunityPost.value.userReaction = reaction
       state.notify()
     }
+
     reacting.value = false
   }
 
