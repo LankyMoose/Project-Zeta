@@ -24,8 +24,8 @@ dependencies:
     specifier: ^8.2.0
     version: 8.2.0
   cinnabun:
-    specifier: ^0.1.55
-    version: 0.1.55
+    specifier: ^0.1.56
+    version: 0.1.56
   cinnabun-transitions:
     specifier: ^1.0.6
     version: 1.0.6
@@ -578,11 +578,11 @@ packages:
   /cinnabun-transitions@1.0.6:
     resolution: {integrity: sha512-yG2TNPb4++QfPfSfOb1wirQQSyJYe61YzoxqHZZM+zA1vvMKULl4m55HoZyRtletG6VuG0uw/Nf06jPFl4cRRw==}
     dependencies:
-      cinnabun: 0.1.55
+      cinnabun: 0.1.56
     dev: false
 
-  /cinnabun@0.1.55:
-    resolution: {integrity: sha512-ltk+RL3EOGVmchYyxq1T2tIZxqtZFYsreUZn+0kuYWvAf5M3ffCD4ZuTR5LpaVefkyJ9mmYSTL/br4LFBC0jOQ==}
+  /cinnabun@0.1.56:
+    resolution: {integrity: sha512-l50VnPexCkAxjG4LVwrjfwUs2kvijbBdsaL6Mt69uqDpEFa67AM3Cjk2xgsEFa4URha7frEv18IO325WUwwbsw==}
     dev: false
 
   /cli-color@2.0.3:

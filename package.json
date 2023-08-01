@@ -22,7 +22,7 @@
     "@fastify/oauth2": "^7.2.1",
     "@fastify/static": "^6.10.2",
     "@fastify/websocket": "^8.2.0",
-    "cinnabun": "^0.1.55",
+    "cinnabun": "^0.1.56",
     "cinnabun-transitions": "^1.0.6",
     "dotenv": "^16.3.1",
     "drizzle-orm": "^0.26.5",
