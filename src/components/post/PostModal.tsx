@@ -51,7 +51,6 @@ export const PostModal = () => {
   const reacting = createSignal(false)
 
   const state = Cinnabun.computed(selectedCommunityPost, () => {
-    console.log("computed", selectedCommunityPost.value)
     return selectedCommunityPost.value
   })
 

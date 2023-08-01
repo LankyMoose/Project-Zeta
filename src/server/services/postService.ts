@@ -73,8 +73,8 @@ export const postService = {
             ${postReactions.postId} as post_id,
             ${postReactions.reaction} as reaction
           from ${postReactions}
-          inner join post on ${postReactions.postId} = post.post_id
-          where ${userId ? `${postReactions.ownerId} = ${userId}` : `1 = 0`}
+          right join post on ${postReactions.postId} = post.post_id
+          and ${postReactions.ownerId} = ${userId ?? null}
         ), total_comments as (
           select
             count(${postComments.id}) as total_comments,

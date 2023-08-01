@@ -266,8 +266,8 @@ export const communityService = {
               ${postReactions.postId} as post_id,
               ${postReactions.reaction} as reaction
             from ${postReactions}
-            inner join top_posts on ${postReactions.postId} = top_posts.post_id
-            where ${userId ? `${postReactions.ownerId} = ${userId}` : `1 = 0`}
+            right join top_posts on ${postReactions.postId} = top_posts.post_id
+            and ${postReactions.ownerId} = ${userId ?? null}
           ), total_comments as (
             select 
               count(${postComments.id}) as total_comments,
@@ -316,9 +316,12 @@ export const communityService = {
               positive: item.positive_reactions,
               negative: item.negative_reactions,
             },
-            userReaction: item.user_reaction,
+            userReaction: null,
             totalComments: item.total_comments?.toString(),
           } as CommunityPostData
+          if (typeof item.user_reaction !== "undefined" && item.user_reaction !== null) {
+            post.userReaction = item.user_reaction
+          }
           acc.push(post)
           return acc
         }
@@ -330,7 +333,10 @@ export const communityService = {
     }
   },
 
-  async getUserCommunitiesByMemberType(userId: string, memberType: 'member' | 'moderator' | 'owner'): Promise<CommunityListData[]> {
+  async getUserCommunitiesByMemberType(
+    userId: string,
+    memberType: "member" | "moderator" | "owner"
+  ): Promise<CommunityListData[]> {
     try {
       const cm = alias(communityMembers, "cm")
       return await db
@@ -346,15 +352,12 @@ export const communityService = {
             eq(communityMembers.communityId, communities.id),
             eq(communityMembers.memberType, memberType)
           )
-      ).leftJoin(
-        cm,
-          eq(cm.communityId, communities.id),
         )
+        .leftJoin(cm, eq(cm.communityId, communities.id))
         .where(eq(communityMembers.userId, userId))
         .groupBy(communities.id)
         .orderBy(({ members }) => desc(members))
         .execute()
-      
     } catch (error) {
       console.error(error)
       return []
