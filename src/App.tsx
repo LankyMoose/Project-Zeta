@@ -74,12 +74,12 @@ export const App = () => {
         <PostCreator />
         <CommunityCreator />
         <CommunityEditor />
-        <CommunityJoinPrompt />
-        
+
         <CommunityDrawer />
         <CommunityLeaveConfirmation />
         <CommunityDeleteConfirmation />
         <PostModal />
+        <CommunityJoinPrompt />
         <AuthModal />
       </Portal>
     </>

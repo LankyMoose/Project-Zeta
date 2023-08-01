@@ -58,6 +58,9 @@ export const PostModal = () => {
     if (authModalOpen.value) {
       authModalOpen.value = false
       return
+    } else if (communityJoinModalOpen.value) {
+      communityJoinModalOpen.value = false
+      return
     }
     loading.value = false
     selectedCommunityPost.value = null

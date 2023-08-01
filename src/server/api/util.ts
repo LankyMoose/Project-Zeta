@@ -20,7 +20,7 @@ export const getActiveMemberOrDie = async (
 ): Promise<CommunityMember> => {
   const userId = getUserIdOrDie(req)
   const member = await communityService.getCommunityMember(communityId, userId)
-  if (!member) throw new NotAuthenticatedError()
+  if (!member) throw new UnauthorizedError()
   if (member.disabled || member.community.disabled) throw new UnauthorizedError()
   if (member.community.disabled) throw new UnauthorizedError()
   if (member.community.deleted) throw new NotFoundError()
