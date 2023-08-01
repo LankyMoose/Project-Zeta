@@ -9,7 +9,7 @@ import {
 } from "../../state/community"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { AuthorTag } from "../AuthorTag"
-import { addPostComment, getPost } from "../../client/actions/posts"
+import { addPostComment, addPostReaction, getPost } from "../../client/actions/posts"
 import { PostComments } from "./PostComments"
 import { CommunityPostDataWithComments } from "../../types/post"
 import { authModalOpen, authModalState, userStore } from "../../state/global"
@@ -18,6 +18,8 @@ import { AuthModalCallback } from "../../types/auth"
 import { Button } from "../Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { timeSinceUTCDate } from "../../utils"
+import { IconButton } from "../IconButton"
+import { ThumbsUpIcon, ThumbsDownIcon } from "../icons"
 
 const loading = createSignal(false)
 
@@ -46,12 +48,66 @@ selectedCommunityPost.subscribe((post) => {
 })
 
 export const PostModal = () => {
+  const reacting = createSignal(false)
+
+  const state = Cinnabun.computed(selectedCommunityPost, () => {
+    console.log("computed", selectedCommunityPost.value)
+    return selectedCommunityPost.value
+  })
+
   const handleClose = () => {
     loading.value = false
     selectedCommunityPost.value = null
     postModalOpen.value = false
     postCommentsPage.value = 0
     window.history.pushState(null, "", window.location.pathname)
+  }
+
+  const addReaction = async (reaction: boolean) => {
+    if (reacting.value) return
+    if (!selectedCommunityPost.value?.id) return
+    if (!userStore.value) {
+      authModalState.value = {
+        title: "Log in to interact with this post",
+        message: "You must be logged in to interact with community posts.",
+        callbackAction: AuthModalCallback.ViewCommunity,
+      }
+      authModalOpen.value = true
+      return
+    }
+    if (!isCommunityMember()) {
+      communityJoinModalOpen.value = true
+      return
+    }
+
+    reacting.value = true
+    const res = await addPostReaction(selectedCommunityPost.value.id, reaction)
+    console.log("res", res)
+    if (res) {
+      if (!selectedCommunityPost.value) {
+        reacting.value = false
+        return
+      }
+      if (!selectedCommunityPost.value.reactions)
+        selectedCommunityPost.value.reactions = {
+          positive: 0,
+          negative: 0,
+        }
+
+      if (selectedCommunityPost.value.userReaction === true) {
+        selectedCommunityPost.value.reactions.positive--
+      } else if (selectedCommunityPost.value.userReaction === false) {
+        selectedCommunityPost.value.reactions.negative--
+      }
+      if (reaction === true) {
+        selectedCommunityPost.value.reactions.positive++
+      } else {
+        selectedCommunityPost.value.reactions.negative++
+      }
+      selectedCommunityPost.value.userReaction = reaction
+      state.notify()
+    }
+    reacting.value = false
   }
 
   return (
@@ -80,6 +136,52 @@ export const PostModal = () => {
           <p watch={selectedCommunityPost} bind:children className="m-0">
             {() => selectedCommunityPost.value?.content ?? ""}
           </p>
+        </div>
+        <div
+          watch={selectedCommunityPost}
+          bind:visible={() => typeof selectedCommunityPost.value?.userReaction !== "undefined"}
+          className="flex justify-content-end"
+        >
+          <div className="flex gap post-reactions">
+            <IconButton
+              onclick={() => addReaction(true)}
+              bind:className={() =>
+                `icon-button flex align-items-center gap-sm ${
+                  state.value?.userReaction === true ? "selected" : ""
+                }`
+              }
+              watch={[userStore, reacting, state]}
+              bind:disabled={() => reacting.value}
+            >
+              <ThumbsUpIcon
+                color="var(--primary)"
+                color:hover="var(--primary-light)"
+                className="text-rg"
+              />
+              <small className="text-muted" watch={state} bind:children>
+                {() => state.value?.reactions?.positive ?? 0}
+              </small>
+            </IconButton>
+            <IconButton
+              onclick={() => addReaction(false)}
+              bind:className={() =>
+                `icon-button flex align-items-center gap-sm ${
+                  state.value?.userReaction === false ? "selected" : ""
+                }`
+              }
+              watch={[userStore, reacting, state]}
+              bind:disabled={() => reacting.value}
+            >
+              <ThumbsDownIcon
+                color="var(--primary)"
+                color:hover="var(--primary-light)"
+                className="text-rg"
+              />
+              <small className="text-muted" watch={state} bind:children>
+                {() => state.value?.reactions?.negative ?? 0}
+              </small>
+            </IconButton>
+          </div>
         </div>
         <div
           watch={selectedCommunityPost}
