@@ -21,7 +21,10 @@ export const getPostComments = async (
   }
 }
 
-export const addPostComment = async (postId: string, comment: string) => {
+export const addPostComment = async (
+  postId: string,
+  comment: string
+): Promise<CommunityPostComment | Error> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}/comments`, {
       method: "POST",
@@ -35,10 +38,7 @@ export const addPostComment = async (postId: string, comment: string) => {
 
     return data
   } catch (error: any) {
-    addNotification({
-      type: "error",
-      text: error.message,
-    })
+    return error
   }
 }
 

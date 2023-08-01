@@ -4,7 +4,6 @@ import {
   selectedCommunityPost,
   postModalOpen,
   communityJoinModalOpen,
-  isCommunityMember,
   postCommentsPage,
 } from "../../state/community"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
@@ -228,25 +227,24 @@ const NewCommentForm = ({
     if (!post.value.communityId || !post.value.id) return
     e.preventDefault()
     if (!userStore.value) {
-      if (!userStore.value) {
-        authModalState.value = {
-          title: "Log in to interact with this post",
-          message: "You must be logged in to interact with community posts.",
-          callbackAction: AuthModalCallback.ViewCommunity,
-        }
-        authModalOpen.value = true
-        return
+      authModalState.value = {
+        title: "Log in to interact with this post",
+        message: "You must be logged in to interact with community posts.",
+        callbackAction: AuthModalCallback.ViewCommunity,
       }
-      return
-    }
-    if (!isCommunityMember()) {
-      communityJoinModalOpen.value = true
+      authModalOpen.value = true
       return
     }
     e.preventDefault()
     loading.value = true
     const res = await addPostComment(post.value.id, newComment.value)
-    if (res) {
+    if (res && "message" in res) {
+      if (res.message === API_ERROR.UNAUTHORIZED) {
+        communityJoinModalOpen.value = true
+        loading.value = false
+        return
+      }
+    } else if (res) {
       if (!post.value.comments) post.value.comments = []
       post.value.comments.unshift(res)
       post.value.totalComments = (parseInt(post.value.totalComments ?? "0") + 1).toString()
