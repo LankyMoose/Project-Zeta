@@ -93,7 +93,7 @@ export const PostComments = () => {
         bind:visible={() => loadingMore.value || !selectedCommunityPost.value?.comments}
         className="flex justify-content-center"
       >
-        <EllipsisLoader />
+        <EllipsisLoader className="lg" />
       </div>
 
       <div

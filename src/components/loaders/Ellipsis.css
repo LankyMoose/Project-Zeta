@@ -5,6 +5,9 @@
   width: var(--size);
   height: var(--size);
 }
+.lds-ellipsis.lg {
+  --size: 2em;
+}
 
 .lds-ellipsis div {
   position: absolute;
