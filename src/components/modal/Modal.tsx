@@ -3,7 +3,7 @@ import { ComponentChildren, ComponentProps } from "cinnabun/types"
 import { ClickOutsideListener, KeyboardListener, NavigationListener } from "cinnabun/listeners"
 import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
-import { bodyStyle, pathStore } from "../../state/global"
+import { openModalCount, pathStore } from "../../state/global"
 
 type ModalGestureProps = {
   closeOnNavigate?: boolean
@@ -34,18 +34,21 @@ export const Modal = (
     if (closeOnNavigate && visible.value) toggle(new Event("click"))
   })
 
+  let didMount = false
+
   return (
     <FadeInOut
       properties={[{ name: "opacity", from: 0, to: 1, ms: 350 }]}
       className="modal-outer"
       tabIndex={-1}
       watch={visible}
-      bind:visible={() => {
+      bind:visible={(self) => {
         if (!visible.value && onclose) onclose()
         if (visible.value) {
-          bodyStyle.value = "overflow: hidden;"
-        } else {
-          bodyStyle.value = ""
+          didMount = true
+        }
+        if (self.props.visible !== visible.value && didMount) {
+          openModalCount.value += visible.value ? 1 : -1
         }
         return visible.value
       }}
@@ -56,7 +59,10 @@ export const Modal = (
         className="modal-wrapper"
         onCapture={(e) => {
           if (e.defaultPrevented) return
-          closeOnClickOutside && toggle(e)
+          if (closeOnClickOutside) {
+            e.preventDefault()
+            toggle(e)
+          }
         }}
       >
         <Transition

@@ -55,6 +55,10 @@ export const PostModal = () => {
   })
 
   const handleClose = () => {
+    if (authModalOpen.value) {
+      authModalOpen.value = false
+      return
+    }
     loading.value = false
     selectedCommunityPost.value = null
     postModalOpen.value = false
@@ -81,7 +85,6 @@ export const PostModal = () => {
 
     reacting.value = true
     const res = await addPostReaction(selectedCommunityPost.value.id, reaction)
-    console.log("res", res)
     if (res) {
       if (!selectedCommunityPost.value) {
         reacting.value = false

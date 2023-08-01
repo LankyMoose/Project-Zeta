@@ -17,7 +17,6 @@
 }
 
 .modal-wrapper {
-  padding: .5rem;
   margin: auto;
 }
 
@@ -27,8 +26,13 @@
   flex-basis: 350px;
   --padding: 1.25rem 1.5rem;
   width: 350px;
-  max-width: calc(100vw - 3rem);
+  max-width: calc(100vw - 2rem);
+  
 }
+.modal-outer ~ .modal-outer .modal {
+  max-width: calc(100vw - 1rem);
+}
+
 @media (prefers-color-scheme: light) {
   .modal {
     background-color: #fafafa;
