@@ -16,6 +16,7 @@ export const CommunityEditor = () => {
       title: selectedCommunity.value?.title ?? "",
       description: selectedCommunity.value?.description ?? "",
       private: selectedCommunity.value?.private ?? false,
+      nsfw: selectedCommunity.value?.nsfw ?? false,
     }
   })
 
@@ -51,14 +52,16 @@ export const CommunityEditor = () => {
       title: selectedCommunity.value?.title ?? "",
       description: selectedCommunity.value?.description ?? "",
       private: selectedCommunity.value?.private ?? false,
+      nsfw: selectedCommunity.value?.nsfw ?? false,
     }
   }
 
   const hasChanged = () => {
     return (
-      state.value?.title !== selectedCommunity.value?.title ||
-      state.value?.description !== selectedCommunity.value?.description ||
-      state.value?.private !== selectedCommunity.value?.private
+      state.value.title !== selectedCommunity.value?.title ||
+      state.value.description !== selectedCommunity.value?.description ||
+      state.value.private !== selectedCommunity.value?.private ||
+      state.value.nsfw !== selectedCommunity.value?.nsfw
     )
   }
 
@@ -89,7 +92,7 @@ export const CommunityEditor = () => {
               type="text"
               className="form-control"
               watch={state}
-              bind:value={() => state.value?.title ?? ""}
+              bind:value={() => state.value.title}
               oninput={handleChange}
             />
           </div>
@@ -99,7 +102,7 @@ export const CommunityEditor = () => {
               id="description"
               className="form-control"
               watch={state}
-              bind:value={() => state.value?.description ?? ""}
+              bind:value={() => state.value.description}
               oninput={handleChange}
             />
           </div>
@@ -110,9 +113,27 @@ export const CommunityEditor = () => {
               type="checkbox"
               className="form-control"
               watch={state}
-              bind:checked={() => state.value?.private ?? false}
+              bind:checked={() => state.value.private}
               oninput={handleChange}
             />
+          </div>
+          <div className="form-group flex-row">
+            <label htmlFor="private">NSFW </label>
+            <input
+              id="nsfw"
+              type="checkbox"
+              className="form-control"
+              watch={state}
+              bind:checked={() => state.value.nsfw}
+              oninput={handleChange}
+            />
+          </div>
+          <div
+            watch={state}
+            bind:visible={() => state.value.nsfw && !state.value.private}
+            className="form-error"
+          >
+            <p>NSFW communities must be private.</p>
           </div>
         </ModalBody>
         <ModalFooter>
@@ -128,12 +149,7 @@ export const CommunityEditor = () => {
           <Button
             watch={[loading, state]}
             bind:disabled={() =>
-              loading.value ||
-              !communityValidation.isCommunityValid(
-                state.value?.title ?? "",
-                state.value?.description ?? ""
-              ) ||
-              !hasChanged()
+              loading.value || !communityValidation.isCommunityValid(state.value) || !hasChanged()
             }
             className="btn btn-primary hover-animate"
           >

@@ -4,14 +4,18 @@ import { NewCommunity } from "../../db/schema"
 import { communityValidation } from "../../db/validation"
 import {
   ApiError,
+  DisabledError,
   InvalidRequestError,
-  NotAuthenticatedError,
   NotFoundError,
   ServerError,
   UnauthorizedError,
 } from "../../errors"
 import { JoinResultType } from "../../types/community"
-import { getActiveMemberOrDie, getUserIdOrDie } from "./util"
+import {
+  ensureCommunityMemberNsfwAgreementOrDie,
+  getActiveMemberOrDie,
+  getUserIdOrDie,
+} from "./util"
 import { isUuid } from "../../utils"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
@@ -44,15 +48,10 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
-    if (!member)
-      return {
-        private: true,
-        id: res.id,
-        title: res.title,
-        description: res.description,
-      }
 
-    if (member.disabled) return { ...res, memberType: "guest" }
+    if (!member || member.disabled) throw new DisabledError()
+
+    if (res.nsfw) await ensureCommunityMemberNsfwAgreementOrDie(member.userId, res.id)
 
     return { ...res, memberType: member.memberType }
   })
@@ -62,7 +61,10 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
     const community = await communityService.getCommunity(req.params.url_title)
     if (!community) throw new NotFoundError()
-    if (community.private) await getActiveMemberOrDie(req, community.id)
+    if (community.private) {
+      const member = await getActiveMemberOrDie(req, community.id)
+      if (community.nsfw) await ensureCommunityMemberNsfwAgreementOrDie(member.userId, community.id)
+    }
 
     const res = await communityService.getCommunityPosts(community.id, req.cookies.user_id)
     if (!res) throw new ServerError()
@@ -156,6 +158,21 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
   })
 
+  app.post<{ Params: { url_title?: string } }>(
+    "/api/communities/:url_title/nsfw-agreement",
+    async (req) => {
+      if (!req.params.url_title) throw new InvalidRequestError()
+      const userId = getUserIdOrDie(req)
+
+      const community = await communityService.getCommunity(req.params.url_title)
+      if (!community) throw new NotFoundError()
+
+      const res = await communityService.createNsfwAgreement(community.id, userId)
+      if (!res) throw new ServerError("Failed to agree to community nsfw")
+      return res
+    }
+  )
+
   app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
     if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
     const userId = getUserIdOrDie(req)
@@ -187,15 +204,17 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   app.post<{ Body: NewCommunity }>("/api/communities", async (req) => {
     const userId = getUserIdOrDie(req)
 
-    const { title, description } = req.body
+    const { title, description, private: _private, nsfw } = req.body
 
-    if (!communityValidation.isCommunityValid(title, description)) throw new InvalidRequestError()
+    if (!communityValidation.isCommunityValid(req.body)) throw new InvalidRequestError()
     if (req.body.url_title) delete req.body.url_title
 
     const res = await communityService.createCommunity(
       {
         title,
         description,
+        private: _private,
+        nsfw,
       },
       userId
     )
@@ -209,23 +228,25 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     async (req) => {
       if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
       if (req.body.url_title) delete req.body.url_title
-      const { title, description, private: _private } = req.body
-
-      if (!communityValidation.isCommunityValid(title, description)) throw new InvalidRequestError()
+      const { title, description, private: _private, nsfw } = req.body
+      if (!communityValidation.isCommunityValid(req.body)) throw new InvalidRequestError()
 
       const member = await getActiveMemberOrDie(req, req.params.id)
-      if (member.memberType !== "owner") throw new NotAuthenticatedError()
+      if (member.memberType !== "owner") throw new UnauthorizedError()
 
       const res = await communityService.updateCommunity(
         {
           title,
           description,
           private: _private,
+          nsfw,
         },
         req.params.id
       )
       if (res instanceof ApiError) throw res
       if (!res) throw new ServerError("Failed to update community")
+      if (res.nsfw) await communityService.createNsfwAgreement(res.id, member.userId)
+
       return res
     }
   )

@@ -19,6 +19,7 @@ import { MenuButton } from "./components/MenuButton"
 import { CommunityDrawer } from "./components/community/CommunityDrawer"
 import { CommunityLeaveConfirmation } from "./components/community/CommunityLeaveConfirmation"
 import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation"
+import { CommunityNsfwAgreementModal } from "./components/community/CommunityNsfwAgreementModal"
 import { PostModal } from "./components/post/PostModal"
 import { NotificationTray } from "./components/Notifications"
 import { Portal } from "./components/Portal"
@@ -78,6 +79,7 @@ export const App = () => {
         <CommunityDrawer />
         <CommunityLeaveConfirmation />
         <CommunityDeleteConfirmation />
+        <CommunityNsfwAgreementModal />
         <PostModal />
         <CommunityJoinPrompt />
         <AuthModal />

@@ -14,11 +14,15 @@ export const CommunityCreator = () => {
   const state = createSignal({
     title: "",
     description: "",
+    private: false,
+    nsfw: false,
   })
   const resetState = () => {
     state.value = {
       title: "",
       description: "",
+      private: false,
+      nsfw: false,
     }
   }
 
@@ -39,7 +43,10 @@ export const CommunityCreator = () => {
 
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement
-    state.value[target.id as keyof typeof state.value] = target.value
+    const value = target.type === "checkbox" ? target.checked : target.value
+
+    //@ts-ignore
+    state.value[target.id as keyof typeof state.value] = value
     state.notify()
   }
 
@@ -74,14 +81,43 @@ export const CommunityCreator = () => {
               bind:value={() => state.value.description}
             ></textarea>
           </div>
+
+          <div className="form-group flex-row">
+            <label htmlFor="private">Private</label>
+            <input
+              id="private"
+              type="checkbox"
+              className="form-control"
+              watch={state}
+              bind:checked={() => state.value.private ?? false}
+              oninput={handleChange}
+            />
+          </div>
+          <div className="form-group flex-row">
+            <label htmlFor="private">NSFW </label>
+            <input
+              id="nsfw"
+              type="checkbox"
+              className="form-control"
+              watch={state}
+              bind:checked={() => state.value.nsfw ?? false}
+              oninput={handleChange}
+            />
+          </div>
+          <div
+            watch={state}
+            bind:visible={() => state.value.nsfw && !state.value.private}
+            className="form-error"
+          >
+            <p>NSFW communities must be private.</p>
+          </div>
           <div className="form-group">
             <Button
               type="submit"
               className="btn btn-primary hover-animate"
               watch={[loading, state]}
               bind:disabled={() =>
-                loading.value ||
-                !communityValidation.isCommunityValid(state.value.title, state.value.description)
+                loading.value || !communityValidation.isCommunityValid(state.value)
               }
             >
               Create

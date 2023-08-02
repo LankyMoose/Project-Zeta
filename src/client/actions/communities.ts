@@ -45,7 +45,9 @@ export const getCommunities = async (page = 0): Promise<CommunityListData[] | vo
 export const getCommunity = async (url_title: string): Promise<Partial<CommunityData> | Error> => {
   try {
     const response = await fetch(`${API_URL}/communities/${url_title}`)
-    return await response.json()
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.message ?? response.statusText)
+    return data
   } catch (error: any) {
     return new Error(error.message)
   }
@@ -240,5 +242,22 @@ export const updateCommunityMemberType = async (
       type: "error",
       text: error.message,
     })
+  }
+}
+
+export const agreeToCommunityNsfw = async (url_title: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/communities/${url_title}/nsfw-agreement`, {
+      method: "POST",
+    })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+    return true
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
+    return false
   }
 }

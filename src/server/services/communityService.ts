@@ -5,10 +5,12 @@ import {
   Community,
   CommunityJoinRequest,
   CommunityMember,
+  CommunityNsfwAgreement,
   NewCommunity,
   communities,
   communityJoinRequests,
   communityMembers,
+  communityNsfwAgreements,
   postComments,
   postReactions,
   posts,
@@ -392,6 +394,16 @@ export const communityService = {
         .returning()
         .execute()
 
+      await db
+        .delete(communityNsfwAgreements)
+        .where(
+          and(
+            eq(communityNsfwAgreements.communityId, communityId),
+            eq(communityNsfwAgreements.userId, userId)
+          )
+        )
+        .execute()
+
       return { type: res.length > 0 ? LeaveResultType.Success : LeaveResultType.NotAMember }
     } catch (error) {
       console.error(error)
@@ -499,6 +511,7 @@ export const communityService = {
         community: {
           disabled: boolean | null
           deleted: boolean | null
+          nsfw: boolean | null
         }
       })
     | void
@@ -512,9 +525,44 @@ export const communityService = {
             columns: {
               disabled: true,
               deleted: true,
+              nsfw: true,
             },
           },
         },
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async createNsfwAgreement(
+    communityId: string,
+    userId: string
+  ): Promise<CommunityNsfwAgreement | void> {
+    try {
+      return (
+        await db
+          .insert(communityNsfwAgreements)
+          .values({ communityId, userId })
+          .onConflictDoNothing()
+          .returning()
+          .execute()
+      ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getCommunityNsfwAgreement(
+    communityId: string,
+    userId: string
+  ): Promise<CommunityNsfwAgreement | void> {
+    try {
+      return await db.query.communityNsfwAgreements.findFirst({
+        where: (agreement, { and, eq }) =>
+          and(eq(agreement.communityId, communityId), eq(agreement.userId, userId)),
       })
     } catch (error) {
       console.error(error)
@@ -596,6 +644,10 @@ export const communityService = {
 
       if (!ownerMember) return new ServerError("Failed to create community owner")
 
+      if (newCommunity.nsfw) {
+        await this.createNsfwAgreement(newCommunity.id, userId)
+      }
+
       return {
         id: newCommunity.url_title!,
       }
@@ -616,6 +668,7 @@ export const communityService = {
       ).at(0)
 
       if (!updatedCommunity) return new ServerError("Failed to update community")
+
       return updatedCommunity
     } catch (error) {
       console.error(error)

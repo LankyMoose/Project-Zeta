@@ -9,8 +9,10 @@ export const communityJoinModalOpen = createSignal(false)
 export const communityLeaveModalOpen = createSignal(false)
 export const communityDeleteModalOpen = createSignal(false)
 export const communityOwnershipTransferModalOpen = createSignal(false)
+export const communityNsfwAgreementModalOpen = createSignal(false)
 
 export const selectedCommunity = createSignal<Partial<CommunityData> | null>(null)
+export const selectedCommunityUrlTitle = createSignal<string | null>(null)
 
 export const pendingCommunityJoinRequests = createSignal<CommunityJoinRequestData[]>([])
 

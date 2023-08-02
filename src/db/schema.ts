@@ -24,6 +24,8 @@ export const userRelations = relations(users, ({ many }) => ({
   posts: many(posts),
   comments: many(postComments),
   reactions: many(postReactions),
+  pollVotes: many(pollVotes),
+  nsfwAgreements: many(communityNsfwAgreements),
 }))
 
 export type User = InferModel<typeof users>
@@ -70,6 +72,7 @@ export const communities = pgTable(
     disabled: boolean("disabled").default(false),
     deleted: boolean("deleted").default(false),
     private: boolean("private").default(false),
+    nsfw: boolean("nsfw").default(false),
   },
   (table) => {
     return {
@@ -85,10 +88,48 @@ export const communityRelations = relations(communities, ({ many }) => ({
   members: many(communityMembers),
   moderators: many(communityMembers),
   owners: many(communityMembers),
+  joinRequests: many(communityJoinRequests),
+  nsfwAgreements: many(communityNsfwAgreements),
 }))
 
 export type Community = InferModel<typeof communities>
 export type NewCommunity = InferModel<typeof communities, "insert">
+
+export const communityNsfwAgreements = pgTable(
+  "community_nsfw_agreement",
+  {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    communityId: uuid("community_id")
+      .notNull()
+      .references(() => communities.id, {
+        onDelete: "cascade",
+      }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    agreedAt: timestamp("agreed_at").defaultNow().notNull(),
+  },
+  (table) => {
+    return {
+      communityIdIdx: index("community_nsfw_agreement_community_id_idx").on(table.communityId),
+      userIdIdx: index("community_nsfw_agreement_user_id_idx").on(table.userId),
+    }
+  }
+)
+
+export const communityNsfwAgreementRelations = relations(communityNsfwAgreements, ({ one }) => ({
+  user: one(users, {
+    fields: [communityNsfwAgreements.userId],
+    references: [users.id],
+  }),
+  community: one(communities, {
+    fields: [communityNsfwAgreements.communityId],
+    references: [communities.id],
+  }),
+}))
+
+export type CommunityNsfwAgreement = InferModel<typeof communityNsfwAgreements>
+export type NewCommunityNsfwAgreement = InferModel<typeof communityNsfwAgreements, "insert">
 
 export const communityMemberTypeEnum = pgEnum("community_member_type", [
   "member",

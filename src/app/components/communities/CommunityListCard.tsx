@@ -27,6 +27,7 @@ export const CommunityListCard = (props: CommunityListData) => {
                   description: community.description,
                   private: !!community.private,
                   disabled: !!community.disabled,
+                  nsfw: !!community.nsfw,
                 }
                 setPath(pathStore, `/communities/${community.url_title}`)
               }}
@@ -34,6 +35,7 @@ export const CommunityListCard = (props: CommunityListData) => {
               {community.title}
             </a>
             {community.private ? <span className="badge text-light ml-2">Private</span> : <></>}
+            {community.nsfw ? <span className="badge text-light ml-2">NSFW</span> : <></>}
           </h2>
         </div>
         <small className="text-muted nowrap">

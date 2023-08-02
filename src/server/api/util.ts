@@ -1,5 +1,5 @@
 import { FastifyRequest } from "fastify"
-import { NotAuthenticatedError, NotFoundError, UnauthorizedError } from "../../errors"
+import { NotAuthenticatedError, NotFoundError, NsfwError, UnauthorizedError } from "../../errors"
 import { PublicUser } from "../../types/user"
 import { communityService } from "../services/communityService"
 import { CommunityMember } from "../../db/schema"
@@ -31,4 +31,12 @@ export const ensureCommunityMemberIfPrivate = async (req: FastifyRequest, commun
   const community = await communityService.getCommunity(communityId, true)
   if (!community) throw new NotFoundError()
   if (community.private) await getActiveMemberOrDie(req, community.id)
+}
+
+export const ensureCommunityMemberNsfwAgreementOrDie = async (
+  userId: string,
+  communityId: string
+) => {
+  const agreement = await communityService.getCommunityNsfwAgreement(communityId, userId)
+  if (!agreement) throw new NsfwError()
 }

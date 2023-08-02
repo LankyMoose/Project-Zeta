@@ -1,5 +1,5 @@
 import * as Cinnabun from "cinnabun"
-import { Button } from "../../../components/Button"
+import { Button } from "../../components/Button"
 import {
   communityDrawerOpen,
   communityDrawerState,

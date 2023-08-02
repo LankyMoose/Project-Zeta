@@ -53,6 +53,7 @@ export type CommunityData = {
   url_title: string
   private: boolean
   memberType: "member" | "moderator" | "owner" | "guest"
+  nsfw: boolean | null
 }
 
 export enum JoinResultType {

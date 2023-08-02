@@ -9,6 +9,7 @@ export enum API_ERROR {
   INVALID_REQUEST = "Invalid",
   SERVER_ERROR = "Server error",
   COMMUNITY_NAME_NOT_AVAILABLE = "Community name not available",
+  NSFW = "NSFW",
 }
 
 export const POST_COMMENT_PAGE_SIZE = 10

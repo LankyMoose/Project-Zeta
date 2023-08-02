@@ -1,3 +1,5 @@
+import { NewCommunity } from "./schema"
+
 export const pollValidation = {
   minPollDescLength: 1,
   maxPollDescLength: 255,
@@ -33,7 +35,7 @@ export const communityValidation = {
   maxCommunityNameLength: 128,
   minCommunityDescLength: 0,
   maxCommunityDescLength: 255,
-  isCommunityNameValid: (name: string | undefined) => {
+  isCommunityTitleValid: (name: string | undefined) => {
     if (!name) return false
     if (
       name.length < communityValidation.minCommunityNameLength ||
@@ -47,15 +49,17 @@ export const communityValidation = {
     }
     return true
   },
-  isCommunityValid: (name: string | undefined, desc: string | undefined) => {
-    if (!desc) return false
-    if (!communityValidation.isCommunityNameValid(name)) return false
+  isCommunityValid: (community: Partial<NewCommunity>) => {
+    if (!community.description) return false
+    if (!communityValidation.isCommunityTitleValid(community.title)) return false
     if (
-      desc.length < communityValidation.minCommunityDescLength ||
-      desc.length > communityValidation.maxCommunityDescLength
+      community.description.length < communityValidation.minCommunityDescLength ||
+      community.description.length > communityValidation.maxCommunityDescLength
     ) {
       return false
     }
+
+    if (community.nsfw && !community.private) return false
 
     return true
   },

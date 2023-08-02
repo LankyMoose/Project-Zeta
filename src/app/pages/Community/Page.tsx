@@ -7,10 +7,12 @@ import {
   communityEditorModalOpen,
   communityJoinModalOpen,
   communityLeaveModalOpen,
+  communityNsfwAgreementModalOpen,
   isCommunityAdmin,
   isCommunityMember,
   isCommunityOwner,
   selectedCommunity,
+  selectedCommunityUrlTitle,
 } from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../../types/community"
@@ -27,9 +29,11 @@ import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
 import { CommunityPostData } from "../../../types/post"
 import { setPath } from "cinnabun/router"
 import { title } from "../../Document"
+import { API_ERROR } from "../../../constants"
 
 export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
+  selectedCommunityUrlTitle.value = params.url_title
   title.value = params.url_title + " | Project Zeta"
 
   const showLoginPrompt = () => {
@@ -58,6 +62,14 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
   const loadCommunity = async (): Promise<Partial<CommunityData> | { message: string }> => {
     const res = await getCommunity(params.url_title!)
     if ("message" in res) {
+      if (res.message === API_ERROR.NSFW) {
+        if (userStore.value) {
+          communityNsfwAgreementModalOpen.value = true
+        } else {
+          showLoginPrompt()
+        }
+        return res
+      }
       addNotification({
         type: "error",
         text: res.message,
@@ -87,6 +99,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       members: res.members,
       owners: res.owners,
       moderators: res.moderators,
+      nsfw: res.nsfw,
     }
 
     return res
@@ -96,11 +109,17 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
     return !data.private || (data.memberType && data.memberType !== "guest")
   }
 
+  const isDataError = (
+    data: Partial<CommunityData> | { message: string }
+  ): data is { message: string } => {
+    return "message" in data
+  }
+
   return (
     <div>
       <Cinnabun.Suspense promise={loadCommunity} cache>
         {(loading: boolean, data: Partial<CommunityData> | { message: string }) => {
-          if (data && "message" in data) return data.message
+          //if (!data) return null
 
           return (
             <div className="page-wrapper">
@@ -127,7 +146,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                 <div className="page-body">
                   <DefaultLoader />
                 </div>
-              ) : canViewCommunityData(data) ? (
+              ) : !isDataError(data) && canViewCommunityData(data) ? (
                 <>
                   <CommunityFixedHeader />
 
@@ -214,6 +233,8 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                     </div>
                   </div>
                 </>
+              ) : isDataError(data) ? (
+                data.message
               ) : userStore.value ? (
                 <Button
                   className="btn btn-primary hover-animate btn-lg"

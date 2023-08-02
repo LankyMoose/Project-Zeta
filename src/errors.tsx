@@ -50,6 +50,12 @@ export class DisabledError extends ApiError {
     super("DISABLED", message ?? API_ERROR.DISABLED, 403)
   }
 }
+export class NsfwError extends ApiError {
+  constructor(message?: string) {
+    super("NSFW", message ?? API_ERROR.NSFW, 403)
+  }
+}
+
 export class ServerError extends ApiError {
   constructor(message?: string) {
     super("SERVER_ERROR", message ?? API_ERROR.SERVER_ERROR, 500)
