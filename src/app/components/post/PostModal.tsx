@@ -18,6 +18,7 @@ import { timeSinceUTCDate } from "../../../utils"
 import { IconButton } from "../../components/IconButton"
 import { ThumbsUpIcon, ThumbsDownIcon } from "../icons"
 import { API_ERROR } from "../../../constants"
+import { UserIcon } from "../icons/UserIcon"
 
 const loading = createSignal(false)
 
@@ -255,9 +256,15 @@ const NewCommentForm = ({
       onsubmit={handleSubmit}
     >
       <div className="flex align-items-center gap flex-wrap flex-grow">
-        <div className="avatar-wrapper sm">
-          <img className="avatar" src={userStore.value?.picture} alt={userStore.value?.name} />
-        </div>
+        {userStore.value?.picture ? (
+          <div className="avatar-wrapper sm">
+            <img className="avatar" src={userStore.value?.picture} alt={userStore.value?.name} />
+          </div>
+        ) : (
+          <div className="avatar-wrapper sm">
+            <UserIcon className="avatar" />
+          </div>
+        )}
         <div className="flex-grow">
           <textarea
             className="form-control"

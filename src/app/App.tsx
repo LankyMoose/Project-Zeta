@@ -23,7 +23,7 @@ import { PostModal } from "./components/post/PostModal"
 import { NotificationTray } from "./components/Notifications"
 import { Portal } from "./components/Portal"
 import { UserDropdown } from "./components/UserDropdown"
-import { UserAvatar } from "./components/UserAvatar"
+import { UserAvatar } from "./components/user/UserAvatar"
 
 const Header = () => (
   <header>

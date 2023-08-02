@@ -7,8 +7,8 @@ import {
   isNotAuthenticated,
   userDropdownOpen,
   userStore,
-} from "../state/global"
-import { UserIcon } from "./icons/UserIcon"
+} from "../../state/global"
+import { UserIcon } from "../icons/UserIcon"
 import { ClickOutsideListener } from "cinnabun/listeners"
 
 export const UserAvatar = () => {
