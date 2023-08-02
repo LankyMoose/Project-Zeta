@@ -6,6 +6,7 @@ import "./styles/card.css"
 import "./styles/utilities.css"
 import "./styles/form.css"
 import "./styles/badge.css"
+import "./styles/skeleton.css"
 
 import { Hydration } from "cinnabun/hydration"
 import { Document } from "../app/Document"
