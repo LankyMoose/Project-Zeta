@@ -16,7 +16,7 @@ export default function Users() {
       <div className="page-body">
         <Cinnabun.Suspense promise={getUsers} cache>
           {(loading: boolean, users: User[] | undefined) => {
-            if (loading) return <SkeletonList numberOfItems={6} className="card-list" />
+            if (loading) return <SkeletonList numberOfItems={3} className="card-list" />
             if (!users)
               return (
                 <div>

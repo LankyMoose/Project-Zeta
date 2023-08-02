@@ -59,6 +59,7 @@ export default function CommunityPage({
   }
 
   const loadPosts = async (): Promise<CommunityPostData[] | void> => {
+    console.log("load posts")
     const res = await getCommunityPosts(params.url_title!)
     if ("message" in res) {
       handleError(res.message)
@@ -201,8 +202,9 @@ export default function CommunityPage({
                           <SkeletonElement tag="p" style="min-height: 2rem; min-width:100px" />
                         )}
                       </div>
-                      <Cinnabun.Suspense promise={loadPosts}>
+                      <Cinnabun.Suspense promise={loadPosts} cache>
                         {(loading: boolean, posts?: CommunityPostData[]) => {
+                          console.log("suspense reevaluate")
                           if (loading || !posts)
                             return (
                               <SkeletonList
@@ -245,13 +247,13 @@ export default function CommunityPage({
                       ) : (
                         <>
                           {() =>
-                            selectedCommunity.value?.moderators ? (
+                            (selectedCommunity.value?.moderators ?? []).length > 0 ? (
                               <>
                                 <div className="section-title">
                                   <h3>Moderators</h3>
                                 </div>
                                 <div className="flex flex-column">
-                                  {selectedCommunity.value.moderators.map((member) => (
+                                  {(selectedCommunity.value?.moderators ?? []).map((member) => (
                                     <CommunityMemberCard member={member} />
                                   ))}
                                 </div>
@@ -261,13 +263,13 @@ export default function CommunityPage({
                             )
                           }
                           {() =>
-                            selectedCommunity.value?.members ? (
+                            (selectedCommunity.value?.members ?? []).length > 0 ? (
                               <>
                                 <div className="section-title">
                                   <h3>Members</h3>
                                 </div>
                                 <div className="flex flex-column">
-                                  {selectedCommunity.value.members.map((member) => (
+                                  {(selectedCommunity.value?.members ?? []).map((member) => (
                                     <CommunityMemberCard member={member} />
                                   ))}
                                 </div>

@@ -31,7 +31,7 @@ const loadPost = async (postId: string) => {
   if (selectedPost.value) {
     if (selectedPost.value.id === res?.id) {
       selectedPost.value = res ?? null
-      loading.value = false
+      if (loading.value) loading.value = false
       return
     }
   }
@@ -120,154 +120,131 @@ export const PostModal = () => {
 
   return (
     <Modal large visible={postModalOpen} toggle={handleClose}>
-      <div watch={loading} bind:children>
-        {() =>
-          loading.value ? (
-            <>
-              <ModalHeader className="modal-header flex flex-column gap-lg">
-                <div className="flex gap-lg align-items-start">
-                  <SkeletonElement tag="h2" style="height:2.5rem; width:100%;" />
-                  <div style="width: 100px" />
+      <ModalHeader watch={loading} bind:children className="modal-header flex flex-column gap-lg">
+        <div className="flex gap-lg align-items-start">
+          {() =>
+            selectedPost.value?.title ? (
+              <h2>{selectedPost.value.title}</h2>
+            ) : (
+              <SkeletonElement tag="h2" style="height:2.5rem; width:100%;" />
+            )
+          }
+          {() =>
+            selectedPost.value?.user && selectedPost.value.createdAt ? (
+              <div className="ml-auto">
+                <AuthorTag
+                  user={selectedPost.value.user!}
+                  date={timeSinceUTCDate(selectedPost.value.createdAt)}
+                />
+              </div>
+            ) : (
+              <SkeletonElement
+                tag="div"
+                className="rounded-full"
+                style="height:2.5rem; min-width: 2.5rem;"
+              />
+            )
+          }
+        </div>
+        <div className="post-content">
+          {() =>
+            selectedPost.value?.content ? (
+              <p className="m-0">{selectedPost.value.content}</p>
+            ) : (
+              <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
+            )
+          }
+        </div>
+        <div className="flex justify-content-end">
+          <div className="flex gap post-reactions">
+            {() =>
+              loading.value ? (
+                <>
                   <SkeletonElement
                     tag="div"
-                    className="rounded-full"
-                    style="height:2.5rem; min-width: 2.5rem;"
+                    className="rounded-sm"
+                    style="height:1.5rem; min-width: 2.5rem;"
                   />
-                </div>
-                <div>
-                  <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
-                </div>
-                <div className="flex justify-content-end">
-                  <div className="flex gap post-reactions">
-                    <SkeletonElement
-                      tag="div"
-                      className="rounded-sm"
-                      style="height:1.5rem; min-width: 2.5rem;"
-                    />
-                    <SkeletonElement
-                      tag="div"
-                      className="rounded-sm"
-                      style="height:1.5rem; min-width: 2.5rem;"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap ">
                   <SkeletonElement
                     tag="div"
-                    className="rounded-full"
-                    style="height:2.5rem; min-width: 2.5rem;"
+                    className="rounded-sm"
+                    style="height:1.5rem; min-width: 2.5rem;"
                   />
-                  <SkeletonElement tag="p" style="min-height:3rem; width:100%;" />
-                </div>
-              </ModalHeader>
-              <ModalBody>
-                <div className="flex flex-column gap-lg">
-                  <div className="flex gap">
-                    <SkeletonElement
-                      tag="div"
-                      className="rounded-full"
-                      style="height:2.5rem; min-width: 2.5rem;"
+                </>
+              ) : (
+                <>
+                  <IconButton
+                    onclick={() => addReaction(true)}
+                    bind:className={() =>
+                      `icon-button flex align-items-center gap-sm ${
+                        state.value?.userReaction === true ? "selected" : ""
+                      }`
+                    }
+                    watch={[userStore, reacting, state]}
+                    bind:disabled={() => reacting.value}
+                  >
+                    <ThumbsUpIcon
+                      color="var(--primary)"
+                      color:hover="var(--primary-light)"
+                      className="text-rg"
                     />
-                    <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
-                  </div>
-                </div>
-              </ModalBody>
-              <ModalFooter className="modal-footer p-2">
-                <SkeletonElement tag="div" className="w-100" style="min-height:3rem;" disabled />
-              </ModalFooter>
-            </>
-          ) : (
-            <>
-              <ModalHeader
-                className="modal-header flex flex-column gap-lg"
-                watch={selectedPost}
-                bind:children
-              >
-                <div className="flex gap-lg align-items-start">
-                  <h2>{() => selectedPost.value?.title ?? ""}</h2>
-                  {() =>
-                    selectedPost.value?.user && selectedPost.value.createdAt ? (
-                      <div className="ml-auto">
-                        <AuthorTag
-                          user={selectedPost.value.user!}
-                          date={timeSinceUTCDate(selectedPost.value.createdAt)}
-                        />
-                      </div>
-                    ) : (
-                      <></>
-                    )
-                  }
-                </div>
-                <div className="post-content">
-                  <p watch={selectedPost} bind:children className="m-0">
-                    {() => selectedPost.value?.content ?? ""}
-                  </p>
-                </div>
-                <div
-                  watch={selectedPost}
-                  bind:visible={() => typeof selectedPost.value?.userReaction !== "undefined"}
-                  className="flex justify-content-end"
-                >
-                  <div className="flex gap post-reactions">
-                    <IconButton
-                      onclick={() => addReaction(true)}
-                      bind:className={() =>
-                        `icon-button flex align-items-center gap-sm ${
-                          state.value?.userReaction === true ? "selected" : ""
-                        }`
-                      }
-                      watch={[userStore, reacting, state]}
-                      bind:disabled={() => reacting.value}
-                    >
-                      <ThumbsUpIcon
-                        color="var(--primary)"
-                        color:hover="var(--primary-light)"
-                        className="text-rg"
-                      />
-                      <small className="text-muted" watch={state} bind:children>
-                        {() => state.value?.reactions?.positive ?? 0}
-                      </small>
-                    </IconButton>
-                    <IconButton
-                      onclick={() => addReaction(false)}
-                      bind:className={() =>
-                        `icon-button flex align-items-center gap-sm ${
-                          state.value?.userReaction === false ? "selected" : ""
-                        }`
-                      }
-                      watch={[userStore, reacting, state]}
-                      bind:disabled={() => reacting.value}
-                    >
-                      <ThumbsDownIcon
-                        color="var(--primary)"
-                        color:hover="var(--primary-light)"
-                        className="text-rg"
-                      />
-                      <small className="text-muted" watch={state} bind:children>
-                        {() => state.value?.reactions?.negative ?? 0}
-                      </small>
-                    </IconButton>
-                  </div>
-                </div>
-                <div watch={selectedPost} bind:visible={() => !!selectedPost.value?.comments}>
-                  <NewCommentForm post={selectedPost} />
-                </div>
-              </ModalHeader>
-              <ModalBody>
-                <PostComments post={selectedPost} />
-              </ModalBody>
-              <ModalFooter className="modal-footer p-2">
-                <Button
-                  className="btn w-100 flex justify-content-center py-3 text-muted text-rg"
-                  onclick={handleClose}
-                >
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )
-        }
-      </div>
+                    <small className="text-muted" watch={state} bind:children>
+                      {() => state.value?.reactions?.positive ?? 0}
+                    </small>
+                  </IconButton>
+                  <IconButton
+                    onclick={() => addReaction(false)}
+                    bind:className={() =>
+                      `icon-button flex align-items-center gap-sm ${
+                        state.value?.userReaction === false ? "selected" : ""
+                      }`
+                    }
+                    watch={[userStore, reacting, state]}
+                    bind:disabled={() => reacting.value}
+                  >
+                    <ThumbsDownIcon
+                      color="var(--primary)"
+                      color:hover="var(--primary-light)"
+                      className="text-rg"
+                    />
+                    <small className="text-muted" watch={state} bind:children>
+                      {() => state.value?.reactions?.negative ?? 0}
+                    </small>
+                  </IconButton>
+                </>
+              )
+            }
+          </div>
+        </div>
+        <div className="flex gap ">
+          {() =>
+            loading.value ? (
+              <>
+                <SkeletonElement
+                  tag="div"
+                  className="rounded-full"
+                  style="height:2.5rem; min-width: 2.5rem;"
+                />
+                <SkeletonElement tag="p" style="min-height:3rem; width:100%;" />
+              </>
+            ) : (
+              <NewCommentForm post={selectedPost} />
+            )
+          }
+        </div>
+      </ModalHeader>
+
+      <ModalBody>
+        <PostComments />
+      </ModalBody>
+      <ModalFooter className="modal-footer p-2">
+        <Button
+          className="btn w-100 flex justify-content-center py-3 text-muted text-rg"
+          onclick={handleClose}
+        >
+          Close
+        </Button>
+      </ModalFooter>
     </Modal>
   )
 }

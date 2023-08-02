@@ -8,7 +8,7 @@ import { Link } from "cinnabun/router"
 import { POST_COMMENT_PAGE_SIZE } from "../../../constants"
 import "./PostComments.css"
 import { postCommentsPage, selectedPost } from "../../state/post"
-import { EllipsisLoader } from "../loaders/Ellipsis"
+import { SkeletonList } from "../loaders/SkeletonList"
 
 const loadingMore = createSignal<boolean>(false)
 
@@ -90,7 +90,7 @@ export const PostComments = () => {
         bind:visible={() => loadingMore.value || !selectedPost.value?.comments}
         className="flex justify-content-center"
       >
-        <EllipsisLoader className="lg" />
+        <SkeletonList numberOfItems={3} height="60px" className="flex flex-column gap-sm" />
       </div>
 
       <div

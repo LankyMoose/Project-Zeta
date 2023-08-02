@@ -4,6 +4,9 @@
   align-items: flex-start;
   margin-bottom:.5rem;
 }
+.form-group:last-child {
+  margin-bottom:0;
+}
 .form-group.flex-row {
   flex-direction: row;
   align-items: center;
@@ -25,4 +28,12 @@
   background: var(--danger);
   padding: 0.5rem;
   margin-bottom: .5rem;
+}
+.form-error:last-child {
+  margin-bottom:0;
+}
+@media screen and (prefers-color-scheme: light) {
+  .form-error {
+    color: var(--light);
+  }
 }
