@@ -47,7 +47,7 @@ export const CommunityCreator = () => {
     <Modal
       onclose={onModalClose}
       visible={communityCreatorModalOpen}
-      toggle={() => (communityCreatorModalOpen.value = !communityCreatorModalOpen.value)}
+      toggle={() => (communityCreatorModalOpen.value = false)}
     >
       <ModalHeader>
         <h2>Create Community</h2>

@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { ComponentChildren, ComponentProps } from "cinnabun/types"
-import { ClickOutsideListener, KeyboardListener, NavigationListener } from "cinnabun/listeners"
+import { KeyboardListener, NavigationListener } from "cinnabun/listeners"
 import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
 import { openModalCount, pathStore } from "../../state/global"
@@ -36,12 +36,15 @@ export const Modal = (
 
   let didMount = false
 
+  const outerRef = Cinnabun.useRef()
+
   return (
     <FadeInOut
       properties={[{ name: "opacity", from: 0, to: 1, ms: 350 }]}
       className="modal-outer"
       tabIndex={-1}
       watch={visible}
+      ref={outerRef}
       bind:visible={(self) => {
         if (!visible.value && onclose) onclose()
         if (visible.value) {
@@ -53,18 +56,12 @@ export const Modal = (
         return visible.value
       }}
       cancelExit={() => visible.value}
+      onclick={(e: MouseEvent) => {
+        const target = e.target as HTMLElement
+        if (target === outerRef.value && closeOnClickOutside) toggle(e)
+      }}
     >
-      <ClickOutsideListener
-        tag="div"
-        className="modal-wrapper"
-        onCapture={(e) => {
-          if (e.defaultPrevented) return
-          if (closeOnClickOutside) {
-            e.preventDefault()
-            toggle(e)
-          }
-        }}
-      >
+      <div tag="div" className="modal-wrapper">
         <Transition
           className={"modal" + (large ? " lg" : "")}
           properties={[{ name: "translate", from: "0 -5rem", to: "0 0", ms: 350 }]}
@@ -76,7 +73,7 @@ export const Modal = (
           <KeyboardListener keys={["Escape"]} onCapture={(_, e) => closeOnEscape && toggle(e)} />
           {children}
         </Transition>
-      </ClickOutsideListener>
+      </div>
     </FadeInOut>
   )
 }
