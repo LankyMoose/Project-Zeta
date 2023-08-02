@@ -129,22 +129,22 @@ export const PostModal = () => {
               <SkeletonElement tag="h2" style="height:2.5rem; width:100%;" />
             )
           }
-          {() =>
-            selectedPost.value?.user && selectedPost.value.createdAt ? (
-              <div className="ml-auto">
+          <div className="ml-auto">
+            {() =>
+              selectedPost.value?.user && selectedPost.value.createdAt ? (
                 <AuthorTag
                   user={selectedPost.value.user!}
                   date={timeSinceUTCDate(selectedPost.value.createdAt)}
                 />
-              </div>
-            ) : (
-              <SkeletonElement
-                tag="div"
-                className="rounded-full"
-                style="height:2.5rem; min-width: 2.5rem;"
-              />
-            )
-          }
+              ) : (
+                <SkeletonElement
+                  tag="div"
+                  className="rounded-full"
+                  style="height:2.5rem; min-width: 2.5rem;"
+                />
+              )
+            }
+          </div>
         </div>
         <div className="post-content">
           {() =>

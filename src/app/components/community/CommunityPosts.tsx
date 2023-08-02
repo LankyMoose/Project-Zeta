@@ -13,12 +13,11 @@ export const CommunityPosts = ({ url_title }: { url_title?: string }) => {
   const loadPosts = async (): Promise<CommunityPostData[] | void> => {
     if (loadingPosts.value) return
     if (url_title === last_title) return
+
     last_title = url_title!
     posts.value = []
-
-    console.log("loading posts")
-
     loadingPosts.value = true
+
     const res = await getCommunityPosts(url_title!)
 
     if ("message" in res) {
@@ -27,7 +26,6 @@ export const CommunityPosts = ({ url_title }: { url_title?: string }) => {
     }
     posts.value = res
     loadingPosts.value = false
-    //posts.notify()
   }
 
   return (

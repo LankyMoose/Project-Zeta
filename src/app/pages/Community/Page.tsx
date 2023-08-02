@@ -69,6 +69,9 @@ export default function CommunityPage({
         showLoginPrompt()
         return
       case API_ERROR.NSFW:
+        if (selectedCommunity.value === null) selectedCommunity.value = {} as Partial<CommunityData>
+        selectedCommunity.value.nsfw = true
+
         if (userStore.value) {
           communityNsfwAgreementModalOpen.value = true
         } else {
@@ -88,7 +91,6 @@ export default function CommunityPage({
 
   const loadCommunity = async (): Promise<Partial<CommunityData> | void> => {
     const res = await getCommunity(params.url_title!)
-    console.log(res)
     if ("message" in res) {
       handleError(res.message)
       return
@@ -129,7 +131,6 @@ export default function CommunityPage({
     <div onBeforeUnmounted={onBeforeUnmounted}>
       <Cinnabun.Suspense promise={loadCommunity} cache>
         {(loading: boolean, data?: Partial<CommunityData>) => {
-          console.log("outer suspense reevaluate")
           return (
             <div className="page-wrapper">
               <div className="page-title">
@@ -175,9 +176,21 @@ export default function CommunityPage({
               )}
 
               {!loading && !data ? (
-                <Button className="btn btn-primary hover-animate btn-lg" onclick={showLoginPrompt}>
-                  Log in to view this community
-                </Button>
+                selectedCommunity.value?.nsfw ? (
+                  <Button
+                    className="btn btn-primary hover-animate btn-lg"
+                    onclick={() => (communityNsfwAgreementModalOpen.value = true)}
+                  >
+                    View the community NSFW agreement
+                  </Button>
+                ) : (
+                  <Button
+                    className="btn btn-primary hover-animate btn-lg"
+                    onclick={showLoginPrompt}
+                  >
+                    Log in to view this community
+                  </Button>
+                )
               ) : (
                 <div onMounted={onMounted} className="page-body">
                   <div className="community-page-inner">
