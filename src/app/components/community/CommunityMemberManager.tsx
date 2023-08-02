@@ -95,7 +95,6 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
       member.user.id,
       "owner"
     )
-    debugger
     if (!res) return
     if ("type" in res) return
     if ("owner" in res) {
@@ -114,6 +113,7 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
     if ("moderator" in res) {
       if (!selectedCommunity.value!.moderators) selectedCommunity.value!.moderators = []
       selectedCommunity.value!.moderators.push(res.moderator)
+      selectedCommunity.value!.memberType = "moderator"
     }
 
     selectedCommunity.notify()
@@ -123,8 +123,11 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
 
   return (
     <div key={member.id} className="card">
-      <div className="card-title flex gap justify-content-between">
-        <span>{member.user.name}</span>
+      <div className="card-title flex gap justify-content-between align-items-center">
+        <div className="avatar-wrapper sm">
+          <img className="avatar" src={member.user.avatarUrl} alt={member.user.name} />
+        </div>
+        <span className="flex-grow">{member.user.name}</span>
         <div className="flex flex-wrap flex-column gap-sm">
           {member.memberType === "moderator" ? (
             <>

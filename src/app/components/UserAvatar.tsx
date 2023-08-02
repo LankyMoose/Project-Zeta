@@ -32,7 +32,7 @@ export const UserAvatar = () => {
   return (
     <ClickOutsideListener
       tag="div"
-      className="user-area"
+      className="user-area flex"
       onCapture={() => (userDropdownOpen.value = false)}
     >
       <button
