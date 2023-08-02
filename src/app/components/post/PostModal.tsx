@@ -18,7 +18,7 @@ import { IconButton } from "../../components/IconButton"
 import { ThumbsUpIcon, ThumbsDownIcon } from "../icons"
 import { API_ERROR } from "../../../constants"
 import { UserIcon } from "../icons/UserIcon"
-import { SkeletonElement } from "../SkeletonElement"
+import { SkeletonElement } from "../loaders/SkeletonElement"
 
 const loading = createSignal(false)
 

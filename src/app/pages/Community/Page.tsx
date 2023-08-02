@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import "./Page.css"
-import { getCommunity, getCommunityPosts } from "../../../client/actions/communities"
+import { getCommunity } from "../../../client/actions/communities"
 import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
 import {
   communityEditorModalOpen,
@@ -25,12 +25,10 @@ import { AddPostButton } from "../../components/community/AddPostButton"
 import { addNotification } from "../../components/Notifications"
 import { Button } from "../../components/Button"
 import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
-import { CommunityPostData } from "../../../types/post"
 import { setPath } from "cinnabun/router"
 import { title } from "../../Document"
 import { API_ERROR } from "../../../constants"
-import { SkeletonList } from "../../components/loaders/SkeletonList"
-import { SkeletonElement } from "../../components/SkeletonElement"
+import { SkeletonElement } from "../../components/loaders/SkeletonElement"
 
 export default function CommunityPage({
   params,
@@ -56,16 +54,6 @@ export default function CommunityPage({
       },
     }
     authModalOpen.value = true
-  }
-
-  const loadPosts = async (): Promise<CommunityPostData[] | void> => {
-    console.log("load posts")
-    const res = await getCommunityPosts(params.url_title!)
-    if ("message" in res) {
-      handleError(res.message)
-      return
-    }
-    return res
   }
 
   const handleError = (message: string) => {
@@ -121,7 +109,6 @@ export default function CommunityPage({
       moderators: res.moderators,
       nsfw: res.nsfw,
     }
-
     return res
   }
 
@@ -142,6 +129,7 @@ export default function CommunityPage({
     <div onBeforeUnmounted={onBeforeUnmounted}>
       <Cinnabun.Suspense promise={loadCommunity} cache>
         {(loading: boolean, data?: Partial<CommunityData>) => {
+          console.log("outer suspense reevaluate")
           return (
             <div className="page-wrapper">
               <div className="page-title">
@@ -202,22 +190,8 @@ export default function CommunityPage({
                           <SkeletonElement tag="p" style="min-height: 2rem; min-width:100px" />
                         )}
                       </div>
-                      <Cinnabun.Suspense promise={loadPosts} cache>
-                        {(loading: boolean, posts?: CommunityPostData[]) => {
-                          console.log("suspense reevaluate")
-                          if (loading || !posts)
-                            return (
-                              <SkeletonList
-                                height="80px"
-                                numberOfItems={5}
-                                className="flex flex-column gap"
-                              />
-                            )
 
-                          //if (!posts) return <></>
-                          return <CommunityPosts posts={posts} />
-                        }}
-                      </Cinnabun.Suspense>
+                      <CommunityPosts url_title={params.url_title} />
                     </section>
                     <section
                       watch={selectedCommunity}
