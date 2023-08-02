@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 
-import { communityJoinModalOpen } from "../../state/community"
+import { communityJoinModalOpen, selectedCommunityUrlTitle } from "../../state/community"
 import { authModalOpen, authModalState, userStore } from "../../state/global"
 import { postModalOpen, selectedPost, postCommentsPage } from "../../state/post"
 
@@ -11,7 +11,6 @@ import { addPostComment, addPostReaction, getPost } from "../../../client/action
 import { PostComments } from "./PostComments"
 import { CommunityPostDataWithComments } from "../../../types/post"
 import { commentValidation } from "../../../db/validation"
-import { AuthModalCallback } from "../../../types/auth"
 import { Button } from "../../components/Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { timeSinceUTCDate } from "../../../utils"
@@ -68,7 +67,12 @@ export const PostModal = () => {
       authModalState.value = {
         title: "Log in to interact with this post",
         message: "You must be logged in to interact with community posts.",
-        callbackAction: AuthModalCallback.ViewCommunity,
+        callbackState: {
+          view: {
+            post: selectedPost.value.id,
+            community: selectedCommunityUrlTitle.value ?? undefined,
+          },
+        },
       }
       authModalOpen.value = true
       return
@@ -221,7 +225,12 @@ const NewCommentForm = ({
       authModalState.value = {
         title: "Log in to interact with this post",
         message: "You must be logged in to interact with community posts.",
-        callbackAction: AuthModalCallback.ViewCommunity,
+        callbackState: {
+          view: {
+            post: post.value.id,
+            community: selectedCommunityUrlTitle.value ?? undefined,
+          },
+        },
       }
       authModalOpen.value = true
       return

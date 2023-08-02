@@ -6,12 +6,11 @@ import { IconButton } from "../../components/IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../../client/actions/posts"
-import { communityJoinModalOpen } from "../../state/community"
+import { communityJoinModalOpen, selectedCommunityUrlTitle } from "../../state/community"
 import { userStore, authModalState, authModalOpen } from "../../state/global"
 
 import { AuthorTag } from "../AuthorTag"
 import "./PostCard.css"
-import { AuthModalCallback } from "../../../types/auth"
 import { CommentIcon } from "../icons/CommentIcon"
 import { API_ERROR } from "../../../constants"
 import { selectedPost } from "../../state/post"
@@ -26,7 +25,12 @@ export const PostCard = ({ post }: { post: CommunityPostData }) => {
       authModalState.value = {
         title: "Log in to interact with this post",
         message: "You must be logged in to interact with community posts.",
-        callbackAction: AuthModalCallback.ViewCommunity,
+        callbackState: {
+          view: {
+            post: post.id,
+            community: selectedCommunityUrlTitle.value ?? undefined,
+          },
+        },
       }
       authModalOpen.value = true
       return

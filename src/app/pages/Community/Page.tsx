@@ -11,6 +11,7 @@ import {
   isCommunityAdmin,
   isCommunityMember,
   isCommunityOwner,
+  postCreatorModalOpen,
   selectedCommunity,
   selectedCommunityUrlTitle,
 } from "../../state/community"
@@ -23,7 +24,6 @@ import { EditIcon } from "../../components/icons"
 import { CommunityFixedHeader } from "../../components/community/CommunityFixedHeader"
 import { AddPostButton } from "../../components/community/AddPostButton"
 import { addNotification } from "../../components/Notifications"
-import { AuthModalCallback } from "../../../types/auth"
 import { Button } from "../../components/Button"
 import { AdminMenu } from "../../components/community/AdminMenu/AdminMenu"
 import { CommunityPostData } from "../../../types/post"
@@ -31,7 +31,13 @@ import { setPath } from "cinnabun/router"
 import { title } from "../../Document"
 import { API_ERROR } from "../../../constants"
 
-export default function CommunityPage({ params }: { params?: { url_title?: string } }) {
+export default function CommunityPage({
+  params,
+  query,
+}: {
+  params?: { url_title?: string }
+  query: { createpost?: string }
+}) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
   selectedCommunityUrlTitle.value = params.url_title
   title.value = params.url_title + " | Project Zeta"
@@ -41,7 +47,11 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
       title: "Log in to view this community",
       message:
         "This community is private and you must be a member of the community to view its content.",
-      callbackAction: AuthModalCallback.ViewCommunity,
+      callbackState: {
+        view: {
+          community: params.url_title,
+        },
+      },
     }
     authModalOpen.value = true
   }
@@ -115,8 +125,21 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
     return "message" in data
   }
 
+  const onMounted = () => {
+    if (query.createpost) {
+      postCreatorModalOpen.value = true
+      window.history.pushState(null, "", window.location.pathname)
+    }
+  }
+
+  const onBeforeUnmounted = () => {
+    selectedCommunity.value = null
+    selectedCommunityUrlTitle.value = null
+    return true
+  }
+
   return (
-    <div>
+    <div onBeforeUnmounted={onBeforeUnmounted}>
       <Cinnabun.Suspense promise={loadCommunity} cache>
         {(loading: boolean, data: Partial<CommunityData> | { message: string }) => {
           //if (!data) return null
@@ -163,7 +186,7 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                     <> </>
                   )}
 
-                  <div className="page-body">
+                  <div onMounted={onMounted} className="page-body">
                     <div className="community-page-inner">
                       <section className="flex flex-column community-page-posts">
                         <div className="section-title">

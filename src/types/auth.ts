@@ -3,8 +3,20 @@ export enum AuthProvider {
   Github = "github",
 }
 
-export enum AuthModalCallback {
-  CreateCommunity = "create-community",
-  CreatePost = "create-post",
-  ViewCommunity = "view-community",
+export type AuthModalCallbackState = {
+  view?: {
+    community?: string
+    post?: string
+  }
+  create?: {
+    community?: true
+    post?: true
+  }
+}
+
+export type AuthModalCallbackStateSerialized = {
+  viewpost?: string
+  viewcommunity?: string
+  createpost?: true
+  createcommunity?: true
 }

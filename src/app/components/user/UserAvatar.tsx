@@ -10,6 +10,7 @@ import {
 } from "../../state/global"
 import { UserIcon } from "../icons/UserIcon"
 import { ClickOutsideListener } from "cinnabun/listeners"
+import { selectedCommunityUrlTitle } from "../../state/community"
 
 export const UserAvatar = () => {
   const handleLoginClick = () => {
@@ -25,7 +26,11 @@ export const UserAvatar = () => {
 
         Try not to be a ****! Unless, of course, you
         join one of the various '****' communities.`,
-      callbackAction: undefined,
+      callbackState: {
+        view: {
+          community: selectedCommunityUrlTitle.value ?? undefined,
+        },
+      },
     }
     authModalOpen.value = true
   }

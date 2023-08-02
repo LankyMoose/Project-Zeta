@@ -4,9 +4,9 @@ import {
   communityJoinModalOpen,
   isCommunityMember,
   postCreatorModalOpen,
+  selectedCommunityUrlTitle,
 } from "../../state/community"
 import { Button } from "../../components/Button"
-import { AuthModalCallback } from "../../../types/auth"
 
 export const AddPostButton = () => {
   const handleAddNewPost = () => {
@@ -14,7 +14,14 @@ export const AddPostButton = () => {
       authModalState.value = {
         title: "Log in to create a Post",
         message: "You must be logged in to create a Post.",
-        callbackAction: AuthModalCallback.CreatePost,
+        callbackState: {
+          view: {
+            community: selectedCommunityUrlTitle.value ?? undefined,
+          },
+          create: {
+            post: true,
+          },
+        },
       }
       authModalOpen.value = true
       return

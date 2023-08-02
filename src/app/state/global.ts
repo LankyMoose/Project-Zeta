@@ -1,6 +1,6 @@
 import { Cinnabun, Component, createSignal } from "cinnabun"
 import { PublicUser } from "../../types/user"
-import { AuthModalCallback } from "../../types/auth"
+import { AuthModalCallbackState } from "../../types/auth"
 
 const isClient = Cinnabun.isClient
 
@@ -47,7 +47,7 @@ export const authModalOpen = createSignal(false)
 export const authModalState = createSignal({
   title: "",
   message: "",
-  callbackAction: undefined as AuthModalCallback | undefined,
+  callbackState: {} as AuthModalCallbackState | undefined,
 })
 
 export const sidebarOpen = createSignal(false)

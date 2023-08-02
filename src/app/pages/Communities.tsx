@@ -5,27 +5,41 @@ import { DefaultLoader } from "../components/loaders/Default"
 import { Button } from "../components/Button"
 import { userStore, authModalOpen, authModalState } from "../state/global"
 import { communityCreatorModalOpen } from "../state/community"
-import { AuthModalCallback } from "../../types/auth"
 import { CommunityListData } from "../../types/community"
 import { title } from "../Document"
 
-export default function Communities() {
+export default function Communities({ query }: { query: { createcommunity?: string } }) {
   title.value = "Communities | Project Zeta"
   const handleCreateCommunityClick = () => {
     if (!userStore.value) {
       authModalState.value = {
         title: "Log in to create a Community",
         message: "You must be logged in to create a Community.",
-        callbackAction: AuthModalCallback.CreateCommunity,
+        callbackState: {
+          create: {
+            community: true,
+          },
+        },
       }
       authModalOpen.value = true
       return
     }
     communityCreatorModalOpen.value = true
   }
+
+  const onMounted = () => {
+    if (query.createcommunity) {
+      handleCreateCommunityClick()
+      window.history.pushState(null, "", window.location.pathname)
+    }
+  }
+
   return (
     <>
-      <div className="page-title flex align-items-center justify-content-between gap flex-wrap">
+      <div
+        onMounted={onMounted}
+        className="page-title flex align-items-center justify-content-between gap flex-wrap"
+      >
         <h1>Communities</h1>
         <Button
           className="btn btn-primary hover-animate sm_btn-sm md_btn-md lg_btn-lg"
