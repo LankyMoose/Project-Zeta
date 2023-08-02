@@ -20,6 +20,8 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
 
     if (!res) return
     if ("type" in res) return
+    if ("moderator" in res || "owner" in res) return
+
     addNotification({
       type: "success",
       text: `${res.user.name} is now a member`,
@@ -44,6 +46,7 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
     loading.value = false
     if (!res) return
     if ("type" in res) return
+    if ("moderator" in res || "owner" in res) return
     addNotification({
       type: "success",
       text: `${res.user.name} is now a moderator`,
@@ -59,6 +62,7 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
   }
 
   const revokeMembership = async () => {
+    if (!confirm("Are you sure you want to remove this member from the community?")) return
     loading.value = true
     const res = await updateCommunityMemberType(
       selectedCommunity.value!.id!,
@@ -83,22 +87,68 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
     }
   }
 
+  const transferOwnership = async () => {
+    if (!confirm("Are you sure you want to transfer ownership of this community?")) return
+    loading.value = true
+    const res = await updateCommunityMemberType(
+      selectedCommunity.value!.id!,
+      member.user.id,
+      "owner"
+    )
+    debugger
+    if (!res) return
+    if ("type" in res) return
+    if ("owner" in res) {
+      if (!selectedCommunity.value!.owners) selectedCommunity.value!.owners = []
+      selectedCommunity.value!.owners[0] = res.owner
+
+      selectedCommunity.value!.moderators = (selectedCommunity.value?.moderators ?? []).filter(
+        (mod) => mod.user.id !== member.user.id
+      )
+
+      addNotification({
+        type: "success",
+        text: `${res.owner.user.name} is now a moderator`,
+      })
+    }
+    if ("moderator" in res) {
+      if (!selectedCommunity.value!.moderators) selectedCommunity.value!.moderators = []
+      selectedCommunity.value!.moderators.push(res.moderator)
+    }
+
+    selectedCommunity.notify()
+
+    loading.value = false
+  }
+
   return (
     <div key={member.id} className="card">
       <div className="card-title flex gap justify-content-between">
         <span>{member.user.name}</span>
         <div className="flex flex-wrap flex-column gap-sm">
           {member.memberType === "moderator" ? (
-            <Button
-              className="btn btn-danger hover-animate btn-sm"
-              watch={loading}
-              bind:disabled={() => loading.value}
-              onclick={demoteToMember}
-            >
-              Demote to member
-            </Button>
+            <>
+              <Button
+                disabled={loading}
+                className="btn btn-secondary hover-animate btn-sm"
+                onclick={transferOwnership}
+              >
+                Transfer ownership
+              </Button>
+              <Button
+                className="btn btn-danger hover-animate btn-sm"
+                disabled={loading}
+                onclick={demoteToMember}
+              >
+                Demote to member
+              </Button>
+            </>
           ) : isCommunityOwner() ? (
-            <Button className="btn btn-secondary hover-animate btn-sm" onclick={promoteToModerator}>
+            <Button
+              disabled={loading}
+              className="btn btn-secondary hover-animate btn-sm"
+              onclick={promoteToModerator}
+            >
               Promote to moderator
             </Button>
           ) : (
@@ -106,8 +156,7 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
           )}
           <Button
             className="btn btn-danger hover-animate btn-sm"
-            watch={loading}
-            bind:disabled={() => loading.value}
+            disabled={loading}
             onclick={revokeMembership}
           >
             Revoke membership
@@ -118,7 +167,13 @@ const MemberCard = ({ member }: { member: CommunityMemberData }) => {
   )
 }
 
-const MemberList = ({ members, title }: { members: CommunityMemberData[]; title: string }) => {
+const MemberList = ({
+  members,
+  title,
+}: {
+  members: Cinnabun.Signal<CommunityMemberData[]>
+  title: string
+}) => {
   return (
     <section>
       <h3>{title}</h3>
@@ -128,16 +183,17 @@ const MemberList = ({ members, title }: { members: CommunityMemberData[]; title:
 }
 
 export const CommunityMemberManager = () => {
+  const moderators = Cinnabun.computed(selectedCommunity, () => {
+    return selectedCommunity.value?.moderators ?? []
+  })
+  const members = Cinnabun.computed(selectedCommunity, () => {
+    return selectedCommunity.value?.members ?? []
+  })
+
   return (
     <div watch={selectedCommunity} bind:children>
-      {() =>
-        isCommunityOwner() ? (
-          <MemberList title="Moderators" members={selectedCommunity.value?.moderators ?? []} />
-        ) : (
-          <></>
-        )
-      }
-      {() => <MemberList title="Members" members={selectedCommunity.value?.members ?? []} />}
+      {() => (isCommunityOwner() ? <MemberList title="Moderators" members={moderators} /> : <></>)}
+      {() => <MemberList title="Members" members={members} />}
     </div>
   )
 }

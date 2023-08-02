@@ -1,6 +1,7 @@
 .admin-menu-wrapper {
   position: absolute;
   right: 0;
+  z-index: 10;
 }
 .admin-menu {
   background-color: var(--content-area);

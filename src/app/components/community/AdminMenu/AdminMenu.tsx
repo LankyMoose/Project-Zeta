@@ -5,8 +5,10 @@ import { MoreIcon } from "../../../components/icons"
 import { SlideInOut } from "cinnabun-transitions"
 import "./AdminMenu.css"
 import {
+  communityDeleteModalOpen,
   communityDrawerOpen,
   communityDrawerState,
+  isCommunityOwner,
   pendingCommunityJoinRequests,
   selectedCommunity,
 } from "../../../state/community"
@@ -105,6 +107,21 @@ export const AdminMenu = () => {
                           </span>
                         )
                       }
+                    </a>
+                  </li>
+                ) : (
+                  <></>
+                )}
+                {isCommunityOwner() ? (
+                  <li>
+                    <a
+                      onclick={() => {
+                        showMenu.value = false
+                        communityDeleteModalOpen.value = true
+                      }}
+                      href="javascript:void(0)"
+                    >
+                      <small>Delete community</small>
                     </a>
                   </li>
                 ) : (

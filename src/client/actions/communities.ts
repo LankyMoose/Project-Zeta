@@ -218,7 +218,12 @@ export const updateCommunityMemberType = async (
   communityId: string,
   userId: string,
   memberType: "member" | "moderator" | "owner" | "none"
-): Promise<CommunityMemberData | { type: string } | void> => {
+): Promise<
+  | { owner: CommunityMemberData; moderator: CommunityMemberData }
+  | CommunityMemberData
+  | { type: string }
+  | void
+> => {
   try {
     const response = await fetch(`${API_URL}/communities/${communityId}/members`, {
       method: "PATCH",

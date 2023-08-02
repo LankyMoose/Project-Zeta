@@ -123,9 +123,28 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       if (!res) throw new ServerError("Failed to leave community")
       return { type: "removed" }
     } else if (req.body.memberType === "owner") {
-      // handle owner change
-      throw new Error("Not implemented")
-      return
+      const res = await communityService.updateCommunityMemberType(
+        req.params.id,
+        req.body.userId,
+        req.body.memberType
+      )
+      if (!res) throw new ServerError("Failed to update member type")
+      const res2 = await communityService.updateCommunityMemberType(
+        req.params.id,
+        member.userId,
+        "moderator"
+      )
+      if (!res2) throw new ServerError("Failed to update member type")
+
+      const newOwner = await communityService.getCommunityMemberData(req.params.id, req.body.userId)
+      if (!newOwner) throw new ServerError("Failed to update member type")
+      const newMod = await communityService.getCommunityMemberData(req.params.id, member.userId)
+      if (!newMod) throw new ServerError("Failed to update member type")
+
+      return {
+        owner: newOwner,
+        moderator: newMod,
+      }
     } else {
       const res = await communityService.updateCommunityMemberType(
         req.params.id,

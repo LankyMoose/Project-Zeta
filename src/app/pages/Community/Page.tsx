@@ -4,7 +4,6 @@ import { getCommunity, getCommunityPosts } from "../../../client/actions/communi
 import { DefaultLoader } from "../../components/loaders/Default"
 import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
 import {
-  communityDeleteModalOpen,
   communityEditorModalOpen,
   communityJoinModalOpen,
   communityLeaveModalOpen,
@@ -133,35 +132,14 @@ export default function CommunityPage({ params }: { params?: { url_title?: strin
                   <CommunityFixedHeader />
 
                   {isCommunityOwner() ? (
-                    <>
-                      <div className="flex gap">
-                        <Button
-                          className="btn btn-danger hover-animate btn-sm"
-                          onclick={() => (communityDeleteModalOpen.value = true)}
-                        >
-                          Delete this community
-                        </Button>
-                        <Button
-                          className="btn btn-primary hover-animate btn-sm"
-                          onclick={() => (communityLeaveModalOpen.value = true)}
-                        >
-                          Transfer ownership
-                        </Button>
-                      </div>
-                      <br />
-                    </>
+                    <></>
                   ) : isCommunityMember() ? (
-                    <>
-                      <div>
-                        <Button
-                          className="btn btn-danger hover-animate btn-sm"
-                          onclick={() => (communityLeaveModalOpen.value = true)}
-                        >
-                          Leave this community
-                        </Button>
-                      </div>
-                      <br />
-                    </>
+                    <Button
+                      className="btn btn-danger hover-animate btn-sm"
+                      onclick={() => (communityLeaveModalOpen.value = true)}
+                    >
+                      Leave this community
+                    </Button>
                   ) : (
                     <> </>
                   )}
