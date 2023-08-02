@@ -185,97 +185,103 @@ export default function CommunityPage({
                 <></>
               )}
 
-              <div onMounted={onMounted} className="page-body">
-                <div className="community-page-inner">
-                  <section className="flex flex-column community-page-posts">
-                    <div className="section-title">
-                      <h3>Posts</h3>
-                      {!loading && !!data ? (
-                        <AddPostButton />
-                      ) : (
-                        <SkeletonElement tag="p" style="min-height: 2rem; min-width:100px" />
-                      )}
-                    </div>
-                    <Cinnabun.Suspense promise={loadPosts} cache>
-                      {(loading: boolean, posts?: CommunityPostData[]) => {
-                        if (loading || !posts)
-                          return (
-                            <SkeletonList
-                              height="80px"
-                              numberOfItems={5}
-                              className="flex flex-column gap"
-                            />
-                          )
+              {!loading && !data ? (
+                <Button className="btn btn-primary hover-animate btn-lg" onclick={showLoginPrompt}>
+                  Log in to view this community
+                </Button>
+              ) : (
+                <div onMounted={onMounted} className="page-body">
+                  <div className="community-page-inner">
+                    <section className="flex flex-column community-page-posts">
+                      <div className="section-title">
+                        <h3>Posts</h3>
+                        {!loading && !!data ? (
+                          <AddPostButton />
+                        ) : (
+                          <SkeletonElement tag="p" style="min-height: 2rem; min-width:100px" />
+                        )}
+                      </div>
+                      <Cinnabun.Suspense promise={loadPosts} cache>
+                        {(loading: boolean, posts?: CommunityPostData[]) => {
+                          if (loading || !posts)
+                            return (
+                              <SkeletonList
+                                height="80px"
+                                numberOfItems={5}
+                                className="flex flex-column gap"
+                              />
+                            )
 
-                        //if (!posts) return <></>
-                        return <CommunityPosts posts={posts} />
-                      }}
-                    </Cinnabun.Suspense>
-                  </section>
-                  <section
-                    watch={selectedCommunity}
-                    bind:children
-                    className="flex flex-column community-page-members"
-                  >
-                    <div className="section-title">
-                      <h3>Owner</h3>
-                    </div>
-                    {() =>
-                      selectedCommunity.value?.owners && selectedCommunity.value.owners[0] ? (
-                        <div className="flex flex-column mb-3">
-                          <CommunityMemberCard member={selectedCommunity.value.owners[0]} />
-                        </div>
-                      ) : (
-                        <div className="flex flex-column mb-3">
+                          //if (!posts) return <></>
+                          return <CommunityPosts posts={posts} />
+                        }}
+                      </Cinnabun.Suspense>
+                    </section>
+                    <section
+                      watch={selectedCommunity}
+                      bind:children
+                      className="flex flex-column community-page-members"
+                    >
+                      <div className="section-title">
+                        <h3>Owner</h3>
+                      </div>
+                      {() =>
+                        selectedCommunity.value?.owners && selectedCommunity.value.owners[0] ? (
+                          <div className="flex flex-column mb-3">
+                            <CommunityMemberCard member={selectedCommunity.value.owners[0]} />
+                          </div>
+                        ) : (
+                          <div className="flex flex-column mb-3">
+                            <SkeletonElement tag="p" style="min-height: 80px;" />
+                          </div>
+                        )
+                      }
+                      {loading || !data ? (
+                        <div className="flex flex-column mb-3 gap">
+                          <SkeletonElement tag="p" style="min-height: 80px;" />
+                          <SkeletonElement tag="p" style="min-height: 80px;" />
                           <SkeletonElement tag="p" style="min-height: 80px;" />
                         </div>
-                      )
-                    }
-                    {loading || !data ? (
-                      <div className="flex flex-column mb-3 gap">
-                        <SkeletonElement tag="p" style="min-height: 80px;" />
-                        <SkeletonElement tag="p" style="min-height: 80px;" />
-                        <SkeletonElement tag="p" style="min-height: 80px;" />
-                      </div>
-                    ) : (
-                      <>
-                        {() =>
-                          selectedCommunity.value?.moderators ? (
-                            <>
-                              <div className="section-title">
-                                <h3>Moderators</h3>
-                              </div>
-                              <div className="flex flex-column">
-                                {selectedCommunity.value.moderators.map((member) => (
-                                  <CommunityMemberCard member={member} />
-                                ))}
-                              </div>
-                            </>
-                          ) : (
-                            <></>
-                          )
-                        }
-                        {() =>
-                          selectedCommunity.value?.members ? (
-                            <>
-                              <div className="section-title">
-                                <h3>Members</h3>
-                              </div>
-                              <div className="flex flex-column">
-                                {selectedCommunity.value.members.map((member) => (
-                                  <CommunityMemberCard member={member} />
-                                ))}
-                              </div>
-                            </>
-                          ) : (
-                            <></>
-                          )
-                        }
-                      </>
-                    )}
-                  </section>
+                      ) : (
+                        <>
+                          {() =>
+                            selectedCommunity.value?.moderators ? (
+                              <>
+                                <div className="section-title">
+                                  <h3>Moderators</h3>
+                                </div>
+                                <div className="flex flex-column">
+                                  {selectedCommunity.value.moderators.map((member) => (
+                                    <CommunityMemberCard member={member} />
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <></>
+                            )
+                          }
+                          {() =>
+                            selectedCommunity.value?.members ? (
+                              <>
+                                <div className="section-title">
+                                  <h3>Members</h3>
+                                </div>
+                                <div className="flex flex-column">
+                                  {selectedCommunity.value.members.map((member) => (
+                                    <CommunityMemberCard member={member} />
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <></>
+                            )
+                          }
+                        </>
+                      )}
+                    </section>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )
         }}
