@@ -21,7 +21,8 @@ export default function Home() {
       <div className=" page-body flex gap flex-wrap">
         <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
           {(loading: boolean, data?: LatestPostsData[]) => {
-            if (loading) return <SkeletonList numberOfItems={6} className="card-list" />
+            if (loading)
+              return <SkeletonList numberOfItems={3} height="140px" className="card-list" />
             if (!data) return <div className="text-muted">No posts yet.</div>
             //return data.map((item) => <PostCard {...item} />)
             return (

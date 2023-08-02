@@ -51,7 +51,7 @@ export default function Communities({ query }: { query: { createcommunity?: stri
       <div className="page-body">
         <Cinnabun.Suspense promise={getCommunities} cache>
           {(loading: boolean, res: CommunityListData[] | undefined) => {
-            if (loading) return <SkeletonList numberOfItems={6} className="card-list" />
+            if (loading) return <SkeletonList numberOfItems={3} className="card-list" />
             if (!res)
               return (
                 <div>

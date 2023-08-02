@@ -201,7 +201,7 @@ export default function CommunityPage({
                           <SkeletonElement tag="p" style="min-height: 2rem; min-width:100px" />
                         )}
                       </div>
-                      <Cinnabun.Suspense promise={loadPosts} cache>
+                      <Cinnabun.Suspense promise={loadPosts}>
                         {(loading: boolean, posts?: CommunityPostData[]) => {
                           if (loading || !posts)
                             return (

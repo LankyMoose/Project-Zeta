@@ -12,17 +12,9 @@ export const SkeletonList = ({
 }) => {
   return (
     <ul className={`w-100 m-0 p-0 ${className}`}>
-      <Cinnabun.For
-        each={Array.from({ length: numberOfItems })}
-        template={(_item, idx) => (
-          <SkeletonElement
-            tag="div"
-            key={idx.toString()}
-            className="card w-100"
-            style={{ minHeight: height }}
-          />
-        )}
-      />
+      {Array.from({ length: numberOfItems }).map(() => (
+        <SkeletonElement tag="div" className="card w-100" style={{ minHeight: height }} />
+      ))}
     </ul>
   )
 }
