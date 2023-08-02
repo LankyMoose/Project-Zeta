@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { getLatestPostsCommunities } from "../../client/actions/communities"
-import { pathStore } from "../../state/global"
-import { selectedCommunity } from "../../state/community"
+import { pathStore } from "../state/global"
+import { selectedCommunity } from "../state/community"
 import { LatestPostsData } from "../../types/post"
 import { DefaultLoader } from "../components/loaders/Default"
 import { AuthorTag } from "../components/AuthorTag"
@@ -9,7 +9,7 @@ import { Link } from "cinnabun/router"
 import { timeSinceUTCDate } from "../../utils"
 import { title } from "../Document"
 import { CommentIcon } from "../components/icons/CommentIcon"
-import { selectedPost } from "../../state/post"
+import { selectedPost } from "../state/post"
 
 export default function Home() {
   title.value = "Project Zeta"

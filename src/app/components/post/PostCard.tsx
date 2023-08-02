@@ -6,15 +6,15 @@ import { IconButton } from "../../components/IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
 import { addPostReaction } from "../../../client/actions/posts"
-import { communityJoinModalOpen } from "../../../state/community"
-import { userStore, authModalState, authModalOpen } from "../../../state/global"
+import { communityJoinModalOpen } from "../../state/community"
+import { userStore, authModalState, authModalOpen } from "../../state/global"
 
 import { AuthorTag } from "../AuthorTag"
 import "./PostCard.css"
 import { AuthModalCallback } from "../../../types/auth"
 import { CommentIcon } from "../icons/CommentIcon"
 import { API_ERROR } from "../../../constants"
-import { selectedPost } from "../../../state/post"
+import { selectedPost } from "../../state/post"
 
 export const PostCard = ({ post }: { post: CommunityPostData }) => {
   const state = createSignal(post)

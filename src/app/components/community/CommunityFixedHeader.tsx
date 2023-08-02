@@ -5,7 +5,7 @@ import {
   selectedCommunity,
   isCommunityOwner,
   communityEditorModalOpen,
-} from "../../../state/community"
+} from "../../state/community"
 import { IconButton } from "../../components/IconButton"
 import { EditIcon } from "../../components/icons"
 import { AddPostButton } from "./AddPostButton"

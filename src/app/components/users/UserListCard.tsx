@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { setPath } from "cinnabun/router"
-import { pathStore } from "../../../state/global"
+import { pathStore } from "../../state/global"
 import "./UserListCard.css"
 import { User } from "../../../db/schema"
 

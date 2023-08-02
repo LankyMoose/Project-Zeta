@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { type Component, createSignal } from "cinnabun"
-import { bodyStyle } from "../state/global"
+import { bodyStyle } from "./state/global"
 
 export const title = createSignal("Project Zeta")
 

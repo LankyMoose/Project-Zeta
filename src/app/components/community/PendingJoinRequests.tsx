@@ -4,7 +4,7 @@ import {
   communityDrawerOpen,
   pendingCommunityJoinRequests,
   selectedCommunity,
-} from "../../../state/community"
+} from "../../state/community"
 import { CommunityJoinRequestData } from "../../../types/community"
 import { respondToCommunityJoinRequest } from "../../../client/actions/communities"
 import { addNotification } from "../../components/Notifications"

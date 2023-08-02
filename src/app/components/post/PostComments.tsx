@@ -1,13 +1,13 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal, Cinnabun as cb } from "cinnabun"
 import { CommunityPostComment } from "../../../types/post"
-import { pathStore } from "../../../state/global"
+import { pathStore } from "../../state/global"
 import { getPostComments } from "../../../client/actions/posts"
 import { timeSinceUTCDate } from "../../../utils"
 import { Link } from "cinnabun/router"
 import { POST_COMMENT_PAGE_SIZE } from "../../../constants"
 import "./PostComments.css"
-import { postCommentsPage, selectedPost } from "../../../state/post"
+import { postCommentsPage, selectedPost } from "../../state/post"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 
 const loadingMore = createSignal<boolean>(false)

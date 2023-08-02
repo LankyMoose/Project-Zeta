@@ -1,9 +1,9 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 
-import { communityJoinModalOpen } from "../../../state/community"
-import { authModalOpen, authModalState, userStore } from "../../../state/global"
-import { postModalOpen, selectedPost, postCommentsPage } from "../../../state/post"
+import { communityJoinModalOpen } from "../../state/community"
+import { authModalOpen, authModalState, userStore } from "../../state/global"
+import { postModalOpen, selectedPost, postCommentsPage } from "../../state/post"
 
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { AuthorTag } from "../AuthorTag"

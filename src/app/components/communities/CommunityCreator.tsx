@@ -4,10 +4,10 @@ import { Button } from "../../components/Button"
 import { Modal, ModalBody, ModalHeader } from "../modal/Modal"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { createCommunity } from "../../../client/actions/communities"
-import { pathStore } from "../../../state/global"
+import { pathStore } from "../../state/global"
 import { communityValidation } from "../../../db/validation"
 import { setPath } from "cinnabun/router"
-import { communityCreatorModalOpen } from "../../../state/community"
+import { communityCreatorModalOpen } from "../../state/community"
 
 export const CommunityCreator = () => {
   const loading = createSignal(false)

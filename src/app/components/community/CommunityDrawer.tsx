@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { Drawer, DrawerBody, DrawerHeader } from "../drawer/Drawer"
-import { communityDrawerOpen, communityDrawerState } from "../../../state/community"
+import { communityDrawerOpen, communityDrawerState } from "../../state/community"
 
 export const CommunityDrawer = () => {
   return (

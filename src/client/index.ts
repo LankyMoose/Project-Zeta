@@ -13,7 +13,7 @@ import { SSRProps } from "cinnabun/src/types"
 import { App } from "../app/App"
 import { Cinnabun } from "cinnabun"
 import { createLiveSocket } from "./liveSocket"
-import { selectedPost } from "../state/post"
+import { selectedPost } from "../app/state/post"
 import { isUuid } from "../utils"
 
 const env = process.env.NODE_ENV ?? "development"

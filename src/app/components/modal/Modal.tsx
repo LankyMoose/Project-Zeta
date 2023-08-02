@@ -3,7 +3,7 @@ import { ComponentChildren, ComponentProps } from "cinnabun/types"
 import { ClickOutsideListener, KeyboardListener, NavigationListener } from "cinnabun/listeners"
 import { FadeInOut, Transition } from "cinnabun-transitions"
 import "./Modal.css"
-import { openModalCount, pathStore } from "../../../state/global"
+import { openModalCount, pathStore } from "../../state/global"
 
 type ModalGestureProps = {
   closeOnNavigate?: boolean

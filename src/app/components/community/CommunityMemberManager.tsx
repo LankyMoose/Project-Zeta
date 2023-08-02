@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal } from "cinnabun"
-import { isCommunityOwner, selectedCommunity } from "../../../state/community"
+import { isCommunityOwner, selectedCommunity } from "../../state/community"
 import { CommunityMemberData } from "../../../types/community"
 import { Button } from "../../components/Button"
 import { updateCommunityMemberType } from "../../../client/actions/communities"

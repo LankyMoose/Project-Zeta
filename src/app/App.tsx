@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { Router, Route, Link } from "cinnabun/router"
-import { pathStore } from "../state/global"
+import { pathStore } from "./state/global"
 
 import HomePage from "./pages/Home"
 import CommunitiesPage from "./pages/Communities"

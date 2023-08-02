@@ -1,12 +1,12 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
-import { pathStore } from "../../../state/global"
+import { pathStore } from "../../state/global"
 import {
   selectedCommunity,
   communityDeleteModalOpen,
   communityHasMembers,
-} from "../../../state/community"
+} from "../../state/community"
 import { Button } from "../../components/Button"
 import { deleteCommunity } from "../../../client/actions/communities"
 import { addNotification } from "../../components/Notifications"

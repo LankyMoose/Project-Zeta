@@ -1,5 +1,5 @@
 import * as Cinnabun from "cinnabun"
-import { sidebarOpen } from "../../state/global"
+import { sidebarOpen } from "../state/global"
 import { Button } from "./Button"
 import { MenuIcon } from "./icons/MenuIcon"
 

@@ -4,8 +4,8 @@ import { Button } from "../../components/Button"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { postValidation } from "../../../db/validation"
 import { addPost } from "../../../client/actions/posts"
-import { userStore } from "../../../state/global"
-import { selectedCommunity, postCreatorModalOpen } from "../../../state/community"
+import { userStore } from "../../state/global"
+import { selectedCommunity, postCreatorModalOpen } from "../../state/community"
 import { addNotification } from "../../components/Notifications"
 
 export const PostCreator = () => {

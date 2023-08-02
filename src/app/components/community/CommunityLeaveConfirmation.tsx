@@ -6,8 +6,8 @@ import { addNotification } from "../../components/Notifications"
 import { leaveCommunity } from "../../../client/actions/communities"
 import { LeaveResultType } from "../../../types/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
-import { selectedCommunity, communityLeaveModalOpen } from "../../../state/community"
-import { pathStore } from "../../../state/global"
+import { selectedCommunity, communityLeaveModalOpen } from "../../state/community"
+import { pathStore } from "../../state/global"
 
 export const CommunityLeaveConfirmation = () => {
   const loading = createSignal(false)

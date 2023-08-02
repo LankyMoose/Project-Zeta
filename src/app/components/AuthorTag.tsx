@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { Link } from "cinnabun/router"
-import { pathStore } from "../../state/global"
+import { pathStore } from "../state/global"
 
 export const AuthorTag = ({
   user,

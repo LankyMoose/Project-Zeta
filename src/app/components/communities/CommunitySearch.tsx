@@ -4,7 +4,7 @@ import { getCommunitySearch } from "../../../client/actions/communities"
 import "./CommunitySearch.css"
 import { CommunitySearchData, CommunityLinkData } from "../../../types/community"
 import { Link } from "cinnabun/router"
-import { pathStore } from "../../../state/global"
+import { pathStore } from "../../state/global"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import { KeyboardListener } from "cinnabun/listeners"
 

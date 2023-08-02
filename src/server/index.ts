@@ -2,7 +2,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import fetch from "node-fetch"
 
-import fastify, { FastifyReply, FastifyRequest } from "fastify"
+import fastify from "fastify"
 import cookie, { CookieSerializeOptions } from "@fastify/cookie"
 import compress from "@fastify/compress"
 import fStatic from "@fastify/static"
@@ -19,7 +19,6 @@ import { App } from "../app/App.jsx"
 
 import { env } from "../env.js"
 import { authService } from "./services/authService.js"
-import { userService } from "./services/userService.js"
 import { socketHandler } from "./socket.js"
 import { generateUUID } from "../utils.js"
 
@@ -30,7 +29,6 @@ import { configureMeRoutes } from "./api/me.js"
 
 import { InvalidRequestError, ServerError } from "../errors.jsx"
 import { AuthProvider } from "../types/auth.js"
-import { UserAuth } from "../db/schema.js"
 
 const _fetch = globalThis.fetch ?? fetch
 globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit | undefined) => {
@@ -135,64 +133,18 @@ app.setErrorHandler(function (error, _, reply) {
   reply.status(error.statusCode ?? 500).send({ message: error.message ?? "Internal Server Error" })
 })
 
-const loadUserInfo = async (provider: AuthProvider, reqOrToken: FastifyRequest | string) => {
-  const tkn = typeof reqOrToken === "string" ? reqOrToken : reqOrToken.cookies["access_token"]
-
-  if (!tkn) return null
-
-  switch (provider) {
-    case AuthProvider.Google: {
-      const userDataRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-        method: "GET",
-        headers: {
-          Authorization: "Bearer " + tkn,
-        },
-      })
-      if (!userDataRes.ok) throw new ServerError("Failed to load user data")
-      return userDataRes.json()
-    }
-    case AuthProvider.Github: {
-      const userDataRes = await fetch("https://api.github.com/user", {
-        method: "GET",
-        headers: {
-          Authorization: "Bearer " + tkn,
-        },
-      })
-      if (!userDataRes.ok) throw new ServerError("Failed to load user data")
-      return userDataRes.json()
-    }
-    default:
-      throw new ServerError("Invalid provider")
-  }
-}
-
+//login
 app.get<{ Params: { provider: AuthProvider } }>(
   "/login/:provider/callback",
   async function (request, reply) {
     const { provider } = request.params
     if (!provider) throw new InvalidRequestError("Missing provider")
 
-    let access_token
-
-    switch (provider) {
-      case AuthProvider.Google: {
-        const res = await app.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
-        access_token = res.token.access_token
-        break
-      }
-      case AuthProvider.Github: {
-        const res = await app.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
-        access_token = res.token.access_token
-        break
-      }
-      default:
-        throw new ServerError("Invalid provider")
-    }
-
-    const userInfo = (await loadUserInfo(provider, access_token)) as any
+    const access_token = await authService.getProviderToken(app, request, provider)
+    const userInfo = (await authService.loadUserInfo(provider, access_token)) as any
     if (!userInfo) throw new ServerError("Failed to load user data")
 
-    const { userId, name, picture } = await handleProviderLogin(provider, userInfo)
+    const { userId, name, picture } = await authService.handleProviderLogin(provider, userInfo)
     if (!userId) throw new ServerError()
 
     reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
@@ -213,60 +165,8 @@ app.get<{ Params: { provider: AuthProvider } }>(
     reply.redirect("/")
   }
 )
-
-async function handleProviderLogin(
-  provider: AuthProvider,
-  info: any
-): Promise<{
-  userId: string
-  name: string
-  picture: string
-}> {
-  const userAuth = await authService.getByProviderId(provider, info.id)
-  switch (provider) {
-    case AuthProvider.Google: {
-      const { name, picture, id, email } = info
-      const userId = await saveUser(provider, userAuth, name, picture, id, email)
-      return { userId, name, picture }
-    }
-    case AuthProvider.Github: {
-      const { login, avatar_url, id, email } = info
-      const userId = await saveUser(provider, userAuth, login, avatar_url, id, email)
-      return { userId, name: login, picture: avatar_url }
-    }
-    default:
-      throw new ServerError("Invalid provider")
-  }
-}
-
-async function saveUser(
-  provider: AuthProvider,
-  auth: UserAuth | undefined,
-  name: string,
-  picture: string,
-  id: string,
-  email: string
-) {
-  const user = await userService.save({
-    id: auth?.userId,
-    name,
-    avatarUrl: picture,
-  })
-
-  if (!user) throw new ServerError()
-  if (!auth) {
-    const res = await authService.save({
-      email,
-      provider,
-      providerId: id,
-      userId: user.id,
-    })
-    if (!res) throw new ServerError()
-  }
-  return user.id
-}
-
-function clearAuthCookies(reply: FastifyReply) {
+//logout
+app.get("/logout", async function (_, reply) {
   reply.clearCookie("user", {
     ...cookieSettings,
     httpOnly: false,
@@ -279,10 +179,6 @@ function clearAuthCookies(reply: FastifyReply) {
     ...cookieSettings,
     httpOnly: true,
   })
-}
-
-app.get("/logout", async function (_, reply) {
-  clearAuthCookies(reply)
   reply.redirect("/")
 })
 

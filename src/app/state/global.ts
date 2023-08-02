@@ -1,6 +1,6 @@
 import { Cinnabun, Component, createSignal } from "cinnabun"
-import { PublicUser } from "../types/user"
-import { AuthModalCallback } from "../types/auth"
+import { PublicUser } from "../../types/user"
+import { AuthModalCallback } from "../../types/auth"
 
 const isClient = Cinnabun.isClient
 

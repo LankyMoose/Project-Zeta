@@ -1,10 +1,10 @@
 import * as Cinnabun from "cinnabun"
-import { authModalOpen, authModalState, userStore } from "../../../state/global"
+import { authModalOpen, authModalState, userStore } from "../../state/global"
 import {
   communityJoinModalOpen,
   isCommunityMember,
   postCreatorModalOpen,
-} from "../../../state/community"
+} from "../../state/community"
 import { Button } from "../../components/Button"
 import { AuthModalCallback } from "../../../types/auth"
 

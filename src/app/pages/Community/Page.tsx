@@ -2,7 +2,7 @@ import * as Cinnabun from "cinnabun"
 import "./Page.css"
 import { getCommunity, getCommunityPosts } from "../../../client/actions/communities"
 import { DefaultLoader } from "../../components/loaders/Default"
-import { authModalOpen, authModalState, pathStore, userStore } from "../../../state/global"
+import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
 import {
   communityDeleteModalOpen,
   communityEditorModalOpen,
@@ -12,7 +12,7 @@ import {
   isCommunityMember,
   isCommunityOwner,
   selectedCommunity,
-} from "../../../state/community"
+} from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
 import { CommunityData } from "../../../types/community"
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"

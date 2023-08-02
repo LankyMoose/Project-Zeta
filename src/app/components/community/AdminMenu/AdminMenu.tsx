@@ -9,7 +9,7 @@ import {
   communityDrawerState,
   pendingCommunityJoinRequests,
   selectedCommunity,
-} from "../../../../state/community"
+} from "../../../state/community"
 import { getCommunityJoinRequests } from "../../../../client/actions/communities"
 import { PendingJoinRequests } from "../PendingJoinRequests"
 import { EllipsisLoader } from "../../loaders/Ellipsis"

@@ -1,6 +1,6 @@
 import { createSignal } from "cinnabun"
 import { ComponentFunc } from "cinnabun/types"
-import { CommunityData, CommunityJoinRequestData } from "../types/community"
+import { CommunityData, CommunityJoinRequestData } from "../../types/community"
 
 export const postCreatorModalOpen = createSignal(false)
 export const communityCreatorModalOpen = createSignal(false)

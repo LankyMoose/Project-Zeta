@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { Cinnabun as cb, Suspense } from "cinnabun"
 import { setPath } from "cinnabun/router"
-import { pathStore, userStore } from "../../../state/global"
+import { pathStore, userStore } from "../../state/global"
 import { MyCommunities } from "../../components/user/MyCommunities"
 import { getUser } from "../../../client/actions/users"
 import { PublicUser } from "../../../types/user"

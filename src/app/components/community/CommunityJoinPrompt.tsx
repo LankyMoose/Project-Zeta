@@ -6,8 +6,8 @@ import { joinCommunity } from "../../../client/actions/communities"
 import { addNotification } from "../../components/Notifications"
 import { JoinResultType } from "../../../types/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
-import { selectedCommunity, communityJoinModalOpen } from "../../../state/community"
-import { pathStore } from "../../../state/global"
+import { selectedCommunity, communityJoinModalOpen } from "../../state/community"
+import { pathStore } from "../../state/global"
 
 export const CommunityJoinPrompt = () => {
   const loading = createSignal(false)
