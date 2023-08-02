@@ -56,10 +56,6 @@ declare module "fastify" {
   }
 }
 
-const app = fastify()
-
-app.register(cookie)
-
 const cookieSettings: Partial<CookieSerializeOptions> = {
   domain: env.domain || "localhost",
   path: "/",
@@ -67,71 +63,70 @@ const cookieSettings: Partial<CookieSerializeOptions> = {
   secure: !isDev,
 }
 
-app.register(compress, { global: false })
-app.register(fStatic, {
-  prefix: "/static/",
-  root: path.join(path.dirname(fileURLToPath(import.meta.url)), "../../dist/static"),
-})
-app.register(websocket, {
-  options: { maxPayload: 1024 },
-})
-
-app.addHook("onRequest", async (req, res) => {
-  if (!req.cookies["user_anon_id"]) {
-    res.setCookie("user_anon_id", generateUUID(), {
-      domain: env.domain,
-      path: "/",
-      sameSite: "lax",
-      httpOnly: true,
-      secure: !isDev,
-    })
-  }
-})
-
-app.register(async function () {
-  app.route({
-    method: "GET",
-    url: "/ws",
-    handler: (_, res) => res.status(400).send(),
-    wsHandler: socketHandler,
+const app = fastify()
+  .register(cookie)
+  .register(compress, { global: false })
+  .register(fStatic, {
+    prefix: "/static/",
+    root: path.join(path.dirname(fileURLToPath(import.meta.url)), "../../dist/static"),
   })
-})
-
-app.register(oauthPlugin, {
-  name: "googleOAuth2",
-  credentials: {
-    client: {
-      id: env.auth0.google.clientId!,
-      secret: env.auth0.google.clientSecret!,
+  .register(websocket, {
+    options: { maxPayload: 1024 },
+  })
+  .register(async () => {
+    app.route({
+      method: "GET",
+      url: "/ws",
+      handler: (_, res) => res.status(400).send(),
+      wsHandler: socketHandler,
+    })
+  })
+  .register(oauthPlugin, {
+    name: "googleOAuth2",
+    credentials: {
+      client: {
+        id: env.auth0.google.clientId!,
+        secret: env.auth0.google.clientSecret!,
+      },
+      auth: oauthPlugin.GOOGLE_CONFIGURATION,
     },
-    auth: oauthPlugin.GOOGLE_CONFIGURATION,
-  },
-  scope: ["profile", "email", "openid"],
-  startRedirectPath: "/login/google",
-  callbackUri: `${env.url}/login/google/callback`,
-})
-
-app.register(oauthPlugin, {
-  name: "githubOAuth2",
-  credentials: {
-    client: {
-      id: env.auth0.github.clientId!,
-      secret: env.auth0.github.clientSecret!,
+    scope: ["profile", "email", "openid"],
+    startRedirectPath: "/login/google",
+    callbackUri: `${env.url}/login/google/callback`,
+  })
+  .register(oauthPlugin, {
+    name: "githubOAuth2",
+    credentials: {
+      client: {
+        id: env.auth0.github.clientId!,
+        secret: env.auth0.github.clientSecret!,
+      },
+      auth: oauthPlugin.GITHUB_CONFIGURATION,
     },
-    auth: oauthPlugin.GITHUB_CONFIGURATION,
-  },
-  scope: [],
-  startRedirectPath: "/login/github",
-  callbackUri: `${env.url}/login/github/callback`,
-})
+    scope: [],
+    startRedirectPath: "/login/github",
+    callbackUri: `${env.url}/login/github/callback`,
+  })
+  .addHook("onRequest", async (req, res) => {
+    if (!req.cookies["user_anon_id"]) {
+      res.setCookie("user_anon_id", generateUUID(), {
+        domain: env.domain,
+        path: "/",
+        sameSite: "lax",
+        httpOnly: true,
+        secure: !isDev,
+      })
+    }
+  })
+  .setErrorHandler(function (error, _, reply) {
+    // Log error
+    this.log.error(error)
 
-app.setErrorHandler(function (error, _, reply) {
-  // Log error
-  this.log.error(error)
-
-  // Send error response
-  reply.status(error.statusCode ?? 500).send({ message: error.message ?? "Internal Server Error" })
-})
+    // Send error response
+    reply
+      .status(error.statusCode ?? 500)
+      .send({ message: error.message ?? "Internal Server Error" })
+  })
 
 //login
 app.get<{ Params: { provider: AuthProvider } }>(
