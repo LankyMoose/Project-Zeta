@@ -8,12 +8,12 @@ import "./styles/form.css"
 import "./styles/badge.css"
 
 import { Hydration } from "cinnabun/hydration"
-import { Document } from "../Document"
+import { Document } from "../app/Document"
 import { SSRProps } from "cinnabun/src/types"
-import { App } from "../App"
+import { App } from "../app/App"
 import { Cinnabun } from "cinnabun"
 import { createLiveSocket } from "./liveSocket"
-import { selectedCommunityPost } from "../state/community"
+import { selectedPost } from "../state/post"
 import { isUuid } from "../utils"
 
 const env = process.env.NODE_ENV ?? "development"
@@ -25,7 +25,7 @@ if ("__cbData" in window) {
     const params = new URLSearchParams(window.location.search)
     const postId = params.get("post")
     if (postId && isUuid(postId)) {
-      selectedCommunityPost.value = { id: postId }
+      selectedPost.value = { id: postId }
     }
   } catch (error) {
     console.error(error)

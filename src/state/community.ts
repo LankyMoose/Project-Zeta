@@ -1,7 +1,6 @@
 import { createSignal } from "cinnabun"
 import { ComponentFunc } from "cinnabun/types"
 import { CommunityData, CommunityJoinRequestData } from "../types/community"
-import { CommunityPostDataWithComments } from "../types/post"
 
 export const postCreatorModalOpen = createSignal(false)
 export const communityCreatorModalOpen = createSignal(false)
@@ -11,13 +10,7 @@ export const communityLeaveModalOpen = createSignal(false)
 export const communityDeleteModalOpen = createSignal(false)
 export const communityOwnershipTransferModalOpen = createSignal(false)
 
-export const postModalOpen = createSignal(false)
-
 export const selectedCommunity = createSignal<Partial<CommunityData> | null>(null)
-export const selectedCommunityPost = createSignal<Partial<CommunityPostDataWithComments> | null>(
-  null
-)
-export const postCommentsPage = createSignal(0)
 
 export const pendingCommunityJoinRequests = createSignal<CommunityJoinRequestData[]>([])
 

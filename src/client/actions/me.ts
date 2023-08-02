@@ -1,4 +1,4 @@
-import { addNotification } from "../../components/Notifications"
+import { addNotification } from "../../app/components/Notifications"
 import { API_URL } from "../../constants"
 import { MyCommunitiesData } from "../../types/community"
 

@@ -14,8 +14,8 @@ import { SSR } from "cinnabun/ssr"
 import { Cinnabun } from "cinnabun"
 import { log } from "../../.cb/logger.js"
 
-import { Document } from "../Document.jsx"
-import { App } from "../App"
+import { Document } from "../app/Document.jsx"
+import { App } from "../app/App.jsx"
 
 import { env } from "../env.js"
 import { authService } from "./services/authService.js"
