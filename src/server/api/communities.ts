@@ -48,8 +48,8 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
-
-    if (!member || member.disabled) throw new DisabledError()
+    if (!member) throw new UnauthorizedError()
+    if (member.disabled) throw new DisabledError()
 
     if (res.nsfw) await ensureCommunityMemberNsfwAgreementOrDie(member.userId, res.id)
 

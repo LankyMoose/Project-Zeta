@@ -3,25 +3,25 @@ import { getLatestPostsCommunities } from "../../client/actions/communities"
 import { pathStore } from "../state/global"
 import { selectedCommunity } from "../state/community"
 import { LatestPostsData } from "../../types/post"
-import { DefaultLoader } from "../components/loaders/Default"
 import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
 import { timeSinceUTCDate } from "../../utils"
 import { title } from "../Document"
 import { CommentIcon } from "../components/icons/CommentIcon"
 import { selectedPost } from "../state/post"
+import { SkeletonList } from "../components/loaders/SkeletonList"
 
 export default function Home() {
   title.value = "Project Zeta"
   return (
-    <div className="flex gap flex-wrap">
-      <section>
-        <div className="section-header">
-          <h2>Latest posts</h2>
-        </div>
+    <>
+      <div className="page-title flex align-items-center justify-content-between gap flex-wrap">
+        <h1>Latest posts</h1>
+      </div>
+      <div className=" page-body flex gap flex-wrap">
         <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
           {(loading: boolean, data?: LatestPostsData[]) => {
-            if (loading) return <DefaultLoader />
+            if (loading) return <SkeletonList numberOfItems={6} className="card-list" />
             if (!data) return <div className="text-muted">No posts yet.</div>
             //return data.map((item) => <PostCard {...item} />)
             return (
@@ -31,8 +31,8 @@ export default function Home() {
             )
           }}
         </Cinnabun.Suspense>
-      </section>
-    </div>
+      </div>
+    </>
   )
 }
 

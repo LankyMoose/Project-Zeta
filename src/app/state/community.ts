@@ -37,8 +37,8 @@ export const communityHasMembers = () => {
 }
 
 export const isCommunityMember = () => {
-  if (!selectedCommunity.value) return true
-  return selectedCommunity.value.memberType !== "guest"
+  if (!selectedCommunity.value) return false
+  return selectedCommunity.value.memberType && selectedCommunity.value.memberType !== "guest"
 }
 
 export const isCommunityOwner = () => {

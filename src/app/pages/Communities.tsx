@@ -1,12 +1,12 @@
 import * as Cinnabun from "cinnabun"
 import { getCommunities } from "../../client/actions/communities"
 import { CommunityList } from "../components/communities/CommunityList"
-import { DefaultLoader } from "../components/loaders/Default"
 import { Button } from "../components/Button"
 import { userStore, authModalOpen, authModalState } from "../state/global"
 import { communityCreatorModalOpen } from "../state/community"
 import { CommunityListData } from "../../types/community"
 import { title } from "../Document"
+import { SkeletonList } from "../components/loaders/SkeletonList"
 
 export default function Communities({ query }: { query: { createcommunity?: string } }) {
   title.value = "Communities | Project Zeta"
@@ -51,7 +51,7 @@ export default function Communities({ query }: { query: { createcommunity?: stri
       <div className="page-body">
         <Cinnabun.Suspense promise={getCommunities} cache>
           {(loading: boolean, res: CommunityListData[] | undefined) => {
-            if (loading) return <DefaultLoader />
+            if (loading) return <SkeletonList numberOfItems={6} className="card-list" />
             if (!res)
               return (
                 <div>

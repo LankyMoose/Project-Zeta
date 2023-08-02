@@ -1,9 +1,9 @@
 import * as Cinnabun from "cinnabun"
-import { DefaultLoader } from "../components/loaders/Default"
 import { title } from "../Document"
 import { getUsers } from "../../client/actions/users"
 import { User } from "../../db/schema"
 import { UserList } from "../components/users/UserList"
+import { SkeletonList } from "../components/loaders/SkeletonList"
 
 export default function Users() {
   title.value = "Users | Project Zeta"
@@ -16,7 +16,7 @@ export default function Users() {
       <div className="page-body">
         <Cinnabun.Suspense promise={getUsers} cache>
           {(loading: boolean, users: User[] | undefined) => {
-            if (loading) return <DefaultLoader />
+            if (loading) return <SkeletonList numberOfItems={6} className="card-list" />
             if (!users)
               return (
                 <div>

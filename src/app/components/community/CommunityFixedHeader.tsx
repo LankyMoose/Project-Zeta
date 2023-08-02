@@ -34,7 +34,9 @@ export const CommunityFixedHeader = () => {
         cancelExit={() => hasScrolled.value}
       >
         <div className="flex gap-sm align-items-center">
-          <h2 className="m-0 text-light">{() => selectedCommunity.value?.title}</h2>
+          <h2 className="m-0 text-light" watch={selectedCommunity} bind:children>
+            {() => selectedCommunity.value?.title}
+          </h2>
           {isCommunityOwner() ? (
             <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
               <EditIcon color="var(--light)" />

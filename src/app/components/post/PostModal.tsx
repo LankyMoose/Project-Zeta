@@ -126,7 +126,8 @@ export const PostModal = () => {
             <>
               <ModalHeader className="modal-header flex flex-column gap-lg">
                 <div className="flex gap-lg align-items-start">
-                  <SkeletonElement tag="h2" style="min-height:2.5rem; width:100%;" />
+                  <SkeletonElement tag="h2" style="height:2.5rem; width:100%;" />
+                  <div style="width: 100px" />
                   <SkeletonElement
                     tag="div"
                     className="rounded-full"
@@ -150,7 +151,7 @@ export const PostModal = () => {
                     />
                   </div>
                 </div>
-                <div className="flex gap">
+                <div className="flex gap ">
                   <SkeletonElement
                     tag="div"
                     className="rounded-full"
@@ -161,9 +162,14 @@ export const PostModal = () => {
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-column gap-lg">
-                  <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
-                  <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
-                  <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
+                  <div className="flex gap">
+                    <SkeletonElement
+                      tag="div"
+                      className="rounded-full"
+                      style="height:2.5rem; min-width: 2.5rem;"
+                    />
+                    <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
+                  </div>
                 </div>
               </ModalBody>
               <ModalFooter className="modal-footer p-2">
