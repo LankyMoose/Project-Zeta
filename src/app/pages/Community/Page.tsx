@@ -284,7 +284,7 @@ export default function CommunityPage({
               <div className="section-title">
                 <h3>Moderators</h3>
               </div>
-              <div className="flex flex-column">
+              <div className="flex flex-column mb-3 gap">
                 {() =>
                   (selectedCommunity.value?.moderators ?? []).map((member) => (
                     <CommunityMemberCard member={member} />
@@ -304,7 +304,7 @@ export default function CommunityPage({
               <div className="section-title">
                 <h3>Members</h3>
               </div>
-              <div className="flex flex-column">
+              <div className="flex flex-column mb-3 gap">
                 {() =>
                   (selectedCommunity.value?.members ?? []).map((member) => (
                     <CommunityMemberCard member={member} />
