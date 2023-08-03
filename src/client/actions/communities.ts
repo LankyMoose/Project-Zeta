@@ -167,9 +167,9 @@ export const updateCommunity = async (community: NewCommunity): Promise<Communit
   }
 }
 
-export const joinCommunity = async (id: string): Promise<JoinResult | void> => {
+export const joinCommunity = async (url_title: string): Promise<JoinResult | void> => {
   try {
-    const response = await fetch(`${API_URL}/communities/${id}/join`, {
+    const response = await fetch(`${API_URL}/communities/${url_title}/join`, {
       method: "POST",
     })
     const data = await response.json()

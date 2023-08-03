@@ -175,11 +175,11 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
   )
 
-  app.post<{ Params: { id?: string } }>("/api/communities/:id/join", async (req) => {
-    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
+  app.post<{ Params: { url_title?: string } }>("/api/communities/:url_title/join", async (req) => {
+    if (!req.params.url_title) throw new InvalidRequestError()
     const userId = getUserIdOrDie(req)
 
-    const community = await communityService.getCommunity(req.params.id, true)
+    const community = await communityService.getCommunity(req.params.url_title)
     if (!community) throw new NotFoundError()
 
     const member = await communityService.getCommunityMember(community.id, userId)

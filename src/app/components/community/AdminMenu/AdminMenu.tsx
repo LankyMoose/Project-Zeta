@@ -68,9 +68,9 @@ export const AdminMenu = () => {
           <span
             watch={[pendingCommunityJoinRequests, loadingRequests]}
             bind:visible={() => totalNotifications() > 0}
-            className="badge "
+            className="badge bg-danger"
           >
-            {totalNotifications()}
+            {() => totalNotifications()}
           </span>
         </IconButton>
         <div style="position:relative">
@@ -102,7 +102,7 @@ export const AdminMenu = () => {
                         loadingRequests.value ? (
                           <EllipsisLoader style="color:var(--text-color); font-size: .75rem;" />
                         ) : (
-                          <span className="badge ">
+                          <span className="badge bg-danger">
                             {() => pendingCommunityJoinRequests.value.length}
                           </span>
                         )

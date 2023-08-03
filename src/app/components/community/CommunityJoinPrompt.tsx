@@ -1,12 +1,16 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
-import { Modal, ModalHeader, ModalBody } from "../modal/Modal"
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "../modal/Modal"
 import { Button } from "../../components/Button"
 import { joinCommunity } from "../../../client/actions/communities"
 import { addNotification } from "../../components/Notifications"
 import { JoinResultType } from "../../../types/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
-import { selectedCommunity, communityJoinModalOpen } from "../../state/community"
+import {
+  selectedCommunity,
+  communityJoinModalOpen,
+  selectedCommunityUrlTitle,
+} from "../../state/community"
 import { pathStore } from "../../state/global"
 
 export const CommunityJoinPrompt = () => {
@@ -22,7 +26,7 @@ export const CommunityJoinPrompt = () => {
   }
 
   const join = async () => {
-    const communityId = selectedCommunity.value?.id
+    const communityId = selectedCommunityUrlTitle.value
     if (!communityId) return addNotification({ type: "error", text: "No community selected." })
     loading.value = true
     const res = await joinCommunity(communityId)
@@ -73,27 +77,27 @@ export const CommunityJoinPrompt = () => {
               }
             </small>
           </p>
-          <div className="flex gap justify-content-between">
-            <Button
-              watch={loading}
-              bind:disabled={() => loading.value}
-              onclick={() => (communityJoinModalOpen.value = false)}
-              className="btn btn-secondary hover-animate"
-            >
-              Cancel
-            </Button>
-            <Button
-              watch={loading}
-              bind:disabled={() => loading.value}
-              onclick={join}
-              className="btn btn-primary hover-animate"
-            >
-              Join
-              <EllipsisLoader watch={loading} bind:visible={() => loading.value} />
-            </Button>
-          </div>
         </div>
       </ModalBody>
+      <ModalFooter>
+        <Button
+          watch={loading}
+          bind:disabled={() => loading.value}
+          onclick={() => (communityJoinModalOpen.value = false)}
+          className="btn btn-secondary hover-animate"
+        >
+          Cancel
+        </Button>
+        <Button
+          watch={loading}
+          bind:disabled={() => loading.value}
+          onclick={join}
+          className="btn btn-primary hover-animate"
+        >
+          Join
+          <EllipsisLoader watch={loading} bind:visible={() => loading.value} />
+        </Button>
+      </ModalFooter>
     </Modal>
   )
 }

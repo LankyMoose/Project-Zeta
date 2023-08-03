@@ -90,7 +90,7 @@ export const PostComments = () => {
         bind:visible={() => loadingMore.value || !selectedPost.value?.comments}
         className="flex justify-content-center"
       >
-        <SkeletonList numberOfItems={3} height="60px" className="flex flex-column gap-sm" />
+        <SkeletonList numberOfItems={3} height="60px" />
       </div>
 
       <div

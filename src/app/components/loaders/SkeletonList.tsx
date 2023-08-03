@@ -13,7 +13,7 @@ export const SkeletonList = ({
   height?: string
 } & ComponentProps) => {
   return (
-    <ul {...rest} className={`w-100 m-0 p-0 ${className}`}>
+    <ul {...rest} className={`w-100 gap flex flex-column m-0 p-0 ${className}`}>
       {Array.from({ length: numberOfItems }).map(() => (
         <SkeletonElement tag="div" className="card w-100" style={{ minHeight: height }} />
       ))}
