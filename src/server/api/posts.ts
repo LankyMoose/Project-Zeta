@@ -12,16 +12,17 @@ import {
 import { isUuid } from "../../utils"
 
 export function configurePostsRoutes(app: FastifyInstance) {
-  app.post<{ Body: NewPost }>("/api/posts", async (req) => {
+  app.post<{ Body: Omit<NewPost, "ownerId"> }>("/api/posts", async (req) => {
     const userId = getUserIdOrDie(req)
-    if (req.body.ownerId !== userId) throw new UnauthorizedError()
-
-    if (!postValidation.isPostValid(req.body.title, req.body.content))
-      throw new InvalidRequestError()
+    const { title, content } = req.body
+    if (!postValidation.isPostValid({ title, content })) throw new InvalidRequestError()
 
     await getActiveMemberOrDie(req, req.body.communityId)
 
-    const res = await postService.createPost(req.body)
+    const res = await postService.createPost({
+      ...req.body,
+      ownerId: userId,
+    })
     if (!res) throw new ServerError()
     return res
   })
@@ -41,6 +42,38 @@ export function configurePostsRoutes(app: FastifyInstance) {
       ...postData,
       comments,
     }
+  })
+
+  app.patch<{
+    Params: { postId: string }
+    Body: { title?: string; content?: string; deleted?: boolean; disabled?: boolean }
+  }>("/api/posts/:postId", async (req) => {
+    if (!req.params.postId || !isUuid(req.params.postId)) throw new InvalidRequestError()
+    const userId = getUserIdOrDie(req)
+
+    const post = await postService.getPost(req.params.postId)
+    if (!post) throw new InvalidRequestError()
+    if (post.ownerId !== userId) {
+      const member = await getActiveMemberOrDie(req, post.communityId)
+      if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
+      delete req.body.title
+      delete req.body.content
+    }
+
+    const { title, content, deleted, disabled } = req.body
+
+    post.title = title ?? post.title
+    post.content = content ?? post.content
+    post.deleted = deleted ?? post.deleted
+    post.disabled = disabled ?? post.disabled
+
+    if (!postValidation.isPostValid(post)) throw new InvalidRequestError()
+
+    await ensureCommunityMemberIfPrivate(req, post.communityId)
+
+    const res = await postService.updatePost(req.params.postId, post)
+    if (!res) throw new ServerError()
+    return res
   })
 
   app.get<{ Params: { postId: string }; Querystring: { offset: string } }>(

@@ -239,4 +239,13 @@ export const postService = {
       return
     }
   },
+
+  async updatePost(postId: string, post: Partial<Post>): Promise<Post | undefined> {
+    try {
+      return (await db.update(posts).set(post).where(eq(posts.id, postId)).returning()).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
 }

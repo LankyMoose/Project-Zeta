@@ -63,7 +63,7 @@ export const addPostReaction = async (
   }
 }
 
-export const addPost = async (post: NewPost) => {
+export const addPost = async (post: Omit<NewPost, "ownerId">) => {
   try {
     const response = await fetch(`${API_URL}/posts`, {
       method: "POST",
@@ -103,6 +103,27 @@ export const getPosts = async (communityId: string, offset: number) => {
 export const getPost = async (postId: string): Promise<CommunityPostDataWithComments | void> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}`)
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+
+    return data
+  } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
+  }
+}
+
+export const updatePost = async (postId: string, post: Partial<NewPost>) => {
+  try {
+    const response = await fetch(`${API_URL}/posts/${postId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(post),
+    })
     const data = await response.json()
     if (!response.ok) throw new Error(data?.message ?? response.statusText)
 

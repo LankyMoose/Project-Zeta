@@ -1,4 +1,4 @@
-import { NewCommunity } from "./schema"
+import { NewCommunity, NewPost } from "./schema"
 
 export const pollValidation = {
   minPollDescLength: 1,
@@ -70,22 +70,27 @@ export const postValidation = {
   maxPostTitleLength: 128,
   minPostContentLength: 1,
   maxPostContentLength: 2048,
-  isPostValid: (title: string, content: string) => {
+  isTitleValid: (title: string) => {
     if (
       title.length < postValidation.minPostTitleLength ||
       title.length > postValidation.maxPostTitleLength
     ) {
       return false
     }
-
+    return true
+  },
+  isContentValid: (content: string) => {
     if (
       content.length < postValidation.minPostContentLength ||
       content.length > postValidation.maxPostContentLength
     ) {
       return false
     }
-
     return true
+  },
+  isPostValid: (post: Partial<NewPost>) => {
+    if (!post.title || !post.content) return false
+    return postValidation.isTitleValid(post.title) && postValidation.isContentValid(post.content)
   },
 }
 

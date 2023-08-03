@@ -32,12 +32,10 @@ export const PostCreator = () => {
     }
     loading.value = true
 
-    console.log("Create post", state.value, selectedCommunity, userId)
     const res = await addPost({
       title,
       content,
       communityId: selectedCommunity.value.id!,
-      ownerId: userId,
     })
 
     if (res.message) {
@@ -97,9 +95,7 @@ export const PostCreator = () => {
           <Button
             className="btn btn-primary hover-animate"
             watch={[loading, state]}
-            bind:disabled={() =>
-              loading.value || !postValidation.isPostValid(state.value.title, state.value.content)
-            }
+            bind:disabled={() => loading.value || !postValidation.isPostValid(state.value)}
             onclick={createPost}
           >
             Create post
