@@ -50,7 +50,7 @@ export const AdminMenu = () => {
   }
 
   return (
-    <div className="ml-auto" onMounted={loadRequests}>
+    <div onMounted={loadRequests}>
       <ClickOutsideListener
         tag="div"
         onCapture={() => {

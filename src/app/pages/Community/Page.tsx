@@ -1,7 +1,8 @@
 import * as Cinnabun from "cinnabun"
+import { createSignal } from "cinnabun"
 import "./Page.css"
 import { getCommunity } from "../../../client/actions/communities"
-import { authModalOpen, authModalState, pathStore, userStore } from "../../state/global"
+import { authModalOpen, authModalState, pathStore } from "../../state/global"
 import {
   communityEditorModalOpen,
   communityJoinModalOpen,
@@ -15,7 +16,6 @@ import {
   selectedCommunityUrlTitle,
 } from "../../state/community"
 import { CommunityPosts } from "../../components/community/CommunityPosts"
-import { CommunityData } from "../../../types/community"
 import { CommunityMemberCard } from "../../components/community/CommunityMemberCard"
 import { IconButton } from "../../components/IconButton"
 import { EditIcon } from "../../components/icons"
@@ -40,6 +40,9 @@ export default function CommunityPage({
   if (!params?.url_title) return setPath(pathStore, "/communities")
   selectedCommunityUrlTitle.value = params.url_title
   title.value = params.url_title + " | Project Zeta"
+  const loading = createSignal(true)
+  const loaded = createSignal(false)
+  const errorMessage = createSignal<API_ERROR | undefined>(undefined)
 
   const showLoginPrompt = () => {
     if (authModalOpen.value) return
@@ -59,25 +62,17 @@ export default function CommunityPage({
   const handleError = (message: string) => {
     switch (message) {
       case API_ERROR.UNAUTHORIZED:
-        if (userStore.value) {
-          communityJoinModalOpen.value = true
-        } else {
-          showLoginPrompt()
-        }
-        return
+        communityJoinModalOpen.value = true
+        errorMessage.value = message
+        break
       case API_ERROR.NOT_AUTHENTICATED:
         showLoginPrompt()
-        return
+        errorMessage.value = message
+        break
       case API_ERROR.NSFW:
-        if (selectedCommunity.value === null) selectedCommunity.value = {} as Partial<CommunityData>
-        selectedCommunity.value.nsfw = true
-
-        if (userStore.value) {
-          communityNsfwAgreementModalOpen.value = true
-        } else {
-          showLoginPrompt()
-        }
-        return
+        communityNsfwAgreementModalOpen.value = true
+        errorMessage.value = message
+        break
       default:
         addNotification({
           type: "error",
@@ -87,16 +82,19 @@ export default function CommunityPage({
         setPath(pathStore, "/communities")
         break
     }
+    console.log("error", message)
   }
 
-  const loadCommunity = async (): Promise<Partial<CommunityData> | void> => {
+  const loadCommunity = async () => {
+    loading.value = true
     const res = await getCommunity(params.url_title!)
     if ("message" in res) {
       handleError(res.message)
+      loading.value = false
       return
     }
-    title.value = res.title + " | Project Zeta"
 
+    title.value = res.title + " | Project Zeta"
     selectedCommunity.value = {
       id: res.id,
       title: res.title,
@@ -111,15 +109,16 @@ export default function CommunityPage({
       moderators: res.moderators,
       nsfw: res.nsfw,
     }
-    return res
-  }
+    loaded.value = true
+    loading.value = false
 
-  const onMounted = () => {
     if (query.createpost) {
       postCreatorModalOpen.value = true
       window.history.pushState(null, "", window.location.pathname)
     }
   }
+
+  if (Cinnabun.Cinnabun.isClient) loadCommunity()
 
   const onBeforeUnmounted = () => {
     selectedCommunity.value = null
@@ -128,153 +127,194 @@ export default function CommunityPage({
   }
 
   return (
-    <div onBeforeUnmounted={onBeforeUnmounted}>
-      <Cinnabun.Suspense promise={loadCommunity} cache>
-        {(loading: boolean, data?: Partial<CommunityData>) => {
-          return (
-            <div className="page-wrapper">
-              <div className="page-title">
-                <div className="flex gap align-items-center">
-                  <h1 watch={selectedCommunity} bind:children>
-                    {() =>
-                      selectedCommunity.value?.title || (
-                        <SkeletonElement tag="p" style="min-height: 50px; min-width:50vw" />
-                      )
-                    }
-                  </h1>
-                  {isCommunityOwner() ? (
-                    <IconButton onclick={() => (communityEditorModalOpen.value = true)}>
-                      <EditIcon color="var(--primary)" />
-                    </IconButton>
-                  ) : (
-                    <></>
-                  )}
-                  {isCommunityAdmin() ? <AdminMenu /> : <></>}
-                </div>
+    <div onBeforeUnmounted={onBeforeUnmounted} className="page-wrapper">
+      <div className="page-title">
+        <div className="flex gap align-items-center">
+          <h1 watch={[loading, selectedCommunity]} bind:children>
+            {() =>
+              loading.value && !selectedCommunity.value?.title ? (
+                <SkeletonElement tag="p" style="min-height: 50px; min-width:50vw" />
+              ) : selectedCommunity.value?.title ? (
+                selectedCommunity.value.title
+              ) : (
+                ""
+              )
+            }
+          </h1>
+          <IconButton
+            watch={selectedCommunity}
+            bind:visible={() => isCommunityOwner()}
+            onclick={() => (communityEditorModalOpen.value = true)}
+          >
+            <EditIcon color="var(--primary)" />
+          </IconButton>
+          <div className="ml-auto" watch={selectedCommunity} bind:children>
+            {() => (isCommunityAdmin() ? <AdminMenu /> : <></>)}
+          </div>
+        </div>
+        <div watch={[loading, selectedCommunity]} bind:children>
+          {() =>
+            loading.value && !selectedCommunity.value?.description ? (
+              <>
                 <SkeletonElement
-                  watch={selectedCommunity}
-                  bind:visible={() => !selectedCommunity.value?.description}
                   tag="p"
+                  className="page-description"
                   style="min-height:1.5rem;margin-bottom:1rem; max-width: 70vw;"
                 />
-                <p watch={selectedCommunity} bind:children className="page-description">
-                  {() => selectedCommunity.value?.description ?? ""}
-                </p>
-              </div>
+                <SkeletonElement
+                  tag="p"
+                  className="page-description"
+                  style="min-height:1.5rem;margin-bottom:1rem; max-width: 60vw;"
+                />
+              </>
+            ) : (
+              <p className="page-description">{selectedCommunity.value?.description}</p>
+            )
+          }
+        </div>
+      </div>
 
-              <CommunityFixedHeader />
+      <CommunityFixedHeader />
 
-              {isCommunityMember() && !isCommunityOwner() ? (
-                <Button
-                  className="btn btn-danger hover-animate btn-sm"
-                  onclick={() => (communityLeaveModalOpen.value = true)}
-                >
-                  Leave this community
-                </Button>
+      <div watch={loading} bind:children>
+        {() =>
+          isCommunityMember() && !isCommunityOwner() ? (
+            <Button
+              className="btn btn-danger hover-animate btn-sm"
+              onclick={() => (communityLeaveModalOpen.value = true)}
+            >
+              Leave this community
+            </Button>
+          ) : (
+            <></>
+          )
+        }
+      </div>
+      <div watch={[loading, errorMessage]} bind:children>
+        {() =>
+          errorMessage.value === API_ERROR.NSFW ? (
+            <Button
+              className="btn btn-primary hover-animate btn-lg"
+              onclick={() => (communityNsfwAgreementModalOpen.value = true)}
+            >
+              View the community NSFW agreement
+            </Button>
+          ) : errorMessage.value === API_ERROR.NOT_AUTHENTICATED ? (
+            <Button className="btn btn-primary hover-animate btn-lg" onclick={showLoginPrompt}>
+              Log in to view this community
+            </Button>
+          ) : errorMessage.value === API_ERROR.UNAUTHORIZED ? (
+            <Button
+              className="btn btn-primary hover-animate btn-lg"
+              onclick={() => (communityJoinModalOpen.value = true)}
+            >
+              Join this community
+            </Button>
+          ) : (
+            <></>
+          )
+        }
+      </div>
+      <div className="page-body">
+        <div className="community-page-inner">
+          <section className="flex flex-column community-page-posts">
+            <div className="section-title" watch={[loading, loaded]} bind:children>
+              {() =>
+                loading.value ? (
+                  <SkeletonElement tag="p" style="min-height: 2rem; min-width:100px" />
+                ) : loaded.value ? (
+                  <>
+                    <h3>Posts</h3>
+                    <AddPostButton />
+                  </>
+                ) : (
+                  <></>
+                )
+              }
+            </div>
+
+            <CommunityPosts url_title={params.url_title} />
+          </section>
+          <section
+            watch={[loading, selectedCommunity]}
+            bind:children
+            className="flex flex-column community-page-members"
+          >
+            {() =>
+              loading.value ? (
+                <>
+                  <div className="section-title">
+                    <SkeletonElement tag="p" style="min-width: 120px; min-height: 2rem;" />
+                  </div>
+                  <div className="flex flex-column mb-3">
+                    <SkeletonElement tag="p" style="min-height: 94px;" />
+                  </div>
+                </>
+              ) : selectedCommunity.value?.owners && selectedCommunity.value.owners[0] ? (
+                <>
+                  <div className="section-title">
+                    <h3>Owner</h3>
+                  </div>
+                  <div className="flex flex-column mb-3">
+                    <CommunityMemberCard member={selectedCommunity.value.owners[0]} />
+                  </div>
+                </>
               ) : (
                 <></>
-              )}
+              )
+            }
 
-              {!loading && !data ? (
-                selectedCommunity.value?.nsfw ? (
-                  <Button
-                    className="btn btn-primary hover-animate btn-lg"
-                    onclick={() => (communityNsfwAgreementModalOpen.value = true)}
-                  >
-                    View the community NSFW agreement
-                  </Button>
-                ) : (
-                  <Button
-                    className="btn btn-primary hover-animate btn-lg"
-                    onclick={showLoginPrompt}
-                  >
-                    Log in to view this community
-                  </Button>
-                )
-              ) : (
-                <div onMounted={onMounted} className="page-body">
-                  <div className="community-page-inner">
-                    <section className="flex flex-column community-page-posts">
-                      <div className="section-title">
-                        <h3>Posts</h3>
-                        {!loading && !!data ? (
-                          <AddPostButton />
-                        ) : (
-                          <SkeletonElement tag="p" style="min-height: 2rem; min-width:100px" />
-                        )}
-                      </div>
-
-                      <CommunityPosts url_title={params.url_title} />
-                    </section>
-                    <section
-                      watch={selectedCommunity}
-                      bind:children
-                      className="flex flex-column community-page-members"
-                    >
-                      <div className="section-title">
-                        <h3>Owner</h3>
-                      </div>
-                      {() =>
-                        selectedCommunity.value?.owners && selectedCommunity.value.owners[0] ? (
-                          <div className="flex flex-column mb-3">
-                            <CommunityMemberCard member={selectedCommunity.value.owners[0]} />
-                          </div>
-                        ) : (
-                          <div className="flex flex-column mb-3">
-                            <SkeletonElement tag="p" style="min-height: 80px;" />
-                          </div>
-                        )
-                      }
-                      {loading || !data ? (
-                        <div className="flex flex-column mb-3 gap">
-                          <SkeletonElement tag="p" style="min-height: 80px;" />
-                          <SkeletonElement tag="p" style="min-height: 80px;" />
-                          <SkeletonElement tag="p" style="min-height: 80px;" />
-                        </div>
-                      ) : (
-                        <>
-                          {() =>
-                            (selectedCommunity.value?.moderators ?? []).length > 0 ? (
-                              <>
-                                <div className="section-title">
-                                  <h3>Moderators</h3>
-                                </div>
-                                <div className="flex flex-column">
-                                  {(selectedCommunity.value?.moderators ?? []).map((member) => (
-                                    <CommunityMemberCard member={member} />
-                                  ))}
-                                </div>
-                              </>
-                            ) : (
-                              <></>
-                            )
-                          }
-                          {() =>
-                            (selectedCommunity.value?.members ?? []).length > 0 ? (
-                              <>
-                                <div className="section-title">
-                                  <h3>Members</h3>
-                                </div>
-                                <div className="flex flex-column">
-                                  {(selectedCommunity.value?.members ?? []).map((member) => (
-                                    <CommunityMemberCard member={member} />
-                                  ))}
-                                </div>
-                              </>
-                            ) : (
-                              <></>
-                            )
-                          }
-                        </>
-                      )}
-                    </section>
-                  </div>
-                </div>
-              )}
+            <div
+              watch={loading}
+              bind:visible={() => loading.value}
+              className="flex flex-column mb-3 gap"
+            >
+              <SkeletonElement tag="p" style="min-height: 94px;" />
+              <SkeletonElement tag="p" style="min-height: 94px;" />
+              <SkeletonElement tag="p" style="min-height: 94px;" />
             </div>
-          )
-        }}
-      </Cinnabun.Suspense>
+            <div
+              watch={[loaded, selectedCommunity]}
+              bind:visible={() =>
+                loaded.value &&
+                !!selectedCommunity.value?.moderators &&
+                selectedCommunity.value.moderators.length > 0
+              }
+            >
+              <div className="section-title">
+                <h3>Moderators</h3>
+              </div>
+              <div className="flex flex-column">
+                {() =>
+                  (selectedCommunity.value?.moderators ?? []).map((member) => (
+                    <CommunityMemberCard member={member} />
+                  ))
+                }
+              </div>
+            </div>
+
+            <div
+              watch={[loaded, selectedCommunity]}
+              bind:visible={() =>
+                loaded.value &&
+                !!selectedCommunity.value?.members &&
+                selectedCommunity.value.members.length > 0
+              }
+            >
+              <div className="section-title">
+                <h3>Members</h3>
+              </div>
+              <div className="flex flex-column">
+                {() =>
+                  (selectedCommunity.value?.members ?? []).map((member) => (
+                    <CommunityMemberCard member={member} />
+                  ))
+                }
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   )
 }

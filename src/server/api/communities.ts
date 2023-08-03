@@ -6,6 +6,7 @@ import {
   ApiError,
   DisabledError,
   InvalidRequestError,
+  NotAuthenticatedError,
   NotFoundError,
   ServerError,
   UnauthorizedError,
@@ -48,6 +49,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     }
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
+    if (!req.cookies.user_id) throw new NotAuthenticatedError()
     if (!member) throw new UnauthorizedError()
     if (member.disabled) throw new DisabledError()
 

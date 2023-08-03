@@ -58,7 +58,9 @@ export const getCommunityPosts = async (
 ): Promise<CommunityPostData[] | Error> => {
   try {
     const response = await fetch(`${API_URL}/communities/${url_title}/posts`)
-    return await response.json()
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.message ?? response.statusText)
+    return data
   } catch (error: any) {
     return new Error(error.message)
   }
