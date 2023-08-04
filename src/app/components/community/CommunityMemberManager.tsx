@@ -4,7 +4,7 @@ import { isCommunityOwner, selectedCommunity } from "../../state/community"
 import { CommunityMemberData } from "../../../types/community"
 import { Button } from "../../components/Button"
 import { updateCommunityMemberType } from "../../../client/actions/communities"
-import { addNotification } from "../../components/Notifications"
+import { addNotification } from "../notifications/Notifications"
 
 const MemberCard = ({ member }: { member: CommunityMemberData }) => {
   const loading = createSignal(false)

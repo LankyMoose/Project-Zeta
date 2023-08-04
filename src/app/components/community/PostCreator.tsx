@@ -6,7 +6,7 @@ import { postValidation } from "../../../db/validation"
 import { addPost } from "../../../client/actions/posts"
 import { userStore } from "../../state/global"
 import { selectedCommunity, postCreatorModalOpen } from "../../state/community"
-import { addNotification } from "../../components/Notifications"
+import { addNotification } from "../notifications/Notifications"
 
 export const PostCreator = () => {
   const loading = createSignal(false)

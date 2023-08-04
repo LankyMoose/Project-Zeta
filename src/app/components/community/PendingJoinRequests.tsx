@@ -7,7 +7,7 @@ import {
 } from "../../state/community"
 import { CommunityJoinRequestData } from "../../../types/community"
 import { respondToCommunityJoinRequest } from "../../../client/actions/communities"
-import { addNotification } from "../../components/Notifications"
+import { addNotification } from "../notifications/Notifications"
 
 const JoinRequestCard = (joinReq: CommunityJoinRequestData) => {
   const { id, communityId } = joinReq

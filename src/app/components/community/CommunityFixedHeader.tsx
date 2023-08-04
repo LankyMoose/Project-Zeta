@@ -6,7 +6,7 @@ import {
   isCommunityOwner,
   communityEditorModalOpen,
 } from "../../state/community"
-import { IconButton } from "../../components/IconButton"
+import { IconButton } from "../icons/IconButton"
 import { EditIcon } from "../../components/icons"
 import { AddPostButton } from "./AddPostButton"
 export const CommunityFixedHeader = () => {

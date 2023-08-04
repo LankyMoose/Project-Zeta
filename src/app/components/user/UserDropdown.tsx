@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { Transition } from "cinnabun-transitions"
 import { Link } from "cinnabun/router"
-import { userDropdownOpen, pathStore } from "../state/global"
+import { userDropdownOpen, pathStore } from "../../state/global"
 import "./UserDropdown.css"
 
 export const UserDropdown = () => {

@@ -3,7 +3,7 @@ import { createSignal } from "cinnabun"
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "../modal/Modal"
 import { Button } from "../../components/Button"
 import { joinCommunity } from "../../../client/actions/communities"
-import { addNotification } from "../../components/Notifications"
+import { addNotification } from "../notifications/Notifications"
 import { JoinResultType } from "../../../types/community"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 import {

@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { Component } from "cinnabun"
 import "./Notifications.css"
-import { generateUUID } from "../../utils"
+import { generateUUID } from "../../../utils"
 import { DomInterop } from "cinnabun/src/domInterop"
 import { useTransition } from "cinnabun-transitions"
 

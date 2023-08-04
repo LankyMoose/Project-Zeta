@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { ClickOutsideListener } from "cinnabun/listeners"
-import { IconButton } from "../../../components/IconButton"
+import { IconButton } from "../../icons/IconButton"
 import { MoreIcon } from "../../../components/icons"
 import { SlideInOut } from "cinnabun-transitions"
 import "./AdminMenu.css"

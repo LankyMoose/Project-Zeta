@@ -5,7 +5,7 @@ import { communityEditorModalOpen, selectedCommunity } from "../../state/communi
 import { Button } from "../../components/Button"
 import { communityValidation } from "../../../db/validation"
 import { updateCommunity } from "../../../client/actions/communities"
-import { addNotification } from "../../components/Notifications"
+import { addNotification } from "../notifications/Notifications"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 
 export const CommunityEditor = () => {

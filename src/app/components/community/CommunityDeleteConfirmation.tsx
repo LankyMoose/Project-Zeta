@@ -9,7 +9,7 @@ import {
 } from "../../state/community"
 import { Button } from "../../components/Button"
 import { deleteCommunity } from "../../../client/actions/communities"
-import { addNotification } from "../../components/Notifications"
+import { addNotification } from "../notifications/Notifications"
 import { setPath } from "cinnabun/router"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 

@@ -1,4 +1,4 @@
-import { addNotification } from "../../app/components/Notifications"
+import { addNotification } from "../../app/components/notifications/Notifications"
 import { API_URL } from "../../constants"
 import { NewPost, PostReaction } from "../../db/schema"
 import { CommunityPostComment, CommunityPostDataWithComments } from "../../types/post"

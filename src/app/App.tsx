@@ -21,9 +21,9 @@ import { CommunityLeaveConfirmation } from "./components/community/CommunityLeav
 import { CommunityDeleteConfirmation } from "./components/community/CommunityDeleteConfirmation"
 import { CommunityNsfwAgreementModal } from "./components/community/CommunityNsfwAgreementModal"
 import { PostModal } from "./components/post/PostModal"
-import { NotificationTray } from "./components/Notifications"
+import { NotificationTray } from "./components/notifications/Notifications"
 import { Portal } from "./components/Portal"
-import { UserDropdown } from "./components/UserDropdown"
+import { UserDropdown } from "./components/user/UserDropdown"
 import { UserAvatar } from "./components/user/UserAvatar"
 
 const Header = () => (
