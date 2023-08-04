@@ -1,10 +1,16 @@
-import { Post } from "../db/schema"
+import { NewPost, Post } from "../db/schema/"
 
-export type CommunityPostReaction = {
+export enum PostAdditionalContentType {
+  IMAGE = "image",
+  VIDEO = "video",
+  POLL = "poll",
+}
+
+export type PostReaction = {
   reaction: boolean
   ownerId: string
 }
-export type CommunityPostComment = {
+export type PostComment = {
   id: string
   content: string
   createdAt: string | Date
@@ -15,7 +21,7 @@ export type CommunityPostComment = {
   }
 }
 
-export type FlatCommunityPostComment = {
+export type FlatPostComment = {
   comment_id: string
   comment_content: string
   comment_created_at: string
@@ -24,7 +30,7 @@ export type FlatCommunityPostComment = {
   user_avatar_url: string | null
 }
 
-export type CommunityPostData = Post & {
+export type PostWithMeta = Post & {
   user: {
     id: string
     name: string
@@ -37,11 +43,11 @@ export type CommunityPostData = Post & {
   userReaction: boolean | null
   totalComments: string
 }
-export type CommunityPostDataWithComments = CommunityPostData & {
-  comments: CommunityPostComment[]
+export type PostWithMetaWithComments = PostWithMeta & {
+  comments: PostComment[]
 }
 
-export type LatestPostsData = {
+export type PostWithCommunityMeta = {
   post: {
     id: string
     title: string
@@ -61,7 +67,7 @@ export type LatestPostsData = {
   }
 }
 
-export type FlatCommunityPostData = {
+export type FlatPostWithMeta = {
   post_id: string
   post_title: string
   post_content: string
@@ -77,4 +83,10 @@ export type FlatCommunityPostData = {
   negative_reactions: number
   user_reaction: boolean | null
   total_comments: number
+}
+
+export type NewPostWithAdditionalContent = NewPost & {
+  additionalContent: {
+    type: PostAdditionalContentType
+  }
 }

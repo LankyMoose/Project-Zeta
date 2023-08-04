@@ -2,7 +2,7 @@ import * as Cinnabun from "cinnabun"
 import { getLatestPostsCommunities } from "../../client/actions/communities"
 import { pathStore } from "../state/global"
 import { selectedCommunity } from "../state/community"
-import { LatestPostsData } from "../../types/post"
+import { PostWithCommunityMeta } from "../../types/post"
 import { AuthorTag } from "../components/AuthorTag"
 import { Link } from "cinnabun/router"
 import { timeSinceUTCDate } from "../../utils"
@@ -18,15 +18,15 @@ export default function Home() {
       <div className="page-title flex align-items-center justify-content-between gap flex-wrap">
         <h1>Latest posts</h1>
       </div>
-      <div className=" page-body flex gap flex-wrap">
+      <div className="page-body flex gap flex-wrap">
         <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
-          {(loading: boolean, data?: LatestPostsData[]) => {
+          {(loading: boolean, data?: PostWithCommunityMeta[]) => {
             if (loading)
-              return <SkeletonList numberOfItems={3} height="140px" className="card-list" />
+              return <SkeletonList numberOfItems={3} height="140px" className="card-list w-100" />
             if (!data) return <div className="text-muted">No posts yet.</div>
             //return data.map((item) => <PostCard {...item} />)
             return (
-              <ul className="card-list">
+              <ul className="card-list w-100">
                 <Cinnabun.For each={data} template={(item) => <PostCard {...item} />} />
               </ul>
             )
@@ -37,7 +37,7 @@ export default function Home() {
   )
 }
 
-const PostCard = ({ post, community, user }: LatestPostsData) => {
+const PostCard = ({ post, community, user }: PostWithCommunityMeta) => {
   const viewPost = () => {
     selectedPost.value = {
       ...post,

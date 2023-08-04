@@ -28,7 +28,7 @@ import {
   LeaveResult,
   LeaveResultType,
 } from "../../types/community"
-import { CommunityPostData, FlatCommunityPostData, LatestPostsData } from "../../types/post"
+import { PostWithMeta, FlatPostWithMeta, PostWithCommunityMeta } from "../../types/post"
 import { alias } from "drizzle-orm/pg-core"
 
 const latestPostColumns = sql`
@@ -49,7 +49,7 @@ export const communityService = {
   fuzzySearchCache: [] as CommunitySearchData[],
   maxFuzzySearchCacheSize: 100,
 
-  async getLatestPosts(userId?: string, _page = 0): Promise<LatestPostsData[] | void> {
+  async getLatestPosts(userId?: string, _page = 0): Promise<PostWithCommunityMeta[] | void> {
     try {
       const query = sql`
           select
@@ -220,7 +220,7 @@ export const communityService = {
     communityId: string,
     userId?: string,
     page = 0
-  ): Promise<CommunityPostData[] | void> {
+  ): Promise<PostWithMeta[] | void> {
     const numPosts = 10
     try {
       const query = sql`
@@ -294,7 +294,7 @@ export const communityService = {
           left join total_comments on top_posts.post_id = total_comments.post_id
           order by top_posts.post_created_at desc
       `
-      const data = (await db.execute(query)) as FlatCommunityPostData[]
+      const data = (await db.execute(query)) as FlatPostWithMeta[]
 
       return data.reduce((acc, item) => {
         let post = acc.find((p) => p.id === item.post_id)
@@ -320,7 +320,7 @@ export const communityService = {
             },
             userReaction: null,
             totalComments: item.total_comments?.toString(),
-          } as CommunityPostData
+          } as PostWithMeta
           if (typeof item.user_reaction !== "undefined" && item.user_reaction !== null) {
             post.userReaction = item.user_reaction
           }
@@ -328,7 +328,7 @@ export const communityService = {
           return acc
         }
         return acc
-      }, [] as CommunityPostData[])
+      }, [] as PostWithMeta[])
     } catch (error) {
       console.error(error)
       return

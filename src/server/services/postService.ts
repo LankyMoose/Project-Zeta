@@ -9,12 +9,7 @@ import {
   postComments,
   users,
 } from "../../db/schema"
-import {
-  CommunityPostComment,
-  CommunityPostData,
-  FlatCommunityPostComment,
-  FlatCommunityPostData,
-} from "../../types/post"
+import { PostComment, PostWithMeta, FlatPostComment, FlatPostWithMeta } from "../../types/post"
 import { ServerError } from "../../errors"
 import { PublicUser } from "../../types/user"
 import { POST_COMMENT_PAGE_SIZE } from "../../constants"
@@ -30,7 +25,7 @@ export const postService = {
     }
   },
 
-  async getPostWithMetadata(postId: string, userId?: string): Promise<CommunityPostData | void> {
+  async getPostWithMetadata(postId: string, userId?: string): Promise<PostWithMeta | void> {
     try {
       const query = sql`
         with post as (
@@ -98,7 +93,7 @@ export const postService = {
         left join user_reaction on post.post_id = user_reaction.post_id
         left join total_comments on post.post_id = total_comments.post_id
       `
-      const data = (await db.execute(query)) as FlatCommunityPostData[]
+      const data = (await db.execute(query)) as FlatPostWithMeta[]
       if (data.length === 0) return
 
       const item = data[0]
@@ -123,7 +118,7 @@ export const postService = {
         },
         userReaction: item.user_reaction,
         totalComments: item.total_comments?.toString(),
-      } as CommunityPostData
+      } as PostWithMeta
     } catch (error) {
       console.error(error)
       return
@@ -134,7 +129,7 @@ export const postService = {
     postId: string,
     user: PublicUser,
     comment: string
-  ): Promise<CommunityPostComment | undefined> {
+  ): Promise<PostComment | undefined> {
     try {
       const createdAt = new Date().toISOString()
       const newComment = (
@@ -194,7 +189,7 @@ export const postService = {
     }
   },
 
-  async getPostComments(postId: string, offset: number): Promise<CommunityPostComment[] | void> {
+  async getPostComments(postId: string, offset: number): Promise<PostComment[] | void> {
     try {
       const query = sql`
         select
@@ -213,7 +208,7 @@ export const postService = {
         offset ${offset}
       `
 
-      const data = (await db.execute(query)) as FlatCommunityPostComment[]
+      const data = (await db.execute(query)) as FlatPostComment[]
 
       return data.map((item) => ({
         id: item.comment_id,

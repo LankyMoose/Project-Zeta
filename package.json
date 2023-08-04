@@ -10,7 +10,7 @@
     "prod": "pnpm build --prod && node dist/server",
     "test": "echo \"Error: no test specified\"",
     "db:migrate": "tsc && node ./dist/src/db/migrate.js",
-    "db:create-migration": "pnpm drizzle-kit generate:pg --schema=./src/db/schema.ts"
+    "db:create-migration": "pnpm drizzle-kit generate:pg --schema=./src/db/schema/"
   },
   "keywords": [],
   "author": "",

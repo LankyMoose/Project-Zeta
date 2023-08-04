@@ -1,7 +1,7 @@
 import * as Cinnabun from "cinnabun"
 import { createSignal } from "cinnabun"
 import { timeSinceUTCDate, truncateText } from "../../../utils"
-import { CommunityPostData } from "../../../types/post"
+import { PostWithMeta } from "../../../types/post"
 import { IconButton } from "../icons/IconButton"
 import { ThumbsUpIcon } from "../icons/ThumbsUpIcon"
 import { ThumbsDownIcon } from "../icons/ThumbsDownIcon"
@@ -15,7 +15,7 @@ import { CommentIcon } from "../icons/CommentIcon"
 import { API_ERROR } from "../../../constants"
 import { selectedPost } from "../../state/post"
 
-export const PostCard = ({ post }: { post: CommunityPostData }) => {
+export const PostCard = ({ post }: { post: PostWithMeta }) => {
   const state = createSignal(post)
   const reacting = createSignal(false)
 

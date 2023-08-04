@@ -1,6 +1,6 @@
 import * as Cinnabun from "cinnabun"
 import { For, createSignal, Cinnabun as cb } from "cinnabun"
-import { CommunityPostComment } from "../../../types/post"
+import { PostComment } from "../../../types/post"
 import { pathStore } from "../../state/global"
 import { getPostComments } from "../../../client/actions/posts"
 import { timeSinceUTCDate } from "../../../utils"
@@ -12,7 +12,7 @@ import { SkeletonList } from "../loaders/SkeletonList"
 
 const loadingMore = createSignal<boolean>(false)
 
-const CommentItem = ({ comment }: { comment: CommunityPostComment }) => {
+const CommentItem = ({ comment }: { comment: PostComment }) => {
   return (
     <div className="comment-item flex align-items-center gap py-3" key={comment.id}>
       <div className="avatar-wrapper sm">

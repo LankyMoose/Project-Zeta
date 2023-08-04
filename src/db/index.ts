@@ -1,7 +1,7 @@
 import postgres from "postgres"
 import { env } from "../env.js"
 import { drizzle } from "drizzle-orm/postgres-js"
-import * as schema from "./schema.js"
+import * as schema from "./schema/index.js"
 
 // create the connection
 const poolConnection = postgres({

@@ -1,12 +1,12 @@
 import { addNotification } from "../../app/components/notifications/Notifications"
 import { API_URL } from "../../constants"
 import { NewPost, PostReaction } from "../../db/schema"
-import { CommunityPostComment, CommunityPostDataWithComments } from "../../types/post"
+import { PostComment, PostWithMetaWithComments } from "../../types/post"
 
 export const getPostComments = async (
   postId: string,
   offset: number
-): Promise<CommunityPostComment[] | void> => {
+): Promise<PostComment[] | void> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}/comments?offset=${offset}`)
     const data = await response.json()
@@ -24,7 +24,7 @@ export const getPostComments = async (
 export const addPostComment = async (
   postId: string,
   comment: string
-): Promise<CommunityPostComment | Error> => {
+): Promise<PostComment | Error> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}/comments`, {
       method: "POST",
@@ -100,7 +100,7 @@ export const getPosts = async (communityId: string, offset: number) => {
   }
 }
 
-export const getPost = async (postId: string): Promise<CommunityPostDataWithComments | void> => {
+export const getPost = async (postId: string): Promise<PostWithMetaWithComments | void> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}`)
     const data = await response.json()

@@ -1,16 +1,16 @@
 import * as Cinnabun from "cinnabun"
 import { For } from "cinnabun"
 import { PostCard } from "../post/PostCard"
-import { CommunityPostData } from "../../../types/post"
+import { PostWithMeta } from "../../../types/post"
 import { getCommunityPosts } from "../../../client/actions/communities"
 import { SkeletonList } from "../loaders/SkeletonList"
 
 export const CommunityPosts = ({ url_title }: { url_title?: string }) => {
-  const posts = Cinnabun.createSignal<CommunityPostData[]>([])
+  const posts = Cinnabun.createSignal<PostWithMeta[]>([])
   const loading = Cinnabun.createSignal(true)
   const loaded = Cinnabun.createSignal(false)
 
-  const loadPosts = async (): Promise<CommunityPostData[] | void> => {
+  const loadPosts = async (): Promise<PostWithMeta[] | void> => {
     const res = await getCommunityPosts(url_title!)
 
     if ("message" in res) {

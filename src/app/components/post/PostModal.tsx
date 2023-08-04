@@ -9,7 +9,7 @@ import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { AuthorTag } from "../AuthorTag"
 import { addPostComment, addPostReaction, getPost } from "../../../client/actions/posts"
 import { PostComments } from "./PostComments"
-import { CommunityPostDataWithComments } from "../../../types/post"
+import { PostWithMetaWithComments } from "../../../types/post"
 import { commentValidation } from "../../../db/validation"
 import { Button } from "../../components/Button"
 import { EllipsisLoader } from "../loaders/Ellipsis"
@@ -252,7 +252,7 @@ export const PostModal = () => {
 const NewCommentForm = ({
   post,
 }: {
-  post: Cinnabun.Signal<Partial<CommunityPostDataWithComments> | null>
+  post: Cinnabun.Signal<Partial<PostWithMetaWithComments> | null>
 }) => {
   const newComment = createSignal("")
   const loading = createSignal(false)

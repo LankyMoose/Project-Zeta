@@ -1,4 +1,4 @@
-import { Community, User } from "../db/schema"
+import { User, Community } from "../db/schema/"
 
 export type CommunityLinkData = { title: string; url_title: string }
 export type CommunitySearchData = {
