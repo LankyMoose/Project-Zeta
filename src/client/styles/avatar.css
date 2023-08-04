@@ -56,7 +56,7 @@
   transition: all .3s ease;
 }
 
-.avatar-wrapper:hover .avatar-overlay {
+.avatar-wrapper:hover .avatar-overlay, .avatar-overlay.show {
   opacity: 1;
   pointer-events: unset;
   background: rgba(0, 0, 0, .5);

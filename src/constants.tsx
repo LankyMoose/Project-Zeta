@@ -1,4 +1,5 @@
 export const API_URL = "/api"
+export const ASSETS_URL = "https://pub-31665e8ce7ad419fa72f43d2c512b439.r2.dev"
 
 export enum API_ERROR {
   NOT_FOUND = "Not found",

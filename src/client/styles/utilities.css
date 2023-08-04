@@ -315,3 +315,7 @@
 .rounded-none {
   border-radius: 0 !important;
 }
+
+.cursor-pointer {
+  cursor: pointer;
+}

@@ -10,15 +10,18 @@ import { title } from "../../Document"
 import { EditIcon } from "../../components/icons"
 import { IconButton } from "../../components/icons/IconButton"
 import { Button } from "../../components/Button"
-import { updateName } from "../../../client/actions/me"
+import { confirmUpdateDp, getUpdateDpUrl, updateName } from "../../../client/actions/me"
 import { userValidation } from "../../../db/validation"
 import { EllipsisLoader } from "../../components/loaders/Ellipsis"
+import { ASSETS_URL } from "../../../constants"
+import { addNotification } from "../../components/notifications/Notifications"
 
 export default function UserPage({ params }: { params?: { userId?: string } }) {
   if (!params?.userId) return setPath(pathStore, "/users")
   const editing = createSignal(false)
   const name = createSignal("")
   const savingName = createSignal(false)
+  const savingImage = createSignal(false)
 
   if (!cb.isClient) return <></>
 
@@ -62,6 +65,43 @@ export default function UserPage({ params }: { params?: { userId?: string } }) {
     name.value = tgt.innerText
   }
 
+  const handleImageUploadChange = async (e: Event) => {
+    const files = (e.target as HTMLInputElement).files
+    if (!files) return
+    savingImage.value = true
+    const { url } = (await getUpdateDpUrl()) ?? {}
+    if (!url) {
+      savingImage.value = false
+      return
+    }
+
+    const res = await fetch(url, {
+      method: "PUT",
+      body: files[0],
+      headers: {
+        "Content-Type": files[0].type,
+      },
+    })
+    if (!res.ok) {
+      savingImage.value = false
+      return
+    }
+
+    const imgUrl = ASSETS_URL + new URL(res.url).pathname
+    const confirmed = await confirmUpdateDp(imgUrl)
+    savingImage.value = false
+
+    if (!confirmed) {
+      addNotification({
+        type: "error",
+        text: "Failed to update profile picture",
+      })
+      return
+    }
+
+    userStore.value = { ...userStore.value!, picture: imgUrl }
+  }
+
   return (
     <div onMounted={handleMount}>
       <Suspense promise={loadUser}>
@@ -72,15 +112,37 @@ export default function UserPage({ params }: { params?: { userId?: string } }) {
           return (
             <div className="page-title flex gap align-items-center">
               <div className="avatar-wrapper xl">
-                <img src={data.picture} alt={data.name} className="avatar" />
                 {isSelfView() ? (
-                  <div className="avatar-overlay">
-                    <IconButton className="icon-button bg-transparent">
-                      <EditIcon color="var(--primary)" />
-                    </IconButton>
-                  </div>
+                  <>
+                    <img
+                      watch={userStore}
+                      bind:src={() => userStore.value?.picture}
+                      bind:alt={() => userStore.value?.name}
+                      className="avatar"
+                    />
+                    <label
+                      htmlFor="profile_img_upload"
+                      watch={savingImage}
+                      bind:children
+                      bind:className={() =>
+                        `avatar-overlay cursor-pointer rounded-full ${
+                          savingImage.value ? "show" : ""
+                        }`
+                      }
+                    >
+                      {() =>
+                        savingImage.value ? <EllipsisLoader /> : <EditIcon color="var(--primary)" />
+                      }
+                    </label>
+                    <input
+                      onchange={handleImageUploadChange}
+                      type="file"
+                      id="profile_img_upload"
+                      className="none"
+                    />
+                  </>
                 ) : (
-                  <></>
+                  <img src={data.picture} alt={data.name} className="avatar" />
                 )}
               </div>
               <h1

@@ -37,9 +37,10 @@ export const userService = {
       return
     }
   },
-  async save(user: NewUser): Promise<PublicUser | undefined> {
+  async save(user: NewUser | Omit<NewUser, "name">): Promise<PublicUser | undefined> {
     try {
       if (!user.id) {
+        if (!("name" in user)) return
         return (
           await db.insert(users).values(user).returning({
             userId: users.id,

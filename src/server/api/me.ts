@@ -27,7 +27,22 @@ export function configureMeRoutes(app: FastifyInstance) {
     const url = await userService.getUserDisplayPictureUpdateUrl(userId)
     if (!url) throw new ServerError()
 
-    return url
+    return { url }
+  })
+
+  app.get<{ Querystring: { url?: string } }>("/api/me/update-dp/confirm", async (req, reply) => {
+    if (!req.query.url) throw new InvalidRequestError()
+    const userId = getUserIdOrDie(req)
+    const res = await userService.save({
+      id: userId,
+      avatarUrl: req.query.url,
+    })
+    if (!res) throw new ServerError()
+
+    reply.setCookie("user", JSON.stringify(res), {
+      ...cookieSettings,
+      httpOnly: false,
+    })
   })
 
   app.put<{ Body: { name: string } }>("/api/me/name", async (req, reply) => {

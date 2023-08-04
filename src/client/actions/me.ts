@@ -18,7 +18,7 @@ export const getMyCommunities = async (): Promise<MyCommunitiesData | void> => {
   }
 }
 
-export const getUpdateDpUrl = async (): Promise<string | void> => {
+export const getUpdateDpUrl = async (): Promise<{ url: string } | void> => {
   try {
     const response = await fetch(`${API_URL}/me/update-dp`)
     const data = await response.json()
@@ -30,6 +30,15 @@ export const getUpdateDpUrl = async (): Promise<string | void> => {
       type: "error",
       text: error.message,
     })
+  }
+}
+
+export const confirmUpdateDp = async (key: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/me/update-dp/confirm?url=${key}`)
+    return response.ok
+  } catch (error: any) {
+    return false
   }
 }
 
