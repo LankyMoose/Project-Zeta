@@ -67,7 +67,7 @@ export default function UserPage({ params }: { params?: { userId?: string } }) {
 
   const handleImageUploadChange = async (e: Event) => {
     const files = (e.target as HTMLInputElement).files
-    if (!files) return
+    if (!files || !files.length) return
     savingImage.value = true
     const { url } = (await getUpdateDpUrl()) ?? {}
     if (!url) {
