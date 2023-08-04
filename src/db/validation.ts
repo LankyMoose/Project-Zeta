@@ -1,5 +1,19 @@
 import { NewCommunity, NewPost } from "./schema"
 
+export const userValidation = {
+  minUserNameLength: 1,
+  maxUserNameLength: 80,
+  isUserNameValid: (name: string) => {
+    if (
+      name.length < userValidation.minUserNameLength ||
+      name.length > userValidation.maxUserNameLength
+    ) {
+      return false
+    }
+    return true
+  },
+}
+
 export const pollValidation = {
   minPollDescLength: 1,
   maxPollDescLength: 255,

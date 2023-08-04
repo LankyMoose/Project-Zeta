@@ -213,6 +213,9 @@
 .bg-secondary {
   background-color: var(--secondary) !important;
 }
+.bg-transparent {
+  background-color: transparent !important;
+}
 
 .shadow-none {
   box-shadow: none !important;

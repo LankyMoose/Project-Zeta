@@ -5,6 +5,7 @@ import { AuthProvider } from "../../types/auth"
 import { ServerError } from "../../errors"
 import { userService } from "./userService"
 import { FastifyInstance, FastifyRequest } from "fastify"
+import { PublicUser } from "../../types/user"
 
 export const authService = {
   async getByEmail(email: string): Promise<UserAuth | undefined> {
@@ -30,25 +31,16 @@ export const authService = {
     ).at(0)
   },
 
-  async handleProviderLogin(
-    provider: AuthProvider,
-    info: any
-  ): Promise<{
-    userId: string
-    name: string
-    picture: string
-  }> {
+  async handleProviderLogin(provider: AuthProvider, info: any): Promise<PublicUser> {
     const userAuth = await authService.getByProviderId(provider, info.id)
     switch (provider) {
       case AuthProvider.Google: {
         const { name, picture, id, email } = info
-        const userId = await this.saveUserAuth(provider, userAuth, name, picture, id, email)
-        return { userId, name, picture }
+        return await this.saveUserAuth(provider, userAuth, name, picture, id, email)
       }
       case AuthProvider.Github: {
         const { login, avatar_url, id, email } = info
-        const userId = await this.saveUserAuth(provider, userAuth, login, avatar_url, id, email)
-        return { userId, name: login, picture: avatar_url }
+        return await this.saveUserAuth(provider, userAuth, login, avatar_url, id, email)
       }
       default:
         throw new ServerError("Invalid provider")
@@ -63,23 +55,24 @@ export const authService = {
     id: string,
     email: string
   ) {
-    const user = await userService.save({
-      id: auth?.userId,
-      name,
-      avatarUrl: picture,
-    })
-
+    const user = auth?.userId
+      ? await userService.getById(auth.userId)
+      : await userService.save({
+          name,
+          avatarUrl: picture,
+        })
     if (!user) throw new ServerError()
+
     if (!auth) {
       const res = await this.save({
         email,
         provider,
         providerId: id,
-        userId: user.id,
+        userId: user.userId,
       })
       if (!res) throw new ServerError()
     }
-    return user.id
+    return user
   },
 
   async getProviderToken(app: FastifyInstance, req: FastifyRequest, provider: AuthProvider) {

@@ -3,12 +3,14 @@ import { fileURLToPath } from "url"
 import fetch from "node-fetch"
 
 import fastify, { FastifyRequest } from "fastify"
-import cookie, { CookieSerializeOptions } from "@fastify/cookie"
+import cookie from "@fastify/cookie"
 import compress from "@fastify/compress"
 import fStatic from "@fastify/static"
 import websocket from "@fastify/websocket"
 
 import oauthPlugin, { OAuth2Namespace } from "@fastify/oauth2"
+
+import { cookieSettings } from "./cookies.js"
 
 import { SSR } from "cinnabun/ssr"
 import { Cinnabun } from "cinnabun"
@@ -58,13 +60,6 @@ declare module "fastify" {
     authCallback: string
     id?: number
   }
-}
-
-const cookieSettings: Partial<CookieSerializeOptions> = {
-  domain: env.domain || "localhost",
-  path: "/",
-  sameSite: "lax",
-  secure: !isDev,
 }
 
 const app = fastify()
@@ -169,14 +164,14 @@ app.get<{ Params: { provider: AuthProvider }; Querystring: { state: string } }>(
     const userInfo = (await authService.loadUserInfo(provider, access_token)) as any
     if (!userInfo) throw new ServerError("Failed to load user data")
 
-    const { userId, name, picture } = await authService.handleProviderLogin(provider, userInfo)
-    if (!userId) throw new ServerError()
+    const user = await authService.handleProviderLogin(provider, userInfo)
+    if (!user) throw new ServerError()
 
-    reply.setCookie("user", JSON.stringify({ userId, name, picture }), {
+    reply.setCookie("user", JSON.stringify(user), {
       ...cookieSettings,
       httpOnly: false,
     })
-    reply.setCookie("user_id", userId, {
+    reply.setCookie("user_id", user.userId, {
       ...cookieSettings,
       httpOnly: true,
     })

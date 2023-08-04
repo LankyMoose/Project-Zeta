@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
 import { NewUser, User, users } from "../../db/schema"
 import { PublicUser } from "../../types/user"
+import { s3Service } from "./s3Service"
 
 export const userService = {
   pageSize: 100,
@@ -36,21 +37,38 @@ export const userService = {
       return
     }
   },
-  async save(user: NewUser): Promise<User | undefined> {
+  async save(user: NewUser): Promise<PublicUser | undefined> {
     try {
       if (!user.id) {
-        return (await db.insert(users).values(user).returning()).at(0)
+        return (
+          await db.insert(users).values(user).returning({
+            userId: users.id,
+            name: users.name,
+            picture: users.avatarUrl,
+          })
+        ).at(0)
       }
       return (
         await db
           .update(users)
           .set(user)
           .where(and(eq(users.id, user.id), eq(users.disabled, false), eq(users.deleted, false)))
-          .returning()
+          .returning({
+            userId: users.id,
+            name: users.name,
+            picture: users.avatarUrl,
+          })
       ).at(0)
     } catch (error) {
       console.error(error)
       return
+    }
+  },
+  async getUserDisplayPictureUpdateUrl(userId: string): Promise<string | void> {
+    try {
+      return await s3Service.getPresignedPutUrl(`user/${userId}/avatar`)
+    } catch (error) {
+      console.error(error)
     }
   },
 }
