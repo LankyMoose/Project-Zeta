@@ -101,10 +101,12 @@ export const AdminMenu = () => {
                       {() =>
                         loadingRequests.value ? (
                           <EllipsisLoader style="color:var(--text-color); font-size: .75rem;" />
-                        ) : (
+                        ) : pendingCommunityJoinRequests.value.length > 0 ? (
                           <span className="badge bg-danger">
                             {() => pendingCommunityJoinRequests.value.length}
                           </span>
+                        ) : (
+                          <></>
                         )
                       }
                     </a>
