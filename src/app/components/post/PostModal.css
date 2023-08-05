@@ -1,3 +1,11 @@
 .post-modal-title {
   background-color: rgba(255,255,255,.3);
 }
+
+.post-media {
+  padding: 1rem;
+  background: rgba(0, 0, 0, .1);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+}

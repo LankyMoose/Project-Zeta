@@ -1,8 +1,9 @@
 import * as Cinnabun from "cinnabun"
 import { For, Component } from "cinnabun"
 import "./Carousel.css"
+import { EllipsisLoader } from "../loaders/Ellipsis"
 
-type CarouselImage = {
+export type CarouselImage = {
   src: string
   alt: string
 }
@@ -13,6 +14,7 @@ export const Carousel = (props: CarouselProps) => {
   const totalItems = props.images.length
   const currentIndex = Cinnabun.createSignal(0)
   let carouselInner: HTMLElement
+  const loading = Cinnabun.createSignal(true)
 
   function goToIndex(index: number) {
     if (index < 0 || index >= totalItems) {
@@ -37,17 +39,14 @@ export const Carousel = (props: CarouselProps) => {
 
   function onMounted(component: Component): void {
     carouselInner = component.element as HTMLDivElement
-    // get the height of the shortest image
-    let minHeight = Infinity
-    const firstImg = carouselInner.querySelector("img")!
-    firstImg.onload = () => {
-      minHeight = firstImg.clientHeight
-      carouselInner.setAttribute("style", `max-height: ${minHeight}px`)
+  }
+
+  function handleImageLoaded(e: Event) {
+    const el = e.target as HTMLImageElement
+    if (el.src === props.images[currentIndex.value].src) {
+      carouselInner?.setAttribute("style", `max-height: ${el.clientHeight}px`)
+      loading.value = false
     }
-    document.addEventListener("resize", () => {
-      minHeight = firstImg.clientHeight
-      carouselInner.setAttribute("style", `max-height: ${minHeight}px`)
-    })
   }
 
   return (
@@ -57,7 +56,12 @@ export const Carousel = (props: CarouselProps) => {
           each={props.images}
           template={(img: CarouselImage, i: number) => (
             <div className="carousel-item" key={i}>
-              <img src={img.src} alt={img.alt} cross-origin="anonymous" />
+              <img
+                onload={handleImageLoaded}
+                src={img.src}
+                alt={img.alt}
+                cross-origin="anonymous"
+              />
             </div>
           )}
         />
@@ -77,6 +81,9 @@ export const Carousel = (props: CarouselProps) => {
         >
           &gt;
         </button>
+      </div>
+      <div watch={loading} bind:visible={() => loading.value} className="carousel-item">
+        <EllipsisLoader />
       </div>
     </div>
   )

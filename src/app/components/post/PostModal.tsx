@@ -1,5 +1,5 @@
 import * as Cinnabun from "cinnabun"
-import { createSignal } from "cinnabun"
+import { createSignal, useComputed, Cinnabun as cb } from "cinnabun"
 
 import { communityJoinModalOpen, selectedCommunityUrlTitle } from "../../state/community"
 import { authModalOpen, authModalState, userStore } from "../../state/global"
@@ -19,33 +19,58 @@ import { ThumbsUpIcon, ThumbsDownIcon } from "../icons"
 import { API_ERROR } from "../../../constants"
 import { UserIcon } from "../icons/UserIcon"
 import { SkeletonElement } from "../loaders/SkeletonElement"
-import { Carousel } from "../carousel/Carousel"
+import { Carousel, CarouselImage } from "../carousel/Carousel"
+import "./PostModal.css"
 
 const loading = createSignal(false)
+const postImages = createSignal<{
+  id: string
+  images: CarouselImage[]
+}>({
+  id: "",
+  images: [],
+})
 
-const loadPost = async (postId: string) => {
+const loadPost = async (post_id: string) => {
   if (loading.value) return
-  if (!postModalOpen.value) return
   loading.value = true
-  const res = await getPost(postId)
+  const res = await getPost(post_id)
+  if (!res) {
+    loading.value = false
+    return
+  }
   if (!postModalOpen.value) return
   if (selectedPost.value) {
     if (selectedPost.value.id === res?.id) {
       selectedPost.value = res ?? null
+      if (selectedPost.value.id !== postImages.value.id) {
+        postImages.value = {
+          id: selectedPost.value.id!,
+          images: selectedPost.value?.media?.map((m) => ({ src: m.url, alt: "" })) ?? [],
+        }
+      }
+
       if (loading.value) loading.value = false
       return
     }
   }
 }
 
-selectedPost.subscribe((post) => {
-  if (post?.id && !postModalOpen.value) {
-    postModalOpen.value = true
-    loadPost(post.id)
-  } else if (!post?.id && postModalOpen.value) {
-    postModalOpen.value = false
-  }
-})
+if (cb.isClient) {
+  useComputed(() => {
+    if (!selectedPost.value?.id && postModalOpen.value) {
+      postModalOpen.value = false
+      postImages.value = {
+        id: "",
+        images: [],
+      }
+    }
+
+    if (!selectedPost.value?.id) return
+    if (!postModalOpen.value) postModalOpen.value = true
+    loadPost(selectedPost.value.id)
+  }, [selectedPost])
+}
 
 export const PostModal = () => {
   const reacting = createSignal(false)
@@ -121,8 +146,8 @@ export const PostModal = () => {
 
   return (
     <Modal size="lg" visible={postModalOpen} toggle={handleClose}>
-      <ModalHeader watch={loading} bind:children className="modal-header flex flex-column gap-lg">
-        <div className="flex gap-lg align-items-start">
+      <ModalHeader className="modal-header flex flex-column gap-lg">
+        <div watch={loading} bind:children className="flex gap-lg align-items-start">
           {() =>
             selectedPost.value?.title ? (
               <h2>{selectedPost.value.title}</h2>
@@ -130,7 +155,7 @@ export const PostModal = () => {
               <SkeletonElement tag="h2" style="height:2.5rem; width:100%;" />
             )
           }
-          <div className="ml-auto">
+          <div watch={loading} bind:children className="ml-auto">
             {() =>
               selectedPost.value?.user && selectedPost.value.createdAt ? (
                 <AuthorTag
@@ -147,7 +172,7 @@ export const PostModal = () => {
             }
           </div>
         </div>
-        <div className="post-content">
+        <div className="post-content" watch={loading} bind:children>
           {() =>
             selectedPost.value?.content ? (
               <p className="m-0">{selectedPost.value.content}</p>
@@ -155,11 +180,13 @@ export const PostModal = () => {
               <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
             )
           }
+        </div>
+        <div watch={postImages} bind:children>
           {() =>
-            selectedPost.value?.media && selectedPost.value?.media?.length > 0 ? (
-              <div>
+            postImages.value.images.length > 0 ? (
+              <div className="post-media">
                 <Carousel
-                  images={selectedPost.value?.media.map((m) => ({ src: m.url, alt: "" }))}
+                  images={postImages.value.images.map((m) => ({ src: m.src, alt: m.alt }))}
                 />
               </div>
             ) : (
@@ -167,7 +194,7 @@ export const PostModal = () => {
             )
           }
         </div>
-        <div className="flex justify-content-end">
+        <div watch={loading} bind:children className="flex justify-content-end">
           <div className="flex gap post-reactions">
             {() =>
               loading.value ? (
@@ -228,7 +255,7 @@ export const PostModal = () => {
             }
           </div>
         </div>
-        <div className="flex gap ">
+        <div watch={loading} bind:children className="flex gap ">
           {() =>
             loading.value ? (
               <>
