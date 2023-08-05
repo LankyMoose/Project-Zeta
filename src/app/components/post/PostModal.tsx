@@ -19,6 +19,7 @@ import { ThumbsUpIcon, ThumbsDownIcon } from "../icons"
 import { API_ERROR } from "../../../constants"
 import { UserIcon } from "../icons/UserIcon"
 import { SkeletonElement } from "../loaders/SkeletonElement"
+import { Carousel } from "../carousel/Carousel"
 
 const loading = createSignal(false)
 
@@ -119,7 +120,7 @@ export const PostModal = () => {
   }
 
   return (
-    <Modal large visible={postModalOpen} toggle={handleClose}>
+    <Modal size="lg" visible={postModalOpen} toggle={handleClose}>
       <ModalHeader watch={loading} bind:children className="modal-header flex flex-column gap-lg">
         <div className="flex gap-lg align-items-start">
           {() =>
@@ -152,6 +153,17 @@ export const PostModal = () => {
               <p className="m-0">{selectedPost.value.content}</p>
             ) : (
               <SkeletonElement tag="p" style="min-height:1.5rem; width:100%;" />
+            )
+          }
+          {() =>
+            selectedPost.value?.media && selectedPost.value?.media?.length > 0 ? (
+              <div>
+                <Carousel
+                  images={selectedPost.value?.media.map((m) => ({ src: m.url, alt: "" }))}
+                />
+              </div>
+            ) : (
+              <></>
             )
           }
         </div>

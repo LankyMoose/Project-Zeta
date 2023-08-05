@@ -12,6 +12,7 @@ import {
   communityMembers,
   communityNsfwAgreements,
   postComments,
+  postMultimedia,
   postReactions,
   posts,
   users,
@@ -277,6 +278,13 @@ export const communityService = {
             from ${postComments}
             inner join top_posts on ${postComments.postId} = top_posts.post_id
             group by ${postComments.postId}
+          ), media as (
+            select
+              ${postMultimedia.postId} as post_id,
+              ${postMultimedia.id} as media_id,
+              ${postMultimedia.url} as media_url
+            from ${postMultimedia}
+            inner join top_posts on ${postMultimedia.postId} = top_posts.post_id
           )
 
           select
@@ -285,18 +293,22 @@ export const communityService = {
             post_reactions_positive.positive_reactions,
             post_reactions_negative.negative_reactions,
             user_reaction.reaction as user_reaction,
-            total_comments.total_comments
+            total_comments.total_comments,
+            media.media_id,
+            media.media_url
           from top_posts
           left join post_owners on top_posts.post_owner_id = post_owners.user_id
           left join post_reactions_positive on top_posts.post_id = post_reactions_positive.post_id
           left join post_reactions_negative on top_posts.post_id = post_reactions_negative.post_id
           left join user_reaction on top_posts.post_id = user_reaction.post_id
           left join total_comments on top_posts.post_id = total_comments.post_id
-          order by top_posts.post_created_at desc
+          left join media on top_posts.post_id = media.post_id
+          order by top_posts.post_created_at desc, media.media_url asc
       `
       const data = (await db.execute(query)) as FlatPostWithMeta[]
 
       return data.reduce((acc, item) => {
+        if (!item.post_id) return acc
         let post = acc.find((p) => p.id === item.post_id)
         if (!post) {
           const user = data.find((u) => u.user_id === item.post_owner_id)
@@ -320,12 +332,26 @@ export const communityService = {
             },
             userReaction: null,
             totalComments: item.total_comments?.toString(),
+            media: [],
           } as PostWithMeta
           if (typeof item.user_reaction !== "undefined" && item.user_reaction !== null) {
             post.userReaction = item.user_reaction
           }
+          if (item.media_id && item.media_url) {
+            post.media.push({
+              id: item.media_id,
+              url: item.media_url,
+            })
+          }
           acc.push(post)
           return acc
+        } else {
+          if (item.media_id && item.media_url && !post.media.find((m) => m.id === item.media_id)) {
+            post.media.push({
+              id: item.media_id,
+              url: item.media_url,
+            })
+          }
         }
         return acc
       }, [] as PostWithMeta[])

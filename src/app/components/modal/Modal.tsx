@@ -21,10 +21,10 @@ type ModalProps = {
   toggle: (e: Event) => void
   onclose?: () => void
   gestures?: ModalGestureProps
-  large?: boolean
+  size?: "lg" | "md" | "sm"
 }
 export const Modal = (
-  { visible, toggle, onclose, gestures = {}, large }: ModalProps,
+  { visible, toggle, onclose, gestures = {}, size = "sm" }: ModalProps,
   children: ComponentChildren
 ) => {
   const _gestures = { ...defaultGestures, ...gestures }
@@ -63,7 +63,7 @@ export const Modal = (
     >
       <div tag="div" className="modal-wrapper">
         <Transition
-          className={"modal" + (large ? " lg" : "")}
+          className={`modal ${size}`}
           properties={[{ name: "translate", from: "0 -5rem", to: "0 0", ms: 350 }]}
           watch={visible}
           bind:visible={() => visible.value}

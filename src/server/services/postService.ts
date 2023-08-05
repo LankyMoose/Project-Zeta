@@ -8,11 +8,27 @@ import {
   NewPost,
   postComments,
   users,
+  PostComment,
+  postCommentReactions,
+  PostCommentReaction,
+  postCommentReplies,
+  postMultimedia,
 } from "../../db/schema"
-import { PostComment, PostWithMeta, FlatPostComment, FlatPostWithMeta } from "../../types/post"
+import {
+  PostCommentWithUser,
+  PostWithMeta,
+  FlatPostComment,
+  FlatPostWithMeta,
+  NewPollDTO,
+  PollWithOptions,
+  FlatPostCommentReply,
+  PostCommentReplyWithUser,
+} from "../../types/post"
 import { ServerError } from "../../errors"
 import { PublicUser } from "../../types/user"
 import { POST_COMMENT_PAGE_SIZE } from "../../constants"
+import { s3Service } from "./s3Service"
+import { pollOptions, polls } from "../../db/schema/polls"
 
 export const postService = {
   pageSize: 25,
@@ -77,7 +93,15 @@ export const postService = {
           from ${postComments}
           inner join post on ${postComments.postId} = post.post_id
           group by ${postComments.postId}
-        )
+        ), post_media as (
+          select 
+            ${postMultimedia.id} as media_id,
+            ${postMultimedia.url} as media_url,
+            ${postMultimedia.postId} as post_id
+          from ${postMultimedia}
+          inner join post on ${postMultimedia.postId} = post.post_id
+          order by ${postMultimedia.createdAt} asc
+        )       
 
         select
           post.*,
@@ -85,20 +109,23 @@ export const postService = {
           post_reactions_positive.positive_reactions,
           post_reactions_negative.negative_reactions,
           user_reaction.reaction as user_reaction,
-          total_comments.total_comments
+          total_comments.total_comments,
+          post_media.media_id,
+          post_media.media_url
         from post
         left join post_owner on post.post_owner_id = post_owner.user_id
         left join post_reactions_positive on post.post_id = post_reactions_positive.post_id
         left join post_reactions_negative on post.post_id = post_reactions_negative.post_id
         left join user_reaction on post.post_id = user_reaction.post_id
         left join total_comments on post.post_id = total_comments.post_id
+        left join post_media on post.post_id = post_media.post_id
       `
       const data = (await db.execute(query)) as FlatPostWithMeta[]
       if (data.length === 0) return
 
       const item = data[0]
       //@ts-ignore
-      return {
+      const res = {
         id: item.post_id,
         title: item.post_title,
         content: item.post_content,
@@ -119,6 +146,15 @@ export const postService = {
         userReaction: item.user_reaction,
         totalComments: item.total_comments?.toString(),
       } as PostWithMeta
+
+      res.media = data
+        .filter((item) => item.media_id)
+        .map((item) => ({
+          id: item.media_id,
+          url: item.media_url,
+        }))
+
+      return res
     } catch (error) {
       console.error(error)
       return
@@ -129,7 +165,7 @@ export const postService = {
     postId: string,
     user: PublicUser,
     comment: string
-  ): Promise<PostComment | undefined> {
+  ): Promise<PostCommentWithUser | undefined> {
     try {
       const createdAt = new Date().toISOString()
       const newComment = (
@@ -155,6 +191,48 @@ export const postService = {
           avatarUrl: user.picture,
         },
       }
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async updatePostComment(
+    commentId: string,
+    comment: Partial<PostComment>
+  ): Promise<PostComment | undefined> {
+    try {
+      return (
+        await db.update(postComments).set(comment).where(eq(postComments.id, commentId)).returning()
+      ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async addPostCommentReaction(
+    commentId: string,
+    userId: string,
+    reaction: boolean
+  ): Promise<PostCommentReaction | undefined> {
+    try {
+      return (
+        await db
+          .insert(postCommentReactions)
+          .values({
+            commentId,
+            ownerId: userId,
+            reaction,
+          })
+          .onConflictDoUpdate({
+            target: [postCommentReactions.commentId, postCommentReactions.ownerId],
+            set: {
+              reaction,
+            },
+          })
+          .returning()
+      ).at(0)
     } catch (error) {
       console.error(error)
       return
@@ -189,7 +267,82 @@ export const postService = {
     }
   },
 
-  async getPostComments(postId: string, offset: number): Promise<PostComment[] | void> {
+  async addPostCommentReply(
+    commentId: string,
+    user: PublicUser,
+    reply: string
+  ): Promise<PostCommentWithUser | undefined> {
+    try {
+      const createdAt = new Date().toISOString()
+      const newReply = (
+        await db
+          .insert(postCommentReplies)
+          .values({
+            commentId,
+            ownerId: user.userId,
+            content: reply,
+          })
+          .returning()
+      ).at(0)
+      if (!newReply) {
+        throw new ServerError("Reply not created")
+      }
+      return {
+        id: newReply.id,
+        content: newReply.content,
+        createdAt,
+        user: {
+          id: user.userId,
+          name: user.name,
+          avatarUrl: user.picture,
+        },
+      }
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getPostCommentReplies(
+    commentId: string,
+    offset: number
+  ): Promise<PostCommentReplyWithUser[] | void> {
+    try {
+      const query = sql`
+        select
+          ${postCommentReplies.id} as reply_id,
+          ${postCommentReplies.content} as reply_content,
+          ${postCommentReplies.createdAt} as reply_created_at,
+          ${users.id} as user_id,
+          ${users.name} as user_name,
+          ${users.avatarUrl} as user_avatar_url
+        from ${postCommentReplies}
+        inner join ${users} on ${users.id} = ${postCommentReplies.ownerId}
+        where ${postCommentReplies.commentId} = ${commentId}
+        and ${postCommentReplies.deleted} = false
+        order by ${postCommentReplies.createdAt} desc
+        limit ${POST_COMMENT_PAGE_SIZE}
+        offset ${offset}
+      `
+      const data = (await db.execute(query)) as FlatPostCommentReply[]
+      return data.map((item) => ({
+        commentId,
+        id: item.reply_id,
+        content: item.reply_content,
+        createdAt: item.reply_created_at,
+        user: {
+          id: item.user_id,
+          name: item.user_name,
+          avatarUrl: item.user_avatar_url,
+        },
+      }))
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getPostComments(postId: string, offset: number): Promise<PostCommentWithUser[] | void> {
     try {
       const query = sql`
         select
@@ -238,6 +391,103 @@ export const postService = {
   async updatePost(postId: string, post: Partial<Post>): Promise<Post | undefined> {
     try {
       return (await db.update(posts).set(post).where(eq(posts.id, postId)).returning()).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async updatePostMedia(postId: string, urls: string[]) {
+    try {
+      await db.delete(postMultimedia).where(eq(postMultimedia.postId, postId))
+
+      return await db
+        .insert(postMultimedia)
+        .values(urls.map((url) => ({ postId, url })))
+        .onConflictDoNothing()
+        .returning({
+          url: postMultimedia.url,
+        })
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async deletePost(postId: string): Promise<Post | undefined> {
+    try {
+      return (
+        await db
+          .update(posts)
+          .set({
+            deleted: true,
+          })
+          .where(eq(posts.id, postId))
+          .returning()
+      ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async disablePost(postId: string): Promise<Post | undefined> {
+    try {
+      return (
+        await db
+          .update(posts)
+          .set({
+            disabled: true,
+          })
+          .where(eq(posts.id, postId))
+          .returning()
+      ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  async getPostMediaUploadUrl(postId: string, idx: number): Promise<string | void> {
+    try {
+      return await s3Service.getPresignedPutUrl(`post/${postId}/${idx}`)
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  async deletePostMedia(postId: string): Promise<boolean> {
+    return s3Service.deleteObject(`post/${postId}`)
+  },
+
+  async createPostPoll(postId: string, poll: NewPollDTO): Promise<PollWithOptions | undefined> {
+    try {
+      const newPoll = (
+        await db
+          .insert(polls)
+          .values({
+            ...poll,
+            postId,
+          })
+          .returning()
+      ).at(0)
+
+      if (!newPoll) throw new ServerError("Poll not created")
+
+      const options = await db
+        .insert(pollOptions)
+        .values(
+          poll.options.map((option) => ({
+            desc: option,
+            pollId: newPoll.id,
+          }))
+        )
+        .execute()
+
+      return {
+        ...newPoll,
+        options,
+      }
     } catch (error) {
       console.error(error)
       return

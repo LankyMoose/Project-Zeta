@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify"
 import { postService } from "../services/postService"
-import { NewPost } from "../../db/schema"
 import { postValidation } from "../../db/validation"
 import { InvalidRequestError, NotFoundError, ServerError, UnauthorizedError } from "../../errors"
 import {
@@ -10,22 +9,69 @@ import {
   getUserOrDie,
 } from "./util"
 import { isUuid } from "../../utils"
+import { NewPostDTO, NewPostResponse } from "../../types/post"
+import { Poll } from "../../db/schema/polls"
 
 export function configurePostsRoutes(app: FastifyInstance) {
-  app.post<{ Body: Omit<NewPost, "ownerId"> }>("/api/posts", async (req) => {
+  app.post<{ Body: NewPostDTO }>("/api/posts", async (req) => {
     const userId = getUserIdOrDie(req)
-    const { title, content } = req.body
+    const { title, content, communityId } = req.body
     if (!postValidation.isPostValid({ title, content })) throw new InvalidRequestError()
 
-    await getActiveMemberOrDie(req, req.body.communityId)
+    await getActiveMemberOrDie(req, communityId)
 
-    const res = await postService.createPost({
-      ...req.body,
+    const post = await postService.createPost({
+      title,
+      content,
+      communityId,
       ownerId: userId,
     })
-    if (!res) throw new ServerError()
-    return res
+    if (!post) throw new ServerError()
+
+    let urls: string[] = []
+    if (req.body.numMedia) {
+      const uploadUrls = await Promise.all(
+        Array.from({ length: req.body.numMedia }).map(async (_, i) => {
+          return postService.getPostMediaUploadUrl(post.id, i)
+        })
+      )
+      urls = uploadUrls.filter((url) => !!url && typeof url === "string") as string[]
+      if (urls.length !== req.body.numMedia) throw new ServerError()
+    }
+
+    let poll: Poll | undefined
+
+    if (req.body.poll) {
+      poll = await postService.createPostPoll(post.id, req.body.poll)
+      if (!poll) throw new ServerError()
+    }
+
+    return {
+      post,
+      urls,
+      poll,
+    } as NewPostResponse
   })
+
+  app.patch<{ Params: { postId: string }; Body: { urls: string[] } }>(
+    "/api/posts/:postId/media",
+    async (req) => {
+      const userId = getUserIdOrDie(req)
+      const post = await postService.getPost(req.params.postId)
+      if (!post) throw new NotFoundError()
+      if (post.ownerId !== userId) {
+        throw new UnauthorizedError()
+      }
+
+      await postService.deletePostMedia(req.params.postId)
+
+      const res = await postService.updatePostMedia(req.params.postId, req.body.urls)
+      if (!res) throw new ServerError()
+      return {
+        urls: res.map(({ url }) => url),
+      }
+    }
+  )
 
   app.get<{ Params: { postId: string } }>("/api/posts/:postId", async (req) => {
     if (!req.params.postId || !isUuid(req.params.postId)) throw new InvalidRequestError()
@@ -52,7 +98,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
     const userId = getUserIdOrDie(req)
 
     const post = await postService.getPost(req.params.postId)
-    if (!post) throw new InvalidRequestError()
+    if (!post) throw new NotFoundError()
     if (post.ownerId !== userId) {
       const member = await getActiveMemberOrDie(req, post.communityId)
       if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
@@ -101,11 +147,56 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const user = getUserOrDie(req)
 
       const post = await postService.getPost(req.params.postId)
-      if (!post) throw new InvalidRequestError()
+      if (!post) throw new NotFoundError()
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
       const res = await postService.addPostComment(req.params.postId, user, req.body.comment)
+      if (!res) throw new ServerError()
+      return res
+    }
+  )
+
+  app.patch<{
+    Params: { postId: string; commentId: string }
+    Body: { comment?: string; deleted?: boolean }
+  }>("/api/posts/:postId/comments/:commentId", async (req) => {
+    const userId = getUserIdOrDie(req)
+
+    const post = await postService.getPost(req.params.postId)
+    if (!post) throw new NotFoundError()
+    if (post.ownerId !== userId) {
+      const member = await getActiveMemberOrDie(req, post.communityId)
+      if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
+    }
+
+    const { comment, deleted } = req.body
+
+    const res = await postService.updatePostComment(req.params.commentId, {
+      content: comment,
+      deleted,
+    })
+    if (!res) throw new ServerError()
+    return res
+  })
+
+  app.post<{ Params: { postId: string; commentId: string }; Body: { reaction: boolean } }>(
+    "/api/posts/:postId/comments/:commentId/reactions",
+    async (req) => {
+      const userId = getUserIdOrDie(req)
+
+      if (!req.params.commentId || !isUuid(req.params.commentId)) throw new InvalidRequestError()
+
+      const post = await postService.getPost(req.params.postId)
+      if (!post) throw new NotFoundError()
+
+      await ensureCommunityMemberIfPrivate(req, post.communityId)
+
+      const res = await postService.addPostCommentReaction(
+        req.params.commentId,
+        userId,
+        req.body.reaction
+      )
       if (!res) throw new ServerError()
       return res
     }

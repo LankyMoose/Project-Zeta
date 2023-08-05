@@ -4,6 +4,7 @@ import { PostCard } from "../post/PostCard"
 import { PostWithMeta } from "../../../types/post"
 import { getCommunityPosts } from "../../../client/actions/communities"
 import { SkeletonList } from "../loaders/SkeletonList"
+import { addNotification } from "../notifications/Notifications"
 
 export const CommunityPosts = ({ url_title }: { url_title?: string }) => {
   const posts = Cinnabun.createSignal<PostWithMeta[]>([])
@@ -17,6 +18,10 @@ export const CommunityPosts = ({ url_title }: { url_title?: string }) => {
       console.error(res.message)
       loading.value = false
       loaded.value = false
+      addNotification({
+        type: "error",
+        text: res.message,
+      })
       return
     }
     posts.value = res

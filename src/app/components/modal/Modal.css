@@ -42,6 +42,10 @@
   width: 720px;
   flex-basis: 100%;
 }
+.modal.md {
+  width: 480px;
+  flex-basis: 100%;
+}
 
 
 .modal-header {

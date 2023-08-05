@@ -1,4 +1,9 @@
-import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3"
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 import { env } from "../../env"
@@ -13,14 +18,54 @@ const S3 = new S3Client({
 })
 
 export const s3Service = {
-  async getPresignedPutUrl(key: string) {
-    return getSignedUrl(S3, new PutObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
-      expiresIn: 3600,
-    })
+  async deleteObject(key: string) {
+    try {
+      const res = await S3.send(
+        new DeleteObjectCommand({
+          Bucket: env.s3.bucketName,
+          Key: key,
+        })
+      )
+
+      return res.$metadata.httpStatusCode === 200
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  },
+
+  async getPresignedPutUrls(keys: string[]): Promise<string[] | void> {
+    try {
+      return Promise.all(
+        keys.map((key) =>
+          getSignedUrl(S3, new GetObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
+            expiresIn: 3600,
+          })
+        )
+      )
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+  async getPresignedPutUrl(key: string): Promise<string | void> {
+    try {
+      return await getSignedUrl(S3, new PutObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
+        expiresIn: 3600,
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
   },
   async getPresignedGetUrl(key: string) {
-    return getSignedUrl(S3, new GetObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
-      expiresIn: 3600,
-    })
+    try {
+      return await getSignedUrl(S3, new GetObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
+        expiresIn: 3600,
+      })
+    } catch (error) {
+      console.error(error)
+      return
+    }
   },
 }

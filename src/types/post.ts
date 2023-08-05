@@ -1,16 +1,35 @@
-import { NewPost, Post } from "../db/schema/"
+import { Post, NewPost } from "../db/schema/"
+import { NewPoll, Poll, PollOption } from "../db/schema/polls"
 
-export enum PostAdditionalContentType {
-  IMAGE = "image",
-  VIDEO = "video",
-  POLL = "poll",
+export type NewPollDTO = Omit<NewPoll, "postId"> & { options: string[] }
+
+export type NewPostDTO = Omit<NewPost, "ownerId"> & {
+  numMedia?: number
+  poll?: NewPollDTO
+}
+
+export type NewPostResponse = {
+  post: Post
+  urls: string[]
+  poll?: Poll
 }
 
 export type PostReaction = {
   reaction: boolean
   ownerId: string
 }
-export type PostComment = {
+export type PostCommentWithUser = {
+  id: string
+  content: string
+  createdAt: string | Date
+  user: {
+    id: string
+    name: string
+    avatarUrl: string | null
+  }
+}
+export type PostCommentReplyWithUser = {
+  commentId: string
   id: string
   content: string
   createdAt: string | Date
@@ -30,6 +49,15 @@ export type FlatPostComment = {
   user_avatar_url: string | null
 }
 
+export type FlatPostCommentReply = {
+  reply_id: string
+  reply_content: string
+  reply_created_at: string
+  user_id: string
+  user_name: string
+  user_avatar_url: string | null
+}
+
 export type PostWithMeta = Post & {
   user: {
     id: string
@@ -42,9 +70,10 @@ export type PostWithMeta = Post & {
   }
   userReaction: boolean | null
   totalComments: string
+  media: { id: string; url: string }[]
 }
 export type PostWithMetaWithComments = PostWithMeta & {
-  comments: PostComment[]
+  comments: PostCommentWithUser[]
 }
 
 export type PostWithCommunityMeta = {
@@ -83,10 +112,10 @@ export type FlatPostWithMeta = {
   negative_reactions: number
   user_reaction: boolean | null
   total_comments: number
+  media_id: string
+  media_url: string
 }
 
-export type NewPostWithAdditionalContent = NewPost & {
-  additionalContent: {
-    type: PostAdditionalContentType
-  }
+export type PollWithOptions = Poll & {
+  options: PollOption[]
 }

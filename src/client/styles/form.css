@@ -2,7 +2,7 @@
   display:flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom:.5rem;
+  margin-bottom:1rem;
 }
 .form-group:last-child {
   margin-bottom:0;

@@ -14,6 +14,7 @@ import "./PostCard.css"
 import { CommentIcon } from "../icons/CommentIcon"
 import { API_ERROR } from "../../../constants"
 import { selectedPost } from "../../state/post"
+import { Carousel } from "../carousel/Carousel"
 
 export const PostCard = ({ post }: { post: PostWithMeta }) => {
   const state = createSignal(post)
@@ -79,6 +80,14 @@ export const PostCard = ({ post }: { post: PostWithMeta }) => {
         <AuthorTag user={post.user} date={timeSinceUTCDate(post.createdAt)} />
       </div>
       <p className="post-card-content">{truncateText(post.content, 256)}</p>
+      {post.media.length > 0 ? (
+        <div>
+          <Carousel images={post.media.map((m) => ({ src: m.url, alt: "" }))} />
+        </div>
+      ) : (
+        <></>
+      )}
+
       <div className="flex justify-content-between">
         <button type="button" className="btn text-sm p-0" onclick={viewPost}>
           <span className="text-muted flex gap-sm align-items-center justify-content-center">

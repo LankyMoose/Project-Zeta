@@ -1,12 +1,17 @@
 import { addNotification } from "../../app/components/notifications/Notifications"
 import { API_URL } from "../../constants"
 import { NewPost, PostReaction } from "../../db/schema"
-import { PostComment, PostWithMetaWithComments } from "../../types/post"
+import {
+  NewPostDTO,
+  NewPostResponse,
+  PostCommentWithUser,
+  PostWithMetaWithComments,
+} from "../../types/post"
 
 export const getPostComments = async (
   postId: string,
   offset: number
-): Promise<PostComment[] | void> => {
+): Promise<PostCommentWithUser[] | void> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}/comments?offset=${offset}`)
     const data = await response.json()
@@ -24,7 +29,7 @@ export const getPostComments = async (
 export const addPostComment = async (
   postId: string,
   comment: string
-): Promise<PostComment | Error> => {
+): Promise<PostCommentWithUser | Error> => {
   try {
     const response = await fetch(`${API_URL}/posts/${postId}/comments`, {
       method: "POST",
@@ -63,7 +68,7 @@ export const addPostReaction = async (
   }
 }
 
-export const addPost = async (post: Omit<NewPost, "ownerId">) => {
+export const addPost = async (post: NewPostDTO): Promise<NewPostResponse | void> => {
   try {
     const response = await fetch(`${API_URL}/posts`, {
       method: "POST",
@@ -129,6 +134,31 @@ export const updatePost = async (postId: string, post: Partial<NewPost>) => {
 
     return data
   } catch (error: any) {
+    addNotification({
+      type: "error",
+      text: error.message,
+    })
+  }
+}
+
+export const updatePostMedia = async (
+  postId: string,
+  urls: string[]
+): Promise<{ urls: string[] } | void> => {
+  try {
+    const response = await fetch(`${API_URL}/posts/${postId}/media`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ urls }),
+    })
+    const data = await response.json()
+    if (!response.ok) throw new Error(data?.message ?? response.statusText)
+
+    return data
+  } catch (error: any) {
+    console.error(error)
     addNotification({
       type: "error",
       text: error.message,

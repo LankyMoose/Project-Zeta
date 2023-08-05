@@ -3,10 +3,12 @@ import { createSignal } from "cinnabun"
 import { Button } from "../../components/Button"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { postValidation } from "../../../db/validation"
-import { addPost } from "../../../client/actions/posts"
+import { addPost, updatePostMedia } from "../../../client/actions/posts"
 import { userStore } from "../../state/global"
 import { selectedCommunity, postCreatorModalOpen } from "../../state/community"
 import { addNotification } from "../notifications/Notifications"
+import { MultimediaDropzone, SelectedFile } from "../dragndrop/MultimediaDropzone"
+import { ASSETS_URL } from "../../../constants"
 
 export const PostCreator = () => {
   const loading = createSignal(false)
@@ -14,6 +16,7 @@ export const PostCreator = () => {
     title: "",
     content: "",
   })
+  const files = createSignal<SelectedFile[]>([])
 
   const createPost = async () => {
     const { title, content } = state.value
@@ -36,24 +39,47 @@ export const PostCreator = () => {
       title,
       content,
       communityId: selectedCommunity.value.id!,
+      numMedia: files.value.length,
     })
 
-    if (res.message) {
+    if (!res || !res) {
       loading.value = false
-      addNotification({
+      return addNotification({
         type: "error",
-        text: res.message,
+        text: "Something went wrong",
       })
-      return
+    }
+
+    if (res.urls.length > 0) {
+      await Promise.all(
+        files.value.map(async (file, i) => {
+          const imgRes = await fetch(res.urls[i], {
+            method: "PUT",
+            body: file.file,
+            headers: {
+              "Content-Type": file.file.type,
+            },
+          })
+
+          if (!imgRes.ok) return
+          file.uploadUrl = ASSETS_URL + new URL(imgRes.url).pathname
+        })
+      )
+      const urls = await updatePostMedia(
+        res.post.id,
+        files.value.map((f) => f.uploadUrl!)
+      )
+      console.log("urls", urls)
     }
 
     addNotification({
       type: "success",
       text: "Post created",
     })
-    setTimeout(() => {
-      window.location.reload()
-    }, 1000)
+    loading.value = false
+    // setTimeout(() => {
+    //   window.location.reload()
+    // }, 1000)
   }
 
   const handleChange = (e: Event) => {
@@ -64,7 +90,11 @@ export const PostCreator = () => {
 
   return (
     <>
-      <Modal visible={postCreatorModalOpen} toggle={() => (postCreatorModalOpen.value = false)}>
+      <Modal
+        size="md"
+        visible={postCreatorModalOpen}
+        toggle={() => (postCreatorModalOpen.value = false)}
+      >
         <ModalHeader>
           <h2>Create post</h2>
         </ModalHeader>
@@ -81,6 +111,9 @@ export const PostCreator = () => {
           <div className="form-group">
             <label htmlFor="content">Content</label>
             <textarea id="content" bind:value={() => state.value.content} oninput={handleChange} />
+          </div>
+          <div className="form-group">
+            <MultimediaDropzone files={files} />
           </div>
         </ModalBody>
         <ModalFooter>
