@@ -23,7 +23,12 @@ export default function Home() {
           {(loading: boolean, data?: PostWithCommunityMeta[]) => {
             if (loading)
               return <SkeletonList numberOfItems={3} height="140px" className="card-list w-100" />
-            if (!data) return <div className="text-muted">No posts yet.</div>
+            if (!data || !data.length)
+              return (
+                <div className="text-muted">
+                  <i>No posts yet.</i>
+                </div>
+              )
             //return data.map((item) => <PostCard {...item} />)
             return (
               <ul className="card-list w-100">

@@ -44,7 +44,7 @@ export const Carousel = (props: CarouselProps) => {
   function handleImageLoaded(e: Event) {
     const el = e.target as HTMLImageElement
     if (el.src === props.images[currentIndex.value].src) {
-      carouselInner?.setAttribute("style", `max-height: ${el.clientHeight}px`)
+      //carouselInner?.setAttribute("style", `max-height: ${el.clientHeight}px`)
       loading.value = false
     }
   }

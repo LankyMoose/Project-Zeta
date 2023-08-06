@@ -4,8 +4,14 @@
 
 .post-media {
   padding: 1rem;
-  background: rgba(0, 0, 0, .1);
+  background: rgba(0, 0, 0, .075);
   min-height: 200px;
   display: flex;
   align-items: center;
+}
+
+@media screen and (prefers-color-scheme: light) {
+  .post-media {
+    background: rgba(0, 0, 0, .025);
+  }
 }

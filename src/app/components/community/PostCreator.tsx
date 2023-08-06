@@ -4,11 +4,13 @@ import { Button } from "../../components/Button"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { postValidation } from "../../../db/validation"
 import { addPost, updatePostMedia } from "../../../client/actions/posts"
-import { userStore } from "../../state/global"
+import { pathStore, userStore } from "../../state/global"
 import { selectedCommunity, postCreatorModalOpen } from "../../state/community"
 import { addNotification } from "../notifications/Notifications"
 import { MultimediaDropzone, SelectedFile } from "../dragndrop/MultimediaDropzone"
 import { ASSETS_URL } from "../../../constants"
+import { setPath } from "cinnabun/router"
+import { EllipsisLoader } from "../loaders/Ellipsis"
 
 export const PostCreator = () => {
   const loading = createSignal(false)
@@ -65,11 +67,10 @@ export const PostCreator = () => {
           file.uploadUrl = ASSETS_URL + new URL(imgRes.url).pathname
         })
       )
-      const urls = await updatePostMedia(
+      await updatePostMedia(
         res.post.id,
         files.value.map((f) => f.uploadUrl!)
       )
-      console.log("urls", urls)
     }
 
     addNotification({
@@ -77,9 +78,7 @@ export const PostCreator = () => {
       text: "Post created",
     })
     loading.value = false
-    // setTimeout(() => {
-    //   window.location.reload()
-    // }, 1000)
+    window.location.href = `/communities/${selectedCommunity.value.url_title}?post=${res.post.id}`
   }
 
   const handleChange = (e: Event) => {
@@ -132,6 +131,7 @@ export const PostCreator = () => {
             onclick={createPost}
           >
             Create post
+            <EllipsisLoader watch={loading} bind:visible={() => loading.value} />
           </Button>
         </ModalFooter>
       </Modal>
