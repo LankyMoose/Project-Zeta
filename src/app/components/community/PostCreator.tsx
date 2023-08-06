@@ -4,12 +4,11 @@ import { Button } from "../../components/Button"
 import { Modal, ModalBody, ModalFooter, ModalHeader } from "../modal/Modal"
 import { postValidation } from "../../../db/validation"
 import { addPost, updatePostMedia } from "../../../client/actions/posts"
-import { pathStore, userStore } from "../../state/global"
+import { userStore } from "../../state/global"
 import { selectedCommunity, postCreatorModalOpen } from "../../state/community"
 import { addNotification } from "../notifications/Notifications"
 import { MultimediaDropzone, SelectedFile } from "../dragndrop/MultimediaDropzone"
 import { ASSETS_URL } from "../../../constants"
-import { setPath } from "cinnabun/router"
 import { EllipsisLoader } from "../loaders/Ellipsis"
 
 export const PostCreator = () => {
