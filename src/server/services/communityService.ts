@@ -29,92 +29,150 @@ import {
   LeaveResult,
   LeaveResultType,
 } from "../../types/community"
-import { PostWithMeta, FlatPostWithMeta, PostWithCommunityMeta } from "../../types/post"
+import { PostWithMeta, FlatPostWithMeta } from "../../types/post"
 import { alias } from "drizzle-orm/pg-core"
-
-const latestPostColumns = sql`
-${posts.id} as post_id,
-${posts.title} as post_title,
-${posts.content} as post_content,
-${posts.createdAt} as post_created_at,
-count(${postComments.id}) as total_comments,
-${communities.id} as community_id,
-${communities.title} as community_title,
-${communities.url_title} as community_url_title,
-${users.id} as user_id,
-${users.name} as user_name,
-${users.avatarUrl} as user_avatar_url`
+import { FlatToNestedPostWithMeta } from "./mappers/post"
 
 export const communityService = {
   pageSize: 25,
   fuzzySearchCache: [] as CommunitySearchData[],
   maxFuzzySearchCacheSize: 100,
 
-  async getLatestPosts(userId?: string, _page = 0): Promise<PostWithCommunityMeta[] | void> {
+  async getLatestPosts(userId?: string, _page = 0): Promise<PostWithMeta[] | void> {
     try {
       const query = sql`
+        with top_posts as (
           select
-            ${latestPostColumns}
-          from ${posts}
-            inner join ${communities} on ${posts.communityId} = ${communities.id}
-            inner join ${users} on ${posts.ownerId} = ${users.id}
-            left join ${postComments} on ${postComments.postId} = ${posts.id}
-          where
-            ${posts.disabled} = false
+            ${posts.id} as post_id,
+            ${posts.title} as post_title,
+            ${posts.content} as post_content,
+            ${posts.createdAt} as post_created_at,
+            ${posts.ownerId} as post_owner_id,
+            ${posts.communityId} as post_community_id,
+            ${posts.deleted} as post_deleted,
+            ${posts.disabled} as post_disabled
+            from ${posts} 
+            where ${posts.disabled} = false
             and ${posts.deleted} = false
+            order by ${posts.createdAt} desc
+            limit ${this.pageSize} offset ${_page * this.pageSize}
+          ), post_owners as (
+            select
+              ${users.id} as user_id,
+              ${users.name} as user_name,
+              ${users.avatarUrl} as user_avatar_url
+            from ${users}
+            inner join top_posts on ${users.id} = top_posts.post_owner_id
+          ), post_reactions_positive as (
+            select
+              count(${postReactions.postId}) as positive_reactions,
+              ${postReactions.postId} as post_id
+            from ${postReactions}
+            inner join top_posts on ${postReactions.postId} = top_posts.post_id
+            where ${postReactions.reaction} = true
+            group by ${postReactions.postId}
+          ), post_reactions_negative as (
+            select
+              count(${postReactions.postId}) as negative_reactions,
+              ${postReactions.postId} as post_id
+            from ${postReactions}
+            inner join top_posts on ${postReactions.postId} = top_posts.post_id
+            where ${postReactions.reaction} = false
+            group by ${postReactions.postId}
+          ), user_reaction as (
+            select
+              ${postReactions.postId} as post_id,
+              ${postReactions.reaction} as reaction
+            from ${postReactions}
+            right join top_posts on ${postReactions.postId} = top_posts.post_id
+            and ${postReactions.ownerId} = ${userId ?? null}
+          ), total_comments as (
+            select 
+              count(${postComments.id}) as total_comments,
+              ${postComments.postId} as post_id
+            from ${postComments}
+            inner join top_posts on ${postComments.postId} = top_posts.post_id
+            group by ${postComments.postId}
+          ), media as (
+            select
+              ${postMultimedia.postId} as post_id,
+              ${postMultimedia.id} as media_id,
+              ${postMultimedia.url} as media_url
+            from ${postMultimedia}
+            inner join top_posts on ${postMultimedia.postId} = top_posts.post_id
+          ), post_communities as (
+            select
+              ${communities.id} as community_id,
+              ${communities.title} as community_title,
+              ${communities.url_title} as community_url_title
+            from ${communities}
+            inner join top_posts on ${communities.id} = top_posts.post_community_id
             and ${communities.disabled} = false
             and ${communities.deleted} = false
-            and ${communities.private} = false 
-          group by ${posts.id}, ${communities.id}, ${users.id}
+          )
+
+          select
+            top_posts.*,
+            post_owners.*,
+            post_reactions_positive.positive_reactions,
+            post_reactions_negative.negative_reactions,
+            user_reaction.reaction as user_reaction,
+            total_comments.total_comments,
+            media.media_id,
+            media.media_url,
+            post_communities.community_id,
+            post_communities.community_title,
+            post_communities.community_url_title
+          from top_posts
+          left join post_owners on top_posts.post_owner_id = post_owners.user_id
+          left join post_reactions_positive on top_posts.post_id = post_reactions_positive.post_id
+          left join post_reactions_negative on top_posts.post_id = post_reactions_negative.post_id
+          left join user_reaction on top_posts.post_id = user_reaction.post_id
+          left join total_comments on top_posts.post_id = total_comments.post_id
+          left join media on top_posts.post_id = media.post_id
+          left join post_communities on top_posts.post_community_id = post_communities.community_id 
         `
       if (userId) {
         query.append(sql` UNION
           select
-            ${latestPostColumns}
-          from ${posts}
-            inner join ${communities} on ${posts.communityId} = ${communities.id}
-            inner join ${users} on ${posts.ownerId} = ${users.id}
-            left join ${postComments} on ${postComments.postId} = ${posts.id}
-            inner join ${communityMembers} on 
-                  ${communityMembers.communityId} = ${communities.id}
+            top_posts.*,
+            post_owners.*,
+            post_reactions_positive.positive_reactions,
+            post_reactions_negative.negative_reactions,
+            user_reaction.reaction as user_reaction,
+            total_comments.total_comments,
+            media.media_id,
+            media.media_url,
+            post_communities.community_id,
+            post_communities.community_title,
+            post_communities.community_url_title 
+          from top_posts
+          left join post_owners on top_posts.post_owner_id = post_owners.user_id
+          left join post_reactions_positive on top_posts.post_id = post_reactions_positive.post_id
+          left join post_reactions_negative on top_posts.post_id = post_reactions_negative.post_id
+          left join user_reaction on top_posts.post_id = user_reaction.post_id
+          left join total_comments on top_posts.post_id = total_comments.post_id
+          left join media on top_posts.post_id = media.post_id
+          left join post_communities on top_posts.post_community_id = post_communities.community_id
+          inner join ${communityMembers} on
+                  ${communityMembers.communityId} = post_communities.community_id
               and ${communityMembers.userId} = ${userId}
               and ${communityMembers.disabled} = false
-          where
-            ${posts.disabled} = false
-            and ${posts.deleted} = false
-            and ${communities.disabled} = false
-            and ${communities.deleted} = false
-            and ${communities.private} = true 
-          group by ${posts.id}, ${communities.id}, ${users.id}`)
+
+        `)
       }
+
       query.append(
         sql` 
-        order by post_created_at desc
+        order by post_created_at desc, media_url desc
         limit ${this.pageSize} 
         offset ${_page * this.pageSize}`
       )
 
-      return (await db.execute(query)).map((item) => ({
-        post: {
-          id: item.post_id as string,
-          title: item.post_title as string,
-          content: item.post_content as string,
-          createdAt: item.post_created_at as string,
-          totalComments: item.total_comments as string,
-        },
-        community: {
-          id: item.community_id as string,
-          title: item.community_title as string,
-          url_title: item.community_url_title as string,
-        },
-        user: {
-          id: item.user_id as string,
-          name: item.user_name as string,
-          avatarUrl: item.user_avatar_url as string,
-        },
-      }))
+      const data = (await db.execute(query)) as FlatPostWithMeta[]
+      return FlatToNestedPostWithMeta(data)
     } catch (error) {
-      console.error(error)
+      console.error("GET_LATEST_POSTS", error)
       return
     }
   },
@@ -306,55 +364,7 @@ export const communityService = {
           order by top_posts.post_created_at desc, media.media_url asc
       `
       const data = (await db.execute(query)) as FlatPostWithMeta[]
-
-      return data.reduce((acc, item) => {
-        if (!item.post_id) return acc
-        let post = acc.find((p) => p.id === item.post_id)
-        if (!post) {
-          const user = data.find((u) => u.user_id === item.post_owner_id)
-          post = {
-            id: item.post_id,
-            title: item.post_title,
-            content: item.post_content,
-            createdAt: new Date(item.post_created_at),
-            ownerId: item.post_owner_id,
-            communityId: item.post_community_id,
-            deleted: item.post_deleted,
-            disabled: item.post_disabled,
-            user: {
-              id: user?.user_id ?? "",
-              name: user?.user_name ?? "",
-              avatarUrl: user?.user_avatar_url ?? "",
-            },
-            reactions: {
-              positive: item.positive_reactions,
-              negative: item.negative_reactions,
-            },
-            userReaction: null,
-            totalComments: item.total_comments?.toString(),
-            media: [],
-          } as PostWithMeta
-          if (typeof item.user_reaction !== "undefined" && item.user_reaction !== null) {
-            post.userReaction = item.user_reaction
-          }
-          if (item.media_id && item.media_url) {
-            post.media.push({
-              id: item.media_id,
-              url: item.media_url,
-            })
-          }
-          acc.push(post)
-          return acc
-        } else {
-          if (item.media_id && item.media_url && !post.media.find((m) => m.id === item.media_id)) {
-            post.media.push({
-              id: item.media_id,
-              url: item.media_url,
-            })
-          }
-        }
-        return acc
-      }, [] as PostWithMeta[])
+      return FlatToNestedPostWithMeta(data)
     } catch (error) {
       console.error(error)
       return

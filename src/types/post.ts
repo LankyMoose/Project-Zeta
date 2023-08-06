@@ -71,29 +71,14 @@ export type PostWithMeta = Post & {
   userReaction: boolean | null
   totalComments: string
   media: { id: string; url: string }[]
-}
-export type PostWithMetaWithComments = PostWithMeta & {
-  comments: PostCommentWithUser[]
-}
-
-export type PostWithCommunityMeta = {
-  post: {
-    id: string
-    title: string
-    content: string
-    createdAt: Date | string
-    totalComments: string
-  }
   community: {
     id: string
     title: string
     url_title: string | undefined
   }
-  user: {
-    id: string
-    name: string
-    avatarUrl: string | undefined | null
-  }
+}
+export type PostWithMetaWithComments = PostWithMeta & {
+  comments: PostCommentWithUser[]
 }
 
 export type FlatPostWithMeta = {
@@ -114,6 +99,9 @@ export type FlatPostWithMeta = {
   total_comments: number
   media_id: string
   media_url: string
+  community_id: string
+  community_title: string
+  community_url_title: string
 }
 
 export type PollWithOptions = Poll & {

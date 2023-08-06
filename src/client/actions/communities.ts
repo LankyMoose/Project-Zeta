@@ -10,7 +10,7 @@ import {
   JoinResult,
   LeaveResult,
 } from "../../types/community"
-import { PostWithMeta, PostWithCommunityMeta } from "../../types/post"
+import { PostWithMeta } from "../../types/post"
 
 export const getCommunitySearch = async (title: string): Promise<CommunitySearchData | void> => {
   try {
@@ -64,9 +64,7 @@ export const getCommunityPosts = async (url_title: string): Promise<PostWithMeta
   }
 }
 
-export const getLatestPostsCommunities = async (
-  page = 0
-): Promise<PostWithCommunityMeta[] | void> => {
+export const getLatestPostsCommunities = async (page = 0): Promise<PostWithMeta[] | void> => {
   try {
     const response = await fetch(`${API_URL}/communities/latest?page=${page}`)
     const data = await response.json()
