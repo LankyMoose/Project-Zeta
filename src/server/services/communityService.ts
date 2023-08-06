@@ -104,7 +104,8 @@ export const communityService = {
             select
               ${communities.id} as community_id,
               ${communities.title} as community_title,
-              ${communities.url_title} as community_url_title
+              ${communities.url_title} as community_url_title,
+              ${communities.private} as community_private
             from ${communities}
             inner join top_posts on ${communities.id} = top_posts.post_community_id
             and ${communities.disabled} = false
@@ -130,7 +131,8 @@ export const communityService = {
           left join user_reaction on top_posts.post_id = user_reaction.post_id
           left join total_comments on top_posts.post_id = total_comments.post_id
           left join media on top_posts.post_id = media.post_id
-          left join post_communities on top_posts.post_community_id = post_communities.community_id 
+          inner join post_communities on top_posts.post_community_id = post_communities.community_id  
+          and post_communities.community_private = false
         `
       if (userId) {
         query.append(sql` UNION
@@ -153,7 +155,7 @@ export const communityService = {
           left join user_reaction on top_posts.post_id = user_reaction.post_id
           left join total_comments on top_posts.post_id = total_comments.post_id
           left join media on top_posts.post_id = media.post_id
-          left join post_communities on top_posts.post_community_id = post_communities.community_id
+          inner join post_communities on top_posts.post_community_id = post_communities.community_id
           inner join ${communityMembers} on
                   ${communityMembers.communityId} = post_communities.community_id
               and ${communityMembers.userId} = ${userId}
