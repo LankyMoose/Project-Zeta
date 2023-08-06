@@ -166,7 +166,7 @@ export const communityService = {
 
       query.append(
         sql` 
-        order by post_created_at desc, media_url desc
+        order by post_created_at desc, media_url asc
         limit ${this.pageSize} 
         offset ${_page * this.pageSize}`
       )
