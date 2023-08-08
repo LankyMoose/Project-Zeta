@@ -56,13 +56,6 @@ export const communityService = {
             and ${posts.deleted} = false
             order by ${posts.createdAt} desc
             limit ${this.pageSize} offset ${_page * this.pageSize}
-          ), post_owners as (
-            select
-              ${users.id} as user_id,
-              ${users.name} as user_name,
-              ${users.avatarUrl} as user_avatar_url
-            from ${users}
-            inner join top_posts on ${users.id} = top_posts.post_owner_id
           ), post_reactions_positive as (
             select
               count(${postReactions.postId}) as positive_reactions,
@@ -114,7 +107,9 @@ export const communityService = {
 
           select
             top_posts.*,
-            post_owners.*,
+            ${users.id} as user_id,
+            ${users.name} as user_name,
+            ${users.avatarUrl} as user_avatar_url,
             post_reactions_positive.positive_reactions,
             post_reactions_negative.negative_reactions,
             user_reaction.reaction as user_reaction,
@@ -125,7 +120,7 @@ export const communityService = {
             post_communities.community_title,
             post_communities.community_url_title
           from top_posts
-          left join post_owners on top_posts.post_owner_id = post_owners.user_id
+          left join ${users} on top_posts.post_owner_id = ${users.id}
           left join post_reactions_positive on top_posts.post_id = post_reactions_positive.post_id
           left join post_reactions_negative on top_posts.post_id = post_reactions_negative.post_id
           left join user_reaction on top_posts.post_id = user_reaction.post_id
@@ -138,7 +133,9 @@ export const communityService = {
         query.append(sql` UNION
           select
             top_posts.*,
-            post_owners.*,
+            ${users.id} as user_id,
+            ${users.name} as user_name,
+            ${users.avatarUrl} as user_avatar_url,
             post_reactions_positive.positive_reactions,
             post_reactions_negative.negative_reactions,
             user_reaction.reaction as user_reaction,
@@ -149,7 +146,7 @@ export const communityService = {
             post_communities.community_title,
             post_communities.community_url_title 
           from top_posts
-          left join post_owners on top_posts.post_owner_id = post_owners.user_id
+          left join ${users} on top_posts.post_owner_id = ${users.id}
           left join post_reactions_positive on top_posts.post_id = post_reactions_positive.post_id
           left join post_reactions_negative on top_posts.post_id = post_reactions_negative.post_id
           left join user_reaction on top_posts.post_id = user_reaction.post_id
