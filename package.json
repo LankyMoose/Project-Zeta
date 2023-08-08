@@ -27,7 +27,7 @@
     "cinnabun": "^0.1.58",
     "cinnabun-transitions": "^1.0.6",
     "dotenv": "^16.3.1",
-    "drizzle-orm": "^0.26.5",
+    "drizzle-orm": "^0.28.1",
     "esbuild": "^0.17.19",
     "fastify": "^4.20.0",
     "glob": "^10.3.3",
@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.16.19",
-    "drizzle-kit": "^0.18.1"
+    "drizzle-kit": "^0.19.12"
   },
   "engines": {
     "node": "18.16.0"
