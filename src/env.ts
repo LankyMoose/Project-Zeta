@@ -6,13 +6,17 @@ type ValidatedObj<T> = {
 }
 
 // recursively ensure that all keys in the object are defined
-function validate<T>(obj: T) {
+function validate<T>(obj: T, path: string = "", errors: string[] = []) {
   for (const key in obj) {
+    const keyPath = (path.length > 0 ? path + "." : "") + key
     if (typeof obj[key] === "object") {
-      validate(obj[key])
+      validate(obj[key], keyPath, errors)
     } else if (obj[key] === undefined) {
-      throw new Error(`Missing environment variable: ${key}`)
+      errors.push(keyPath)
     }
+  }
+  if (errors.length > 0) {
+    throw new Error(`Missing env variables: ${errors.join(", ")}`)
   }
   return obj as ValidatedObj<T>
 }
