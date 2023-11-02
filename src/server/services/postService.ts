@@ -401,13 +401,15 @@ export const postService = {
     try {
       await db.delete(postMultimedia).where(eq(postMultimedia.postId, postId))
 
-      return await db
-        .insert(postMultimedia)
-        .values(urls.map((url) => ({ postId, url })))
-        .onConflictDoNothing()
-        .returning({
-          url: postMultimedia.url,
-        })
+      return (
+        await db
+          .insert(postMultimedia)
+          .values(urls.map((url) => ({ postId, url })))
+          .onConflictDoNothing()
+          .returning({
+            url: postMultimedia.url,
+          })
+      ).map(({ url }) => url)
     } catch (error) {
       console.error(error)
       return

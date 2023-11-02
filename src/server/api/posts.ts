@@ -4,11 +4,13 @@ import { postValidation } from "../../db/validation"
 import { InvalidRequestError, NotFoundError, ServerError, UnauthorizedError } from "../../errors"
 import {
   ensureCommunityMemberIfPrivate,
+  ensureCommunityModerator,
   getActiveMemberOrDie,
+  getOrDie,
   getUserIdOrDie,
   getUserOrDie,
+  uuidOrDie,
 } from "./util"
-import { isUuid } from "../../utils"
 import { NewPostDTO, NewPostResponse } from "../../types/post"
 import { Poll } from "../../db/schema/polls"
 
@@ -20,13 +22,14 @@ export function configurePostsRoutes(app: FastifyInstance) {
 
     await getActiveMemberOrDie(req, communityId)
 
-    const post = await postService.createPost({
-      title,
-      content,
-      communityId,
-      ownerId: userId,
-    })
-    if (!post) throw new ServerError()
+    const post = await getOrDie(
+      postService.createPost({
+        title,
+        content,
+        communityId,
+        ownerId: userId,
+      })
+    )
 
     let urls: string[] = []
     if (req.body.numMedia) {
@@ -42,8 +45,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
     let poll: Poll | undefined
 
     if (req.body.poll) {
-      poll = await postService.createPostPoll(post.id, req.body.poll)
-      if (!poll) throw new ServerError()
+      poll = await getOrDie(postService.createPostPoll(post.id, req.body.poll))
     }
 
     return {
@@ -57,30 +59,27 @@ export function configurePostsRoutes(app: FastifyInstance) {
     "/api/posts/:postId/media",
     async (req) => {
       const userId = getUserIdOrDie(req)
-      const post = await postService.getPost(req.params.postId)
-      if (!post) throw new NotFoundError()
-      if (post.ownerId !== userId) {
-        throw new UnauthorizedError()
-      }
+      const postId = uuidOrDie(req.params.postId)
 
-      await postService.deletePostMedia(req.params.postId)
+      const post = await getOrDie(postService.getPost(postId), NotFoundError)
+      if (post.ownerId !== userId) throw new UnauthorizedError()
 
-      const res = await postService.updatePostMedia(req.params.postId, req.body.urls)
-      if (!res) throw new ServerError()
+      await postService.deletePostMedia(postId)
+
+      const res = await getOrDie(postService.updatePostMedia(postId, req.body.urls))
       return {
-        urls: res.map(({ url }) => url),
+        urls: res,
       }
     }
   )
 
   app.get<{ Params: { postId: string } }>("/api/posts/:postId", async (req) => {
-    if (!req.params.postId || !isUuid(req.params.postId)) throw new InvalidRequestError()
+    const postId = uuidOrDie(req.params.postId)
 
     const [postData, comments] = await Promise.all([
-      postService.getPostWithMetadata(req.params.postId, req.cookies.user_id),
-      postService.getPostComments(req.params.postId, 0),
+      getOrDie(postService.getPostWithMetadata(postId, req.cookies.user_id), NotFoundError),
+      getOrDie(postService.getPostComments(postId, 0), NotFoundError),
     ])
-    if (!postData || !comments) throw new NotFoundError()
 
     await ensureCommunityMemberIfPrivate(req, postData.communityId)
 
@@ -94,14 +93,15 @@ export function configurePostsRoutes(app: FastifyInstance) {
     Params: { postId: string }
     Body: { title?: string; content?: string; deleted?: boolean; disabled?: boolean }
   }>("/api/posts/:postId", async (req) => {
-    if (!req.params.postId || !isUuid(req.params.postId)) throw new InvalidRequestError()
+    const postId = uuidOrDie(req.params.postId)
     const userId = getUserIdOrDie(req)
 
-    const post = await postService.getPost(req.params.postId)
-    if (!post) throw new NotFoundError()
+    const post = await getOrDie(postService.getPost(postId), NotFoundError)
+
     if (post.ownerId !== userId) {
       const member = await getActiveMemberOrDie(req, post.communityId)
-      if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
+      ensureCommunityModerator(member)
+      // if we're not the community owner or a moderator, we can't overwrite the title or content
       delete req.body.title
       delete req.body.content
     }
@@ -117,43 +117,35 @@ export function configurePostsRoutes(app: FastifyInstance) {
 
     await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-    const res = await postService.updatePost(req.params.postId, post)
-    if (!res) throw new ServerError()
-    return res
+    return getOrDie(postService.updatePost(postId, post))
   })
 
   app.get<{ Params: { postId: string }; Querystring: { offset: string } }>(
     "/api/posts/:postId/comments",
     async (req) => {
+      const postId = uuidOrDie(req.params.postId)
       const offset = parseInt(req.query.offset)
-      if (!req.params.postId || !isUuid(req.params.postId)) throw new InvalidRequestError()
-
       if (isNaN(offset)) throw new InvalidRequestError()
 
-      const post = await postService.getPost(req.params.postId)
-      if (!post) throw new NotFoundError()
+      const post = await getOrDie(postService.getPost(postId), NotFoundError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      const res = await postService.getPostComments(req.params.postId, offset)
-      if (!res) throw new ServerError()
-      return res
+      return getOrDie(postService.getPostComments(postId, offset))
     }
   )
 
   app.post<{ Params: { postId: string }; Body: { comment: string } }>(
     "/api/posts/:postId/comments",
     async (req) => {
+      const postId = uuidOrDie(req.params.postId)
       const user = getUserOrDie(req)
 
-      const post = await postService.getPost(req.params.postId)
-      if (!post) throw new NotFoundError()
+      const post = await getOrDie(postService.getPost(postId), NotFoundError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      const res = await postService.addPostComment(req.params.postId, user, req.body.comment)
-      if (!res) throw new ServerError()
-      return res
+      return getOrDie(postService.addPostComment(postId, user, req.body.comment))
     }
   )
 
@@ -161,60 +153,53 @@ export function configurePostsRoutes(app: FastifyInstance) {
     Params: { postId: string; commentId: string }
     Body: { comment?: string; deleted?: boolean }
   }>("/api/posts/:postId/comments/:commentId", async (req) => {
+    const postId = uuidOrDie(req.params.postId)
+    const commentId = uuidOrDie(req.params.commentId)
     const userId = getUserIdOrDie(req)
 
-    const post = await postService.getPost(req.params.postId)
-    if (!post) throw new NotFoundError()
+    const post = await getOrDie(postService.getPost(postId), NotFoundError)
+
     if (post.ownerId !== userId) {
       const member = await getActiveMemberOrDie(req, post.communityId)
-      if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
+      ensureCommunityModerator(member)
     }
 
     const { comment, deleted } = req.body
 
-    const res = await postService.updatePostComment(req.params.commentId, {
-      content: comment,
-      deleted,
-    })
-    if (!res) throw new ServerError()
-    return res
+    return getOrDie(
+      postService.updatePostComment(commentId, {
+        content: comment,
+        deleted,
+      })
+    )
   })
 
   app.post<{ Params: { postId: string; commentId: string }; Body: { reaction: boolean } }>(
     "/api/posts/:postId/comments/:commentId/reactions",
     async (req) => {
+      const postId = uuidOrDie(req.params.postId)
+      const commentId = uuidOrDie(req.params.commentId)
       const userId = getUserIdOrDie(req)
 
-      if (!req.params.commentId || !isUuid(req.params.commentId)) throw new InvalidRequestError()
-
-      const post = await postService.getPost(req.params.postId)
-      if (!post) throw new NotFoundError()
+      const post = await getOrDie(postService.getPost(postId), NotFoundError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      const res = await postService.addPostCommentReaction(
-        req.params.commentId,
-        userId,
-        req.body.reaction
-      )
-      if (!res) throw new ServerError()
-      return res
+      return getOrDie(postService.addPostCommentReaction(commentId, userId, req.body.reaction))
     }
   )
 
   app.post<{ Params: { postId: string }; Body: { reaction: boolean } }>(
     "/api/posts/:postId/reactions",
     async (req) => {
+      const postId = uuidOrDie(req.params.postId)
       const userId = getUserIdOrDie(req)
 
-      const post = await postService.getPost(req.params.postId)
-      if (!post) throw new InvalidRequestError()
+      const post = await getOrDie(postService.getPost(postId), InvalidRequestError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      const res = await postService.addPostReaction(req.params.postId, userId, req.body.reaction)
-      if (!res) throw new ServerError()
-      return res
+      return getOrDie(postService.addPostReaction(postId, userId, req.body.reaction))
     }
   )
 }

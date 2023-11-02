@@ -652,14 +652,14 @@ export const communityService = {
         .execute()
     } catch (error) {
       console.error(error)
-      return
+      return []
     }
   },
 
   async createCommunity(
     community: Omit<NewCommunity, "url_title">,
     userId: string
-  ): Promise<{ id: string } | ApiError | undefined> {
+  ): Promise<{ id: string } | ApiError> {
     try {
       const newCommunity = (
         await db.insert(communities).values(community).onConflictDoNothing().returning()
@@ -677,7 +677,7 @@ export const communityService = {
           .returning()
       ).at(0)
 
-      if (!ownerMember) return new ServerError("Failed to create community owner")
+      if (!ownerMember) throw "Failed to create community owner"
 
       if (newCommunity.nsfw) {
         await this.createNsfwAgreement(newCommunity.id, userId)
@@ -688,7 +688,7 @@ export const communityService = {
       }
     } catch (error) {
       console.error(error)
-      return
+      return new ServerError("Failed to create community")
     }
   },
 
@@ -701,8 +701,6 @@ export const communityService = {
           .where(and(eq(communities.id, communityId)))
           .returning()
       ).at(0)
-
-      if (!updatedCommunity) return new ServerError("Failed to update community")
 
       return updatedCommunity
     } catch (error) {
@@ -720,8 +718,7 @@ export const communityService = {
         .returning()
         .execute()
 
-      if (res.length === 0) return new ServerError()
-      return true
+      return res.length > 0
     } catch (error) {
       console.error(error)
       return

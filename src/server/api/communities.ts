@@ -4,204 +4,193 @@ import { NewCommunity } from "../../db/schema"
 import { communityValidation } from "../../db/validation"
 import {
   ApiError,
-  DisabledError,
   InvalidRequestError,
   NotAuthenticatedError,
   NotFoundError,
-  ServerError,
   UnauthorizedError,
 } from "../../errors"
 import { JoinResultType } from "../../types/community"
 import {
   ensureCommunityMemberNsfwAgreementOrDie,
+  ensureCommunityModerator,
   getActiveMemberOrDie,
+  getOrDie,
   getUserIdOrDie,
+  uuidOrDie,
+  valueOrDie,
 } from "./util"
-import { isUuid } from "../../utils"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
-  app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) => {
-    const res = await communityService.getPage(req.query.page)
-    if (!res) throw new ServerError()
-    return res
-  })
+  app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) =>
+    getOrDie(communityService.getPage(req.query.page))
+  )
 
-  app.get<{ Querystring: { title?: string } }>("/api/communities/search", async (req) => {
-    if (!req.query.title) throw new InvalidRequestError()
-    const res = await communityService.fuzzySearchCommunity(req.query.title)
-    if (!res) throw new ServerError()
-    return res
-  })
+  app.get<{ Querystring: { title: string } }>("/api/communities/search", async (req) =>
+    getOrDie(communityService.fuzzySearchCommunity(valueOrDie(req.query.title)))
+  )
 
-  app.get<{ Querystring: { page?: number } }>("/api/communities/latest", async (req) => {
-    const res = await communityService.getLatestPosts(req.cookies.user_id, req.query.page)
-    if (!res) throw new ServerError()
-    return res
-  })
+  app.get<{ Querystring: { page?: number } }>("/api/communities/latest", async (req) =>
+    getOrDie(communityService.getLatestPosts(req.cookies.user_id, req.query.page))
+  )
 
-  app.get<{ Params: { url_title?: string } }>("/api/communities/:url_title", async (req) => {
-    if (!req.params.url_title) throw new InvalidRequestError()
-    const res = await communityService.getCommunityWithMembers(req.params.url_title)
-    if (!res) throw new NotFoundError()
-    let member
-    if (req.cookies.user_id) {
-      member = await communityService.getCommunityMember(res.id, req.cookies.user_id)
-    }
+  app.get<{ Params: { url_title: string } }>("/api/communities/:url_title", async (req) => {
+    const url_title = valueOrDie(req.params.url_title)
+    const res = await getOrDie(communityService.getCommunityWithMembers(url_title), NotFoundError)
+
+    const member = req.cookies.user_id ? await getActiveMemberOrDie(req, res.id) : null
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
-    if (!req.cookies.user_id) throw new NotAuthenticatedError()
-    if (!member) throw new UnauthorizedError()
-    if (member.disabled) throw new DisabledError()
+    if (!member) throw new NotAuthenticatedError()
 
     if (res.nsfw) await ensureCommunityMemberNsfwAgreementOrDie(member.userId, res.id)
 
     return { ...res, memberType: member.memberType }
   })
 
-  app.get<{ Params: { url_title?: string } }>("/api/communities/:url_title/posts", async (req) => {
-    if (!req.params.url_title) throw new InvalidRequestError()
+  app.get<{ Params: { url_title: string } }>("/api/communities/:url_title/posts", async (req) => {
+    const community = await getOrDie(
+      communityService.getCommunity(valueOrDie(req.params.url_title)),
+      NotFoundError
+    )
 
-    const community = await communityService.getCommunity(req.params.url_title)
-    if (!community) throw new NotFoundError()
     if (community.private) {
       const member = await getActiveMemberOrDie(req, community.id)
       if (community.nsfw) await ensureCommunityMemberNsfwAgreementOrDie(member.userId, community.id)
     }
 
-    const res = await communityService.getCommunityPosts(community.id, req.cookies.user_id)
-    if (!res) throw new ServerError()
-    return res
+    return getOrDie(communityService.getCommunityPosts(community.id, req.cookies.user_id))
   })
 
-  app.get<{ Params: { id?: string } }>("/api/communities/:id/join-requests", async (req) => {
-    if (!req.params.id) throw new InvalidRequestError()
-
-    const member = await getActiveMemberOrDie(req, req.params.id)
-    if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
-
-    const res = await communityService.getJoinRequests(req.params.id)
-    if (!res) throw new ServerError()
-    return res
-  })
-
-  app.post<{ Params: { id?: string }; Body: { requestId: string; accepted: boolean } }>(
-    "/api/communities/:id/join-requests",
+  app.get<{ Params: { communityId: string } }>(
+    "/api/communities/:communityId/join-requests",
     async (req) => {
-      if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
+      const communityId = uuidOrDie(req.params.communityId)
+      const member = await getActiveMemberOrDie(req, communityId)
 
-      const member = await getActiveMemberOrDie(req, req.params.id)
-      if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
+      ensureCommunityModerator(member)
 
-      const res = await communityService.respondToJoinRequest(req.body.requestId, req.body.accepted)
-      if (!res) throw new ServerError()
+      return getOrDie(communityService.getJoinRequests(communityId))
+    }
+  )
+
+  app.post<{ Params: { communityId?: string }; Body: { requestId: string; accepted: boolean } }>(
+    "/api/communities/:communityId/join-requests",
+    async (req) => {
+      const communityId = uuidOrDie(req.params.communityId)
+      const member = await getActiveMemberOrDie(req, communityId)
+      ensureCommunityModerator(member)
+
+      const res = await getOrDie(
+        communityService.respondToJoinRequest(req.body.requestId, req.body.accepted)
+      )
       if (res instanceof ApiError) throw res
 
-      return await communityService.getCommunityMemberData(req.params.id, res.userId)
+      return communityService.getCommunityMemberData(communityId, res.userId)
     }
   )
 
   app.patch<{
-    Params: { id?: string }
+    Params: { communityId: string }
     Body: { userId: string; memberType: "owner" | "moderator" | "member" | "none" }
-  }>("/api/communities/:id/members", async (req) => {
-    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
+  }>("/api/communities/:communityId/members", async (req) => {
+    const targetUserId = uuidOrDie(req.body.userId)
+    const targetNewType = valueOrDie(req.body.memberType)
+    if (["owner", "moderator", "member", "none"].indexOf(targetNewType) === -1)
+      throw new InvalidRequestError()
 
-    const member = await getActiveMemberOrDie(req, req.params.id)
-    if (["owner", "moderator"].indexOf(member.memberType) === -1) throw new UnauthorizedError()
+    const communityId = uuidOrDie(req.params.communityId)
+    const member = await getActiveMemberOrDie(req, communityId)
+    ensureCommunityModerator(member)
 
-    const targetMember = await communityService.getCommunityMember(req.params.id, req.body.userId)
-    if (!targetMember) throw new NotFoundError()
+    const targetMember = await getOrDie(
+      communityService.getCommunityMember(communityId, targetUserId),
+      NotFoundError
+    )
 
-    if (req.body.memberType === targetMember.memberType)
-      return communityService.getCommunityMemberData(req.params.id, req.body.userId)
+    if (targetNewType === targetMember.memberType)
+      return communityService.getCommunityMemberData(communityId, targetUserId)
 
-    // ensure mods can only remove members
     if (member.memberType === "moderator") {
-      if (req.body.memberType !== "none") throw new UnauthorizedError()
+      // ensure mods can only affect members
       if (targetMember.memberType !== "member") throw new UnauthorizedError()
+      // ensure mods can only demote members to none
+      if (targetNewType !== "none") throw new UnauthorizedError()
     }
 
-    if (req.body.memberType === "none") {
+    if (targetNewType === "none") {
       // delete member record for target member
-      const res = await communityService.leaveCommunity(req.params.id, req.body.userId)
-      if (!res) throw new ServerError("Failed to leave community")
+      await getOrDie(
+        communityService.leaveCommunity(communityId, targetUserId),
+        "Failed to leave community"
+      )
       return { type: "removed" }
-    } else if (req.body.memberType === "owner") {
-      const res = await communityService.updateCommunityMemberType(
-        req.params.id,
-        req.body.userId,
-        req.body.memberType
-      )
-      if (!res) throw new ServerError("Failed to update member type")
-      const res2 = await communityService.updateCommunityMemberType(
-        req.params.id,
-        member.userId,
-        "moderator"
-      )
-      if (!res2) throw new ServerError("Failed to update member type")
+    } else if (targetNewType === "owner") {
+      // giving owner status to another user, relegating current owner to moderator
+      await Promise.all([
+        getOrDie(
+          communityService.updateCommunityMemberType(communityId, targetUserId, "owner"),
+          "Failed to update member type"
+        ),
+        getOrDie(
+          communityService.updateCommunityMemberType(communityId, member.userId, "moderator"),
+          "Failed to update member type"
+        ),
+      ])
 
-      const newOwner = await communityService.getCommunityMemberData(req.params.id, req.body.userId)
-      if (!newOwner) throw new ServerError("Failed to update member type")
-      const newMod = await communityService.getCommunityMemberData(req.params.id, member.userId)
-      if (!newMod) throw new ServerError("Failed to update member type")
+      const [newOwner, newMod] = await Promise.all([
+        getOrDie(communityService.getCommunityMemberData(communityId, targetUserId)),
+        getOrDie(communityService.getCommunityMemberData(communityId, member.userId)),
+      ])
 
       return {
         owner: newOwner,
         moderator: newMod,
       }
     } else {
-      const res = await communityService.updateCommunityMemberType(
-        req.params.id,
-        req.body.userId,
-        req.body.memberType
+      await getOrDie(
+        communityService.updateCommunityMemberType(communityId, targetUserId, targetNewType)
       )
-      if (!res) throw new ServerError("Failed to update member type")
-      return communityService.getCommunityMemberData(req.params.id, req.body.userId)
+      return communityService.getCommunityMemberData(communityId, targetUserId)
     }
   })
 
-  app.post<{ Params: { url_title?: string } }>(
+  app.post<{ Params: { url_title: string } }>(
     "/api/communities/:url_title/nsfw-agreement",
     async (req) => {
-      if (!req.params.url_title) throw new InvalidRequestError()
+      const url_title = valueOrDie(req.params.url_title)
       const userId = getUserIdOrDie(req)
+      const community = await getOrDie(communityService.getCommunity(url_title), NotFoundError)
 
-      const community = await communityService.getCommunity(req.params.url_title)
-      if (!community) throw new NotFoundError()
-
-      const res = await communityService.createNsfwAgreement(community.id, userId)
-      if (!res) throw new ServerError("Failed to agree to community nsfw")
-      return res
+      return getOrDie(communityService.createNsfwAgreement(community.id, userId))
     }
   )
 
   app.post<{ Params: { url_title?: string } }>("/api/communities/:url_title/join", async (req) => {
-    if (!req.params.url_title) throw new InvalidRequestError()
+    const url_title = valueOrDie(req.params.url_title)
     const userId = getUserIdOrDie(req)
 
-    const community = await communityService.getCommunity(req.params.url_title)
-    if (!community) throw new NotFoundError()
+    const community = await getOrDie(communityService.getCommunity(url_title), NotFoundError)
 
     const member = await communityService.getCommunityMember(community.id, userId)
     if (member)
       return { type: member.disabled ? JoinResultType.Banned : JoinResultType.AlreadyJoined }
 
-    const res = community.private
-      ? await communityService.submitJoinRequest(community.id, userId)
-      : await communityService.joinCommunity(community.id, userId)
-
-    if (!res) throw new ServerError("Failed to join community")
-    return res
+    return getOrDie(
+      community.private
+        ? communityService.submitJoinRequest(community.id, userId)
+        : communityService.joinCommunity(community.id, userId)
+    )
   })
 
-  app.post<{ Params: { id?: string } }>("/api/communities/:id/leave", async (req) => {
-    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
-    const userId = getUserIdOrDie(req)
+  app.post<{ Params: { communityId: string } }>(
+    "/api/communities/:communityId/leave",
+    async (req) => {
+      const communityId = uuidOrDie(req.params.communityId)
+      const userId = getUserIdOrDie(req)
 
-    const res = await communityService.leaveCommunity(req.params.id, userId)
-    if (!res) throw new ServerError("Failed to leave community")
-    return res
-  })
+      return getOrDie(communityService.leaveCommunity(communityId, userId))
+    }
+  )
 
   app.post<{ Body: NewCommunity }>("/api/communities", async (req) => {
     const userId = getUserIdOrDie(req)
@@ -211,55 +200,56 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!communityValidation.isCommunityValid(req.body)) throw new InvalidRequestError()
     if (req.body.url_title) delete req.body.url_title
 
-    const res = await communityService.createCommunity(
-      {
-        title,
-        description,
-        private: _private,
-        nsfw,
-      },
-      userId
-    )
-    if (res instanceof ApiError) throw res
-    if (!res) throw new ServerError("Failed to create community")
-    return res
-  })
-
-  app.patch<{ Body: Partial<NewCommunity>; Params: { id?: string } }>(
-    "/api/communities/:id",
-    async (req) => {
-      if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
-      if (req.body.url_title) delete req.body.url_title
-      const { title, description, private: _private, nsfw } = req.body
-      if (!communityValidation.isCommunityValid(req.body)) throw new InvalidRequestError()
-
-      const member = await getActiveMemberOrDie(req, req.params.id)
-      if (member.memberType !== "owner") throw new UnauthorizedError()
-
-      const res = await communityService.updateCommunity(
+    const res = await getOrDie(
+      communityService.createCommunity(
         {
           title,
           description,
           private: _private,
           nsfw,
         },
-        req.params.id
+        userId
+      )
+    )
+    if (res instanceof ApiError) throw res
+    return res
+  })
+
+  app.patch<{ Body: Partial<NewCommunity>; Params: { communityId?: string } }>(
+    "/api/communities/:communityId",
+    async (req) => {
+      const communityId = uuidOrDie(req.params.communityId)
+
+      if (req.body.url_title) delete req.body.url_title
+      const { title, description, private: _private, nsfw } = req.body
+      if (!communityValidation.isCommunityValid(req.body)) throw new InvalidRequestError()
+
+      const member = await getActiveMemberOrDie(req, communityId)
+      if (member.memberType !== "owner") throw new UnauthorizedError()
+
+      const res = await getOrDie(
+        communityService.updateCommunity(
+          {
+            title,
+            description,
+            private: _private,
+            nsfw,
+          },
+          communityId
+        )
       )
       if (res instanceof ApiError) throw res
-      if (!res) throw new ServerError("Failed to update community")
       if (res.nsfw) await communityService.createNsfwAgreement(res.id, member.userId)
 
       return res
     }
   )
-  app.delete<{ Params: { id?: string } }>("/api/communities/:id", async (req) => {
-    if (!req.params.id || !isUuid(req.params.id)) throw new InvalidRequestError()
+  app.delete<{ Params: { communityId?: string } }>("/api/communities/:communityId", async (req) => {
+    const communityId = uuidOrDie(req.params.communityId)
 
-    const member = await getActiveMemberOrDie(req, req.params.id)
+    const member = await getActiveMemberOrDie(req, communityId)
     if (member.memberType !== "owner") throw new UnauthorizedError()
 
-    const res = await communityService.deleteCommunity(req.params.id)
-    if (!res) throw new ServerError("Failed to delete community")
-    return res
+    return getOrDie(communityService.deleteCommunity(communityId))
   })
 }
