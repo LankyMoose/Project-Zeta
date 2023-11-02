@@ -5,6 +5,11 @@ import { AuthModalCallbackState } from "../../types/auth"
 const isClient = Cinnabun.isClient
 
 export const pathStore = createSignal(isClient ? window.location.pathname : "/")
+if (isClient) {
+  window.addEventListener("popstate", (e) => {
+    pathStore.value = (e.target as Window)?.location.pathname ?? "/"
+  })
+}
 
 const decodeCookie = (str: string) =>
   str
