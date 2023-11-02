@@ -4,16 +4,18 @@ import { getUsers } from "../../client/actions/users"
 import { User } from "../../db/schema"
 import { UserList } from "../components/users/UserList"
 import { SkeletonList } from "../components/loaders/SkeletonList"
+import { PageTitle } from "../components/PageTitle"
+import { PageBody } from "../components/PageBody"
 
 export default function Users() {
   title.value = "Users | Project Zeta"
 
   return (
     <>
-      <div className="page-title flex align-items-center justify-content-between gap flex-wrap">
+      <PageTitle>
         <h1>Users</h1>
-      </div>
-      <div className="page-body">
+      </PageTitle>
+      <PageBody>
         <Cinnabun.Suspense promise={getUsers} cache>
           {(loading: boolean, users: User[] | undefined) => {
             if (loading) return <SkeletonList numberOfItems={3} className="card-list" />
@@ -33,7 +35,7 @@ export default function Users() {
             return <UserList users={users} />
           }}
         </Cinnabun.Suspense>
-      </div>
+      </PageBody>
     </>
   )
 }

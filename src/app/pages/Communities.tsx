@@ -7,6 +7,8 @@ import { communityCreatorModalOpen } from "../state/community"
 import { CommunityListData } from "../../types/community"
 import { title } from "../Document"
 import { SkeletonList } from "../components/loaders/SkeletonList"
+import { PageTitle } from "../components/PageTitle"
+import { PageBody } from "../components/PageBody"
 
 export default function Communities({ query }: { query: { newcommunity?: string } }) {
   title.value = "Communities | Project Zeta"
@@ -34,10 +36,7 @@ export default function Communities({ query }: { query: { newcommunity?: string 
 
   return (
     <>
-      <div
-        onMounted={onMounted}
-        className="page-title flex align-items-center justify-content-between gap flex-wrap"
-      >
+      <PageTitle onMounted={onMounted}>
         <h1>Communities</h1>
         <Button
           className="btn btn-primary hover-animate sm_btn-sm md_btn-md lg_btn-lg"
@@ -45,8 +44,8 @@ export default function Communities({ query }: { query: { newcommunity?: string 
         >
           Create a Community
         </Button>
-      </div>
-      <div className="page-body">
+      </PageTitle>
+      <PageBody>
         <Cinnabun.Suspense promise={getCommunities} cache>
           {(loading: boolean, res: CommunityListData[] | undefined) => {
             if (loading) return <SkeletonList numberOfItems={3} className="card-list" />
@@ -68,7 +67,7 @@ export default function Communities({ query }: { query: { newcommunity?: string 
             return <CommunityList communities={res} />
           }}
         </Cinnabun.Suspense>
-      </div>
+      </PageBody>
     </>
   )
 }
