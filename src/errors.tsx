@@ -2,7 +2,7 @@ import { FastifyError, ValidationResult } from "fastify"
 import { SchemaErrorDataVar } from "fastify/types/schema"
 import { API_ERROR } from "./constants"
 
-export class ApiError extends Error implements FastifyError {
+export abstract class ApiError extends Error implements FastifyError {
   code: string
   name: string
   statusCode?: number | undefined

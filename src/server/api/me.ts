@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify"
 import { communityService } from "../services/communityService"
-import { resolveOrDie, getUserIdOrDie, valueOrDie } from "./util"
+import { resolve, getUserIdOrDie, resolveSync } from "./util"
 import { InvalidRequestError } from "../../errors"
 import { userService } from "../services/userService"
 import { userValidation } from "../../db/validation"
@@ -24,16 +24,16 @@ export function configureMeRoutes(app: FastifyInstance) {
 
   app.get("/api/me/update-dp", async (req) => {
     const userId = getUserIdOrDie(req)
-    const url = await resolveOrDie(userService.getUserDisplayPictureUpdateUrl(userId))
+    const url = await resolve(userService.getUserDisplayPictureUpdateUrl(userId))
     return { url }
   })
 
   app.get<{ Querystring: { url?: string } }>("/api/me/update-dp/confirm", async (req, reply) => {
     const userId = getUserIdOrDie(req)
-    const res = await resolveOrDie(
+    const res = await resolve(
       userService.upsert({
         id: userId,
-        avatarUrl: valueOrDie(req.query.url),
+        avatarUrl: resolveSync(req.query.url, InvalidRequestError),
       })
     )
 
@@ -45,9 +45,10 @@ export function configureMeRoutes(app: FastifyInstance) {
 
   app.put<{ Body: { name: string } }>("/api/me/name", async (req, reply) => {
     const userId = getUserIdOrDie(req)
-    if (!userValidation.isUserNameValid(valueOrDie(req.body.name))) throw new InvalidRequestError()
+    if (!userValidation.isUserNameValid(resolveSync(req.body.name, InvalidRequestError)))
+      throw new InvalidRequestError()
 
-    const res = await resolveOrDie(
+    const res = await resolve(
       userService.upsert({
         id: userId,
         name: req.body.name,

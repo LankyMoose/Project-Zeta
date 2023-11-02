@@ -73,7 +73,7 @@ export const authService = {
     }
   },
 
-  async getProviderToken(app: FastifyInstance, req: FastifyRequest, provider: AuthProvider) {
+  async getProviderToken(provider: AuthProvider, app: FastifyInstance, req: FastifyRequest) {
     try {
       return (
         await match(provider)(

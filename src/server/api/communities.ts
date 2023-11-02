@@ -13,31 +13,31 @@ import {
   ensureCommunityMemberNsfwAgreementOrDie,
   ensureCommunityModerator,
   getActiveMemberOrDie,
-  resolveOrDie,
+  resolve,
   getUserIdOrDie,
   uuidOrDie,
-  valueOrDie,
+  resolveSync,
 } from "./util"
 
 export function configureCommunityRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { page?: number } }>("/api/communities", async (req) =>
-    resolveOrDie(communityService.getPage(req.query.page))
+    resolve(communityService.getPage(req.query.page))
   )
 
   app.get<{ Querystring: { title: string } }>("/api/communities/search", async (req) =>
-    resolveOrDie(communityService.fuzzySearchCommunity(valueOrDie(req.query.title)))
+    resolve(
+      communityService.fuzzySearchCommunity(resolveSync(req.query.title, InvalidRequestError))
+    )
   )
 
   app.get<{ Querystring: { page?: number } }>("/api/communities/latest", async (req) =>
-    resolveOrDie(communityService.getLatestPosts(req.cookies.user_id, req.query.page))
+    resolve(communityService.getLatestPosts(req.cookies.user_id, req.query.page))
   )
 
   app.get<{ Params: { url_title: string } }>("/api/communities/:url_title", async (req) => {
-    const url_title = valueOrDie(req.params.url_title)
-    const res = await resolveOrDie(
-      communityService.getCommunityWithMembers(url_title),
-      NotFoundError
-    )
+    const url_title = resolveSync(req.params.url_title, InvalidRequestError)
+
+    const res = await resolve(communityService.getCommunityWithMembers(url_title), NotFoundError)
 
     const member = req.cookies.user_id ? await getActiveMemberOrDie(req, res.id) : null
 
@@ -50,8 +50,8 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   })
 
   app.get<{ Params: { url_title: string } }>("/api/communities/:url_title/posts", async (req) => {
-    const community = await resolveOrDie(
-      communityService.getCommunity(valueOrDie(req.params.url_title)),
+    const community = await resolve(
+      communityService.getCommunity(resolveSync(req.params.url_title, InvalidRequestError)),
       NotFoundError
     )
 
@@ -60,7 +60,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       if (community.nsfw) await ensureCommunityMemberNsfwAgreementOrDie(member.userId, community.id)
     }
 
-    return resolveOrDie(communityService.getCommunityPosts(community.id, req.cookies.user_id))
+    return resolve(communityService.getCommunityPosts(community.id, req.cookies.user_id))
   })
 
   app.get<{ Params: { communityId: string } }>(
@@ -71,7 +71,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
       ensureCommunityModerator(member)
 
-      return resolveOrDie(communityService.getJoinRequests(communityId))
+      return resolve(communityService.getJoinRequests(communityId))
     }
   )
 
@@ -82,7 +82,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       const member = await getActiveMemberOrDie(req, communityId)
       ensureCommunityModerator(member)
 
-      const res = await resolveOrDie(
+      const res = await resolve(
         communityService.respondToJoinRequest(req.body.requestId, req.body.accepted)
       )
 
@@ -95,7 +95,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     Body: { userId: string; memberType: "owner" | "moderator" | "member" | "none" }
   }>("/api/communities/:communityId/members", async (req) => {
     const targetUserId = uuidOrDie(req.body.userId)
-    const targetNewType = valueOrDie(req.body.memberType)
+    const targetNewType = resolveSync(req.body.memberType, InvalidRequestError)
     if (["owner", "moderator", "member", "none"].indexOf(targetNewType) === -1)
       throw new InvalidRequestError()
 
@@ -103,7 +103,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     const member = await getActiveMemberOrDie(req, communityId)
     ensureCommunityModerator(member)
 
-    const targetMember = await resolveOrDie(
+    const targetMember = await resolve(
       communityService.getCommunityMember(communityId, targetUserId),
       NotFoundError
     )
@@ -120,7 +120,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
     if (targetNewType === "none") {
       // delete member record for target member
-      await resolveOrDie(
+      await resolve(
         communityService.leaveCommunity(communityId, targetUserId),
         "Failed to leave community"
       )
@@ -128,19 +128,19 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     } else if (targetNewType === "owner") {
       // giving owner status to another user, relegating current owner to moderator
       await Promise.all([
-        resolveOrDie(
+        resolve(
           communityService.updateCommunityMemberType(communityId, targetUserId, "owner"),
           "Failed to update member type"
         ),
-        resolveOrDie(
+        resolve(
           communityService.updateCommunityMemberType(communityId, member.userId, "moderator"),
           "Failed to update member type"
         ),
       ])
 
       const [newOwner, newMod] = await Promise.all([
-        resolveOrDie(communityService.getCommunityMemberData(communityId, targetUserId)),
-        resolveOrDie(communityService.getCommunityMemberData(communityId, member.userId)),
+        resolve(communityService.getCommunityMemberData(communityId, targetUserId)),
+        resolve(communityService.getCommunityMemberData(communityId, member.userId)),
       ])
 
       return {
@@ -148,7 +148,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
         moderator: newMod,
       }
     } else {
-      await resolveOrDie(
+      await resolve(
         communityService.updateCommunityMemberType(communityId, targetUserId, targetNewType)
       )
       return communityService.getCommunityMemberData(communityId, targetUserId)
@@ -158,25 +158,25 @@ export function configureCommunityRoutes(app: FastifyInstance) {
   app.post<{ Params: { url_title: string } }>(
     "/api/communities/:url_title/nsfw-agreement",
     async (req) => {
-      const url_title = valueOrDie(req.params.url_title)
+      const url_title = resolveSync(req.params.url_title, InvalidRequestError)
       const userId = getUserIdOrDie(req)
-      const community = await resolveOrDie(communityService.getCommunity(url_title), NotFoundError)
+      const community = await resolve(communityService.getCommunity(url_title), NotFoundError)
 
-      return resolveOrDie(communityService.createNsfwAgreement(community.id, userId))
+      return resolve(communityService.createNsfwAgreement(community.id, userId))
     }
   )
 
   app.post<{ Params: { url_title?: string } }>("/api/communities/:url_title/join", async (req) => {
-    const url_title = valueOrDie(req.params.url_title)
+    const url_title = resolveSync(req.params.url_title, InvalidRequestError)
     const userId = getUserIdOrDie(req)
 
-    const community = await resolveOrDie(communityService.getCommunity(url_title), NotFoundError)
+    const community = await resolve(communityService.getCommunity(url_title), NotFoundError)
 
     const member = await communityService.getCommunityMember(community.id, userId)
     if (member)
       return { type: member.disabled ? JoinResultType.Banned : JoinResultType.AlreadyJoined }
 
-    return resolveOrDie(
+    return resolve(
       community.private
         ? communityService.submitJoinRequest(community.id, userId)
         : communityService.joinCommunity(community.id, userId)
@@ -189,7 +189,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       const communityId = uuidOrDie(req.params.communityId)
       const userId = getUserIdOrDie(req)
 
-      return resolveOrDie(communityService.leaveCommunity(communityId, userId))
+      return resolve(communityService.leaveCommunity(communityId, userId))
     }
   )
 
@@ -201,7 +201,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     if (!communityValidation.isCommunityValid(req.body)) throw new InvalidRequestError()
     if (req.body.url_title) delete req.body.url_title
 
-    const res = await resolveOrDie(
+    const res = await resolve(
       communityService.createCommunity(
         {
           title,
@@ -227,7 +227,7 @@ export function configureCommunityRoutes(app: FastifyInstance) {
       const member = await getActiveMemberOrDie(req, communityId)
       if (member.memberType !== "owner") throw new UnauthorizedError()
 
-      const res = await resolveOrDie(
+      const res = await resolve(
         communityService.updateCommunity(
           {
             title,
@@ -249,6 +249,6 @@ export function configureCommunityRoutes(app: FastifyInstance) {
     const member = await getActiveMemberOrDie(req, communityId)
     if (member.memberType !== "owner") throw new UnauthorizedError()
 
-    return resolveOrDie(communityService.deleteCommunity(communityId))
+    return resolve(communityService.deleteCommunity(communityId))
   })
 }
