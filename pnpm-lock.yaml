@@ -50,6 +50,9 @@ dependencies:
   glob:
     specifier: ^10.3.3
     version: 10.3.3
+  matcha-js:
+    specifier: ^1.0.14
+    version: 1.0.14
   node-fetch:
     specifier: ^3.3.1
     version: 3.3.1
@@ -2446,6 +2449,10 @@ packages:
     dependencies:
       es5-ext: 0.10.62
     dev: true
+
+  /matcha-js@1.0.14:
+    resolution: {integrity: sha512-KYe+FxL5o7BbfZlzb/96nrT35xnGtp9r/97QGv5QgafJ0UeyRexPlTvwHWGLPKeWYKwFgLHcZ2mORF+0tmZXOA==}
+    dev: false
 
   /memoizee@0.4.15:
     resolution: {integrity: sha512-UBWmJpLZd5STPm7PMUlOw/TSy972M+z8gcyQ5veOnSDRREz/0bmpyTfKt3/51DhEBqCZQn1udM/5flcSPYhkdQ==}

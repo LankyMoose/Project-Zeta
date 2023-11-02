@@ -2,7 +2,7 @@ import { FastifyError, ValidationResult } from "fastify"
 import { SchemaErrorDataVar } from "fastify/types/schema"
 import { API_ERROR } from "./constants"
 
-export class ApiError implements FastifyError {
+export class ApiError extends Error implements FastifyError {
   code: string
   name: string
   statusCode?: number | undefined
@@ -13,6 +13,7 @@ export class ApiError implements FastifyError {
   cause?: unknown
 
   constructor(code: string, message: API_ERROR | string, statusCode?: number) {
+    super(message)
     this.code = code
     this.name = code
     this.message = message

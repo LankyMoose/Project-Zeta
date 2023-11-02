@@ -31,6 +31,7 @@
     "esbuild": "^0.17.19",
     "fastify": "^4.20.0",
     "glob": "^10.3.3",
+    "matcha-js": "^1.0.14",
     "node-fetch": "^3.3.1",
     "postgres": "^3.3.5",
     "tree-kill": "^1.2.2"

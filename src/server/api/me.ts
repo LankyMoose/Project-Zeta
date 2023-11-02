@@ -31,7 +31,7 @@ export function configureMeRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { url?: string } }>("/api/me/update-dp/confirm", async (req, reply) => {
     const userId = getUserIdOrDie(req)
     const res = await getOrDie(
-      userService.save({
+      userService.upsert({
         id: userId,
         avatarUrl: valueOrDie(req.query.url),
       })
@@ -48,7 +48,7 @@ export function configureMeRoutes(app: FastifyInstance) {
     if (!userValidation.isUserNameValid(valueOrDie(req.body.name))) throw new InvalidRequestError()
 
     const res = await getOrDie(
-      userService.save({
+      userService.upsert({
         id: userId,
         name: req.body.name,
       })

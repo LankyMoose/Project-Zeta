@@ -37,7 +37,7 @@ export const userService = {
       return
     }
   },
-  async save(user: NewUser | Omit<NewUser, "name">): Promise<PublicUser | undefined> {
+  async upsert(user: NewUser | Omit<NewUser, "name">): Promise<PublicUser | undefined> {
     try {
       if (!user.id) {
         if (!("name" in user)) return

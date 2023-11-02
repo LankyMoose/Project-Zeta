@@ -2,122 +2,116 @@ import { and, eq } from "drizzle-orm"
 import { db } from "../../db"
 import { NewUserAuth, UserAuth, userAuths } from "../../db/schema"
 import { AuthProvider } from "../../types/auth"
-import { ServerError } from "../../errors"
-import { userService } from "./userService"
 import { FastifyInstance, FastifyRequest } from "fastify"
-import { PublicUser } from "../../types/user"
+import { match } from "matcha-js"
+
+type ProviderInfo<T extends AuthProvider> = T extends AuthProvider.Google
+  ? {
+      name: string
+      picture: string
+      id: string
+      email: string
+    }
+  : T extends AuthProvider.Github
+  ? {
+      login: string
+      avatar_url: string
+      id: string
+      email: string
+    }
+  : never
 
 export const authService = {
   async getByEmail(email: string): Promise<UserAuth | undefined> {
-    return (await db.select().from(userAuths).where(eq(userAuths.email, email)).limit(1)).at(0)
+    try {
+      return (await db.select().from(userAuths).where(eq(userAuths.email, email)).limit(1)).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
   },
 
   async getByProviderId(provider: AuthProvider, providerId: string): Promise<UserAuth | undefined> {
-    return (
-      await db
-        .select()
-        .from(userAuths)
-        .where(and(eq(userAuths.provider, provider), eq(userAuths.providerId, providerId)))
-        .limit(1)
-    ).at(0)
-  },
-
-  async save(userAuth: UserAuth | NewUserAuth): Promise<UserAuth | undefined> {
-    if (!userAuth.id) {
-      return (await db.insert(userAuths).values(userAuth).returning()).at(0)
+    try {
+      return (
+        await db
+          .select()
+          .from(userAuths)
+          .where(and(eq(userAuths.provider, provider), eq(userAuths.providerId, providerId)))
+          .limit(1)
+      ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
     }
-    return (
-      await db.update(userAuths).set(userAuth).where(eq(userAuths.id, userAuth.id)).returning()
-    ).at(0)
   },
 
-  async handleProviderLogin(provider: AuthProvider, info: any): Promise<PublicUser> {
-    const userAuth = await authService.getByProviderId(provider, info.id)
+  async upsert(userAuth: UserAuth | NewUserAuth): Promise<UserAuth | undefined> {
+    try {
+      if (!userAuth.id) {
+        return (await db.insert(userAuths).values(userAuth).returning()).at(0)
+      }
+      return (
+        await db.update(userAuths).set(userAuth).where(eq(userAuths.id, userAuth.id)).returning()
+      ).at(0)
+    } catch (error) {
+      console.error(error)
+      return
+    }
+  },
+
+  normalizeProviderData(provider: AuthProvider, info: ProviderInfo<AuthProvider>) {
     switch (provider) {
       case AuthProvider.Google: {
-        const { name, picture, id, email } = info
-        return await this.saveUserAuth(provider, userAuth, name, picture, id, email)
+        const { name, picture, id, email } = info as ProviderInfo<AuthProvider.Google>
+        return { name, picture, providerId: id, email }
       }
       case AuthProvider.Github: {
-        const { login, avatar_url, id, email } = info
-        return await this.saveUserAuth(provider, userAuth, login, avatar_url, id, email)
+        const { login, avatar_url, id, email } = info as ProviderInfo<AuthProvider.Github>
+        return { name: login, picture: avatar_url, providerId: id, email }
       }
-      default:
-        throw new ServerError("Invalid provider")
     }
-  },
-
-  async saveUserAuth(
-    provider: AuthProvider,
-    auth: UserAuth | undefined,
-    name: string,
-    picture: string,
-    id: string,
-    email: string
-  ) {
-    const user = auth?.userId
-      ? await userService.getById(auth.userId)
-      : await userService.save({
-          name,
-          avatarUrl: picture,
-        })
-    if (!user) throw new ServerError()
-
-    if (!auth) {
-      const res = await this.save({
-        email,
-        provider,
-        providerId: id,
-        userId: user.userId,
-      })
-      if (!res) throw new ServerError()
-    }
-    return user
   },
 
   async getProviderToken(app: FastifyInstance, req: FastifyRequest, provider: AuthProvider) {
-    switch (provider) {
-      case AuthProvider.Google: {
-        const res = await app.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req)
-        return res.token.access_token
-      }
-      case AuthProvider.Github: {
-        const res = await app.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(req)
-        return res.token.access_token
-      }
-      default:
-        throw new ServerError("Invalid provider")
+    try {
+      return (
+        await match(provider)(
+          [AuthProvider.Google, () => app.googleOAuth2],
+          [AuthProvider.Github, () => app.githubOAuth2]
+        ).getAccessTokenFromAuthorizationCodeFlow(req)
+      ).token.access_token
+    } catch (error) {
+      console.error(error)
+      return
     }
   },
 
-  async loadUserInfo(provider: AuthProvider, reqOrToken: FastifyRequest | string) {
-    const tkn = typeof reqOrToken === "string" ? reqOrToken : reqOrToken.cookies["access_token"]
+  async loadProviderData<T extends AuthProvider>(
+    provider: T,
+    reqOrToken: FastifyRequest | string
+  ): Promise<ProviderInfo<T> | undefined> {
+    try {
+      const tkn = typeof reqOrToken === "string" ? reqOrToken : reqOrToken.cookies["access_token"]
+      if (!tkn) return
 
-    if (!tkn) return null
+      const url = match(provider)(
+        [AuthProvider.Google, () => "https://www.googleapis.com/oauth2/v2/userinfo"],
+        [AuthProvider.Github, () => "https://api.github.com/user"]
+      )
 
-    switch (provider) {
-      case AuthProvider.Google: {
-        const userDataRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + tkn,
-          },
-        })
-        if (!userDataRes.ok) throw new ServerError("Failed to load user data")
-        return userDataRes.json()
-      }
-      case AuthProvider.Github: {
-        const userDataRes = await fetch("https://api.github.com/user", {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + tkn,
-          },
-        })
-        if (!userDataRes.ok) throw new ServerError("Failed to load user data")
-        return userDataRes.json()
-      }
-      default:
-        throw new ServerError("Invalid provider")
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + tkn,
+        },
+      })
+      if (!res.ok) return
+
+      return res.json() as Promise<ProviderInfo<T>>
+    } catch (error) {
+      console.error(error)
+      return
     }
   },
 }
