@@ -8,7 +8,7 @@ import { CommunityListData } from "../../types/community"
 import { title } from "../Document"
 import { SkeletonList } from "../components/loaders/SkeletonList"
 
-export default function Communities({ query }: { query: { createcommunity?: string } }) {
+export default function Communities({ query }: { query: { newcommunity?: string } }) {
   title.value = "Communities | Project Zeta"
   const handleCreateCommunityClick = () => {
     if (!userStore.value) {
@@ -16,9 +16,7 @@ export default function Communities({ query }: { query: { createcommunity?: stri
         title: "Log in to create a Community",
         message: "You must be logged in to create a Community.",
         callbackState: {
-          create: {
-            community: true,
-          },
+          newcommunity: true,
         },
       }
       authModalOpen.value = true
@@ -28,7 +26,7 @@ export default function Communities({ query }: { query: { createcommunity?: stri
   }
 
   const onMounted = () => {
-    if (query.createcommunity) {
+    if (query.newcommunity) {
       handleCreateCommunityClick()
       window.history.pushState(null, "", window.location.pathname)
     }

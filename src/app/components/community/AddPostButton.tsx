@@ -15,12 +15,8 @@ export const AddPostButton = () => {
         title: "Log in to create a Post",
         message: "You must be logged in to create a Post.",
         callbackState: {
-          view: {
-            community: selectedCommunityUrlTitle.value ?? undefined,
-          },
-          create: {
-            post: true,
-          },
+          community: selectedCommunityUrlTitle.value ?? undefined,
+          newpost: true,
         },
       }
       authModalOpen.value = true

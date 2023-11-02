@@ -95,10 +95,8 @@ export const PostModal = () => {
         title: "Log in to interact with this post",
         message: "You must be logged in to interact with community posts.",
         callbackState: {
-          view: {
-            post: selectedPost.value.id,
-            community: selectedCommunityUrlTitle.value ?? undefined,
-          },
+          post: selectedPost.value.id,
+          community: selectedCommunityUrlTitle.value ?? undefined,
         },
       }
       authModalOpen.value = true
@@ -305,10 +303,8 @@ const NewCommentForm = ({
         title: "Log in to interact with this post",
         message: "You must be logged in to interact with community posts.",
         callbackState: {
-          view: {
-            post: post.value.id,
-            community: selectedCommunityUrlTitle.value ?? undefined,
-          },
+          post: post.value.id,
+          community: selectedCommunityUrlTitle.value ?? undefined,
         },
       }
       authModalOpen.value = true

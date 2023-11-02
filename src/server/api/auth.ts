@@ -1,11 +1,23 @@
 import { FastifyInstance, FastifyRequest } from "fastify"
 import oauthPlugin from "@fastify/oauth2"
-import { AuthModalCallbackStateSerialized, AuthProvider } from "../../types/auth"
+import { AuthCallbackState, AuthProvider } from "../../types/auth"
 import { authService } from "../services/authService"
 import { cookieSettings } from "../cookies"
 import { env } from "../../env"
 import { resolve, resolveSync } from "./util"
 import { userService } from "../services/userService"
+
+const generateStateFunction = (request: FastifyRequest<{ Querystring: AuthCallbackState }>) => {
+  const { community, post, newcommunity, newpost } = request.query
+  return JSON.stringify({ community, post, newcommunity, newpost })
+}
+
+const checkStateFunction = (
+  _: FastifyRequest<{ Querystring: AuthCallbackState }>,
+  callback: { (): void }
+) => {
+  callback()
+}
 
 export function configureAuthRoutes(app: FastifyInstance) {
   app
@@ -21,19 +33,8 @@ export function configureAuthRoutes(app: FastifyInstance) {
       scope: ["profile", "email", "openid"],
       startRedirectPath: "/login/google",
       callbackUri: `${env.url}/login/google/callback`,
-      generateStateFunction: (
-        request: FastifyRequest<{ Querystring: AuthModalCallbackStateSerialized }>
-      ) => {
-        const { viewcommunity, viewpost, createcommunity, createpost } = request.query
-        const state = JSON.stringify({ viewcommunity, viewpost, createcommunity, createpost })
-        return state
-      },
-      checkStateFunction: (
-        _request: FastifyRequest<{ Querystring: AuthModalCallbackStateSerialized }>,
-        callback: { (): void }
-      ) => {
-        callback()
-      },
+      generateStateFunction,
+      checkStateFunction,
     })
     .register(oauthPlugin, {
       name: "githubOAuth2",
@@ -47,19 +48,8 @@ export function configureAuthRoutes(app: FastifyInstance) {
       scope: [],
       startRedirectPath: "/login/github",
       callbackUri: `${env.url}/login/github/callback`,
-      generateStateFunction: (
-        request: FastifyRequest<{ Querystring: AuthModalCallbackStateSerialized }>
-      ) => {
-        const { viewcommunity, viewpost, createcommunity, createpost } = request.query
-        const state = JSON.stringify({ viewcommunity, viewpost, createcommunity, createpost })
-        return state
-      },
-      checkStateFunction: (
-        _request: FastifyRequest<{ Querystring: AuthModalCallbackStateSerialized }>,
-        callback: { (): void }
-      ) => {
-        callback()
-      },
+      generateStateFunction,
+      checkStateFunction,
     })
 
   app.get<{ Params: { provider: AuthProvider }; Querystring: { state: string } }>(
@@ -120,17 +110,17 @@ export function configureAuthRoutes(app: FastifyInstance) {
       let redirectTarget = "/"
 
       if (request.query.state) {
-        const stateData = JSON.parse(request.query.state) as AuthModalCallbackStateSerialized
-        const { viewcommunity, viewpost, createcommunity, createpost } = stateData
-        if (viewcommunity) {
-          redirectTarget += `communities/${viewcommunity}`
-        } else if (createcommunity) {
-          redirectTarget += "communities?createcommunity=true"
+        const stateData = JSON.parse(request.query.state) as AuthCallbackState
+        const { community, post, newcommunity, newpost } = stateData
+        if (community) {
+          redirectTarget += `communities/${community}`
+        } else if (newcommunity) {
+          redirectTarget += "communities?newcommunity=true"
         }
-        if (viewpost) {
-          redirectTarget += `?post=${viewpost}`
-        } else if (createpost) {
-          redirectTarget += "?createpost=true"
+        if (post) {
+          redirectTarget += `?post=${post}`
+        } else if (newpost) {
+          redirectTarget += "?newpost=true"
         }
       }
 

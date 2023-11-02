@@ -35,7 +35,7 @@ export default function CommunityPage({
   query,
 }: {
   params?: { url_title?: string }
-  query: { createpost?: string }
+  query: { newpost?: string }
 }) {
   if (!params?.url_title) return setPath(pathStore, "/communities")
   selectedCommunityUrlTitle.value = params.url_title
@@ -51,9 +51,7 @@ export default function CommunityPage({
       message:
         "This community is private and you must be a member of the community to view its content.",
       callbackState: {
-        view: {
-          community: params.url_title,
-        },
+        community: params.url_title,
       },
     }
     authModalOpen.value = true
@@ -112,7 +110,9 @@ export default function CommunityPage({
     loaded.value = true
     loading.value = false
 
-    if (query.createpost) {
+    console.log("query", query)
+
+    if (query.newpost) {
       postCreatorModalOpen.value = true
       window.history.pushState(null, "", window.location.pathname)
     }

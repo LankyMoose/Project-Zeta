@@ -21,17 +21,9 @@ const AuthModalProviderList = () => {
     const callbackState = authModalState.value.callbackState
     const params = new URLSearchParams()
     if (callbackState) {
-      if (callbackState.view) {
-        for (const [key, value] of Object.entries(callbackState.view)) {
-          if (typeof value === "undefined") continue
-          params.append(`view${key}`, value)
-        }
-      }
-      if (callbackState.create) {
-        for (const [key, value] of Object.entries(callbackState.create)) {
-          if (typeof value === "undefined") continue
-          params.append(`create${key}`, "true")
-        }
+      for (const [key, value] of Object.entries(callbackState)) {
+        if (typeof value === "undefined") continue
+        params.append(key, value.toString())
       }
     }
     window.location.href = `/login/${option.title.toLowerCase()}?${params.toString()}`

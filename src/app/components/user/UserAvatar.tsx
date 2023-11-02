@@ -27,9 +27,7 @@ export const UserAvatar = () => {
         Try not to be a ****! Unless, of course, you
         join one of the various '****' communities.`,
       callbackState: {
-        view: {
-          community: selectedCommunityUrlTitle.value ?? undefined,
-        },
+        community: selectedCommunityUrlTitle.value ?? undefined,
       },
     }
     authModalOpen.value = true

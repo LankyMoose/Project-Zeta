@@ -27,10 +27,8 @@ export const PostCard = ({ post }: { post: PostWithMeta }) => {
         title: "Log in to interact with this post",
         message: "You must be logged in to interact with community posts.",
         callbackState: {
-          view: {
-            post: post.id,
-            community: selectedCommunityUrlTitle.value ?? undefined,
-          },
+          post: post.id,
+          community: selectedCommunityUrlTitle.value ?? undefined,
         },
       }
       authModalOpen.value = true
