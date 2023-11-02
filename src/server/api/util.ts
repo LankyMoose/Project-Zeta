@@ -32,7 +32,7 @@ export const getActiveMemberOrDie = async (
   communityId: string
 ): Promise<CommunityMember> => {
   const userId = getUserIdOrDie(req)
-  const member = await getOrDie(
+  const member = await resolveOrDie(
     communityService.getCommunityMember(communityId, userId),
     UnauthorizedError
   )
@@ -42,7 +42,10 @@ export const getActiveMemberOrDie = async (
 }
 
 export const ensureCommunityMemberIfPrivate = async (req: FastifyRequest, communityId: string) => {
-  const community = await getOrDie(communityService.getCommunity(communityId, true), NotFoundError)
+  const community = await resolveOrDie(
+    communityService.getCommunity(communityId, true),
+    NotFoundError
+  )
   if (community.private) await getActiveMemberOrDie(req, community.id)
 }
 
@@ -54,12 +57,12 @@ export const ensureCommunityMemberNsfwAgreementOrDie = async (
   userId: string,
   communityId: string
 ) => {
-  await getOrDie(communityService.getCommunityNsfwAgreement(communityId, userId), NsfwError)
+  await resolveOrDie(communityService.getCommunityNsfwAgreement(communityId, userId), NsfwError)
 }
 
 type Value<T> = T extends undefined | ApiError ? never : T
 
-export const getOrDie = async <T>(
+export const resolveOrDie = async <T>(
   val: Promise<T | void>,
   msgOrErrCtor: string | { new (msg?: string): Error } = ServerError,
   msg?: string

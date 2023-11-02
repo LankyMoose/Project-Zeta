@@ -13,7 +13,7 @@ import {
   ensureCommunityMemberNsfwAgreementOrDie,
   ensureCommunityModerator,
   getActiveMemberOrDie,
-  getOrDie as resolveOrDie,
+  resolveOrDie,
   getUserIdOrDie,
   uuidOrDie,
   valueOrDie,
