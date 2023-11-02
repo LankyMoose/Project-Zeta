@@ -24,10 +24,7 @@ export function configureAuthRoutes(app: FastifyInstance) {
     .register(oauthPlugin, {
       name: "googleOAuth2",
       credentials: {
-        client: {
-          id: env.auth0.google.clientId!,
-          secret: env.auth0.google.clientSecret!,
-        },
+        client: env.auth0.google,
         auth: oauthPlugin.GOOGLE_CONFIGURATION,
       },
       scope: ["profile", "email", "openid"],
@@ -39,10 +36,7 @@ export function configureAuthRoutes(app: FastifyInstance) {
     .register(oauthPlugin, {
       name: "githubOAuth2",
       credentials: {
-        client: {
-          id: env.auth0.github.clientId!,
-          secret: env.auth0.github.clientSecret!,
-        },
+        client: env.auth0.github,
         auth: oauthPlugin.GITHUB_CONFIGURATION,
       },
       scope: [],
