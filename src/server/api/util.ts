@@ -69,7 +69,8 @@ export const resolve = async <T>(
     return resolveSync(await val, msgOrErrCtor, msg) as Value<T>
   } catch (error) {
     console.error("unhandled getOrDie error", error)
-    throw new ServerError(msg)
+    if (typeof msgOrErrCtor === "string") throw new ServerError(msgOrErrCtor)
+    throw new msgOrErrCtor(msg)
   }
 }
 

@@ -2,12 +2,7 @@ import { FastifyInstance } from "fastify"
 import { communityService } from "../services/communityService"
 import { NewCommunity } from "../../db/schema"
 import { communityValidation } from "../../db/validation"
-import {
-  InvalidRequestError,
-  NotAuthenticatedError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../../errors"
+import { InvalidRequestError, NotFoundError, UnauthorizedError } from "../../errors"
 import { JoinResultType } from "../../types/community"
 import {
   ensureCommunityMemberNsfwAgreementOrDie,
@@ -36,13 +31,20 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { url_title: string } }>("/api/communities/:url_title", async (req) => {
     const url_title = resolveSync(req.params.url_title, InvalidRequestError)
+    console.log("url_title", url_title)
 
     const res = await resolve(communityService.getCommunityWithMembers(url_title), NotFoundError)
+    console.log("res", res)
 
-    const member = req.cookies.user_id ? await getActiveMemberOrDie(req, res.id) : null
+    const member = req.cookies.user_id
+      ? await communityService.getCommunityMember(res.id, req.cookies.user_id)
+      : null
+
+    console.log("member", member)
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
-    if (!member) throw new NotAuthenticatedError()
+    if (!member) throw new UnauthorizedError()
+    if (member.disabled) throw new UnauthorizedError()
 
     if (res.nsfw) await ensureCommunityMemberNsfwAgreementOrDie(member.userId, res.id)
 

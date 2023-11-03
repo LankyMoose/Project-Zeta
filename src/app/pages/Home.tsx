@@ -16,24 +16,26 @@ export default function Home() {
       </PageTitle>
 
       <PageBody>
-        <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
-          {(loading: boolean, data?: PostWithMeta[]) => {
-            if (loading)
-              return <SkeletonList numberOfItems={3} height="140px" className="card-list w-100" />
-            if (!data || !data.length)
+        <div style="max-width: 600px; margin: 0 auto;">
+          <Cinnabun.Suspense promise={getLatestPostsCommunities} cache>
+            {(loading: boolean, data?: PostWithMeta[]) => {
+              if (loading)
+                return <SkeletonList numberOfItems={3} height="140px" className="card-list w-100" />
+              if (!data || !data.length)
+                return (
+                  <div className="text-muted">
+                    <i>No posts yet.</i>
+                  </div>
+                )
+              //return data.map((item) => <PostCard {...item} />)
               return (
-                <div className="text-muted">
-                  <i>No posts yet.</i>
-                </div>
+                <ul className="card-list feed w-100">
+                  <Cinnabun.For each={data} template={(item) => <PostCard post={item} />} />
+                </ul>
               )
-            //return data.map((item) => <PostCard {...item} />)
-            return (
-              <ul className="card-list feed w-100">
-                <Cinnabun.For each={data} template={(item) => <PostCard post={item} />} />
-              </ul>
-            )
-          }}
-        </Cinnabun.Suspense>
+            }}
+          </Cinnabun.Suspense>
+        </div>
       </PageBody>
     </>
   )

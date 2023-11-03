@@ -28,7 +28,6 @@ import { UserAvatar } from "./components/user/UserAvatar"
 
 const Header = () => (
   <header>
-    <MenuButton className="hide-sm" />
     <Link to="/" store={pathStore}>
       <div id="logo">Project Zeta</div>
     </Link>
@@ -50,6 +49,7 @@ const Header = () => (
     </>
 
     <UserAvatar />
+    <MenuButton className="hide-sm" />
   </header>
 )
 
