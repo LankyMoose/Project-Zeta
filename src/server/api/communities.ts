@@ -31,16 +31,12 @@ export function configureCommunityRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { url_title: string } }>("/api/communities/:url_title", async (req) => {
     const url_title = resolveSync(req.params.url_title, InvalidRequestError)
-    console.log("url_title", url_title)
 
     const res = await resolve(communityService.getCommunityWithMembers(url_title), NotFoundError)
-    console.log("res", res)
 
     const member = req.cookies.user_id
       ? await communityService.getCommunityMember(res.id, req.cookies.user_id)
       : null
-
-    console.log("member", member)
 
     if (!res.private) return { ...res, memberType: member?.memberType ?? "guest" }
     if (!member) throw new UnauthorizedError()
