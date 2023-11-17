@@ -6,7 +6,7 @@ import {
   ensureCommunityMemberIfPrivate,
   ensureCommunityModerator,
   getActiveMemberOrDie,
-  resolve,
+  resolveOrDie,
   getUserIdOrDie,
   getUserOrDie,
   uuidOrDie,
@@ -22,7 +22,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
 
     await getActiveMemberOrDie(req, communityId)
 
-    const post = await resolve(
+    const post = await resolveOrDie(
       postService.createPost({
         title,
         content,
@@ -45,7 +45,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
     let poll: Poll | undefined
 
     if (req.body.poll) {
-      poll = await resolve(postService.createPostPoll(post.id, req.body.poll))
+      poll = await resolveOrDie(postService.createPostPoll(post.id, req.body.poll))
     }
 
     return {
@@ -61,12 +61,12 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const userId = getUserIdOrDie(req)
       const postId = uuidOrDie(req.params.postId)
 
-      const post = await resolve(postService.getPost(postId), NotFoundError)
+      const post = await resolveOrDie(postService.getPost(postId), NotFoundError)
       if (post.ownerId !== userId) throw new UnauthorizedError()
 
       await postService.deletePostMedia(postId)
 
-      const res = await resolve(postService.updatePostMedia(postId, req.body.urls))
+      const res = await resolveOrDie(postService.updatePostMedia(postId, req.body.urls))
       return {
         urls: res,
       }
@@ -77,8 +77,8 @@ export function configurePostsRoutes(app: FastifyInstance) {
     const postId = uuidOrDie(req.params.postId)
 
     const [postData, comments] = await Promise.all([
-      resolve(postService.getPostWithMetadata(postId, req.cookies.user_id), NotFoundError),
-      resolve(postService.getPostComments(postId, 0), NotFoundError),
+      resolveOrDie(postService.getPostWithMetadata(postId, req.cookies.user_id), NotFoundError),
+      resolveOrDie(postService.getPostComments(postId, 0), NotFoundError),
     ])
 
     await ensureCommunityMemberIfPrivate(req, postData.communityId)
@@ -96,7 +96,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
     const postId = uuidOrDie(req.params.postId)
     const userId = getUserIdOrDie(req)
 
-    const post = await resolve(postService.getPost(postId), NotFoundError)
+    const post = await resolveOrDie(postService.getPost(postId), NotFoundError)
 
     if (post.ownerId !== userId) {
       const member = await getActiveMemberOrDie(req, post.communityId)
@@ -117,7 +117,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
 
     await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-    return resolve(postService.updatePost(postId, post))
+    return resolveOrDie(postService.updatePost(postId, post))
   })
 
   app.get<{ Params: { postId: string }; Querystring: { offset: string } }>(
@@ -127,11 +127,11 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const offset = parseInt(req.query.offset)
       if (isNaN(offset)) throw new InvalidRequestError()
 
-      const post = await resolve(postService.getPost(postId), NotFoundError)
+      const post = await resolveOrDie(postService.getPost(postId), NotFoundError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      return resolve(postService.getPostComments(postId, offset))
+      return resolveOrDie(postService.getPostComments(postId, offset))
     }
   )
 
@@ -141,11 +141,11 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const postId = uuidOrDie(req.params.postId)
       const user = getUserOrDie(req)
 
-      const post = await resolve(postService.getPost(postId), NotFoundError)
+      const post = await resolveOrDie(postService.getPost(postId), NotFoundError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      return resolve(postService.addPostComment(postId, user, req.body.comment))
+      return resolveOrDie(postService.addPostComment(postId, user, req.body.comment))
     }
   )
 
@@ -157,7 +157,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
     const commentId = uuidOrDie(req.params.commentId)
     const userId = getUserIdOrDie(req)
 
-    const post = await resolve(postService.getPost(postId), NotFoundError)
+    const post = await resolveOrDie(postService.getPost(postId), NotFoundError)
 
     if (post.ownerId !== userId) {
       const member = await getActiveMemberOrDie(req, post.communityId)
@@ -166,7 +166,7 @@ export function configurePostsRoutes(app: FastifyInstance) {
 
     const { comment, deleted } = req.body
 
-    return resolve(
+    return resolveOrDie(
       postService.updatePostComment(commentId, {
         content: comment,
         deleted,
@@ -181,11 +181,11 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const commentId = uuidOrDie(req.params.commentId)
       const userId = getUserIdOrDie(req)
 
-      const post = await resolve(postService.getPost(postId), NotFoundError)
+      const post = await resolveOrDie(postService.getPost(postId), NotFoundError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      return resolve(postService.addPostCommentReaction(commentId, userId, req.body.reaction))
+      return resolveOrDie(postService.addPostCommentReaction(commentId, userId, req.body.reaction))
     }
   )
 
@@ -195,11 +195,11 @@ export function configurePostsRoutes(app: FastifyInstance) {
       const postId = uuidOrDie(req.params.postId)
       const userId = getUserIdOrDie(req)
 
-      const post = await resolve(postService.getPost(postId), InvalidRequestError)
+      const post = await resolveOrDie(postService.getPost(postId), InvalidRequestError)
 
       await ensureCommunityMemberIfPrivate(req, post.communityId)
 
-      return resolve(postService.addPostReaction(postId, userId, req.body.reaction))
+      return resolveOrDie(postService.addPostReaction(postId, userId, req.body.reaction))
     }
   )
 }

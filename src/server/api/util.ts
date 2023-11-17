@@ -14,12 +14,12 @@ import { CommunityMember } from "../../db/schema"
 import { isUuid } from "../../utils"
 
 export const getUserIdOrDie = (req: FastifyRequest) => {
-  return resolveSync(req.cookies.user_id, NotAuthenticatedError)
+  return resolveOrDieSync(req.cookies.user_id, NotAuthenticatedError)
 }
 
 export const getUserOrDie = (req: FastifyRequest) => {
   try {
-    const userData = resolveSync(req.cookies.user, NotAuthenticatedError)
+    const userData = resolveOrDieSync(req.cookies.user, NotAuthenticatedError)
     return JSON.parse(userData) as PublicUser
   } catch (error) {
     if (error instanceof ApiError) throw error
@@ -32,7 +32,7 @@ export const getActiveMemberOrDie = async (
   communityId: string
 ): Promise<CommunityMember> => {
   const userId = getUserIdOrDie(req)
-  const member = await resolve(
+  const member = await resolveOrDie(
     communityService.getCommunityMember(communityId, userId),
     UnauthorizedError
   )
@@ -42,7 +42,10 @@ export const getActiveMemberOrDie = async (
 }
 
 export const ensureCommunityMemberIfPrivate = async (req: FastifyRequest, communityId: string) => {
-  const community = await resolve(communityService.getCommunity(communityId, true), NotFoundError)
+  const community = await resolveOrDie(
+    communityService.getCommunity(communityId, true),
+    NotFoundError
+  )
   if (community.private) await getActiveMemberOrDie(req, community.id)
 }
 
@@ -54,19 +57,19 @@ export const ensureCommunityMemberNsfwAgreementOrDie = async (
   userId: string,
   communityId: string
 ) => {
-  await resolve(communityService.getCommunityNsfwAgreement(communityId, userId), NsfwError)
+  await resolveOrDie(communityService.getCommunityNsfwAgreement(communityId, userId), NsfwError)
 }
 
 type Value<T> = T extends undefined | ApiError ? never : T
 type MessageOrErrorCtor = string | { new (msg?: string): ApiError }
 
-export const resolve = async <T>(
+export const resolveOrDie = async <T>(
   val: Promise<T | void>,
   msgOrErrCtor: MessageOrErrorCtor = ServerError,
   msg?: string
 ): Promise<Value<T>> => {
   try {
-    return resolveSync(await val, msgOrErrCtor, msg) as Value<T>
+    return resolveOrDieSync(await val, msgOrErrCtor, msg) as Value<T>
   } catch (error) {
     console.error("unhandled getOrDie error", error)
     if (typeof msgOrErrCtor === "string") throw new ServerError(msgOrErrCtor)
@@ -74,7 +77,7 @@ export const resolve = async <T>(
   }
 }
 
-export const resolveSync = <T>(
+export const resolveOrDieSync = <T>(
   val: T | void,
   msgOrErrCtor: MessageOrErrorCtor = ServerError,
   msg?: string

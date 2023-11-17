@@ -4,7 +4,7 @@ import { AuthCallbackState, AuthProvider } from "../../types/auth"
 import { authService } from "../services/authService"
 import { cookieSettings } from "../cookies"
 import { env } from "../../env"
-import { resolve, resolveSync } from "./util"
+import { resolveOrDie, resolveOrDieSync } from "./util"
 import { userService } from "../services/userService"
 
 const generateStateFunction = (request: FastifyRequest<{ Querystring: AuthCallbackState }>) => {
@@ -49,13 +49,13 @@ export function configureAuthRoutes(app: FastifyInstance) {
   app.get<{ Params: { provider: AuthProvider }; Querystring: { state: string } }>(
     "/login/:provider/callback",
     async function (request, reply) {
-      const provider = resolveSync(request.params.provider, "Missing provider")
+      const provider = resolveOrDieSync(request.params.provider, "Missing provider")
 
-      const access_token = await resolve(
+      const access_token = await resolveOrDie(
         authService.getProviderToken(provider, app, request),
         "Failed to get user access token"
       )
-      const providerData = await resolve(
+      const providerData = await resolveOrDie(
         authService.loadProviderData(provider, access_token),
         "Failed to load user provider data"
       )
@@ -66,7 +66,7 @@ export function configureAuthRoutes(app: FastifyInstance) {
 
       const userAuth = await authService.getByProviderId(provider, providerId)
 
-      const user = await resolve(
+      const user = await resolveOrDie(
         userAuth?.userId
           ? userService.getById(userAuth.userId)
           : userService.upsert({
@@ -76,7 +76,7 @@ export function configureAuthRoutes(app: FastifyInstance) {
       )
 
       if (!userAuth) {
-        await resolve(
+        await resolveOrDie(
           authService.upsert({
             email,
             provider,
