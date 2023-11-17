@@ -451,11 +451,7 @@ export const postService = {
   },
 
   async getPostMediaUploadUrl(postId: string, idx: number): Promise<string | void> {
-    try {
-      return await s3Service.getPresignedPutUrl(`post/${postId}/${idx}`)
-    } catch (error) {
-      console.error(error)
-    }
+    return s3Service.getPresignedPutUrl(`post/${postId}/${idx}`)
   },
 
   async deletePostMedia(postId: string): Promise<boolean> {

@@ -50,7 +50,7 @@ export const s3Service = {
   },
   async getPresignedPutUrl(key: string): Promise<string | void> {
     try {
-      return await getSignedUrl(S3, new PutObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
+      return getSignedUrl(S3, new PutObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
         expiresIn: 3600,
       })
     } catch (error) {
@@ -60,7 +60,7 @@ export const s3Service = {
   },
   async getPresignedGetUrl(key: string) {
     try {
-      return await getSignedUrl(S3, new GetObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
+      return getSignedUrl(S3, new GetObjectCommand({ Bucket: env.s3.bucketName, Key: key }), {
         expiresIn: 3600,
       })
     } catch (error) {

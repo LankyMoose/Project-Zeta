@@ -8,7 +8,7 @@ export const userService = {
   pageSize: 100,
   async getPage(page: number = 0): Promise<User[] | undefined> {
     try {
-      return await db
+      return db
         .select()
         .from(users)
         .where(and(eq(users.disabled, false), eq(users.deleted, false)))
@@ -66,10 +66,6 @@ export const userService = {
     }
   },
   async getUserDisplayPictureUpdateUrl(userId: string): Promise<string | void> {
-    try {
-      return await s3Service.getPresignedPutUrl(`user/${userId}/avatar`)
-    } catch (error) {
-      console.error(error)
-    }
+    return s3Service.getPresignedPutUrl(`user/${userId}/avatar`)
   },
 }

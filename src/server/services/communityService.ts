@@ -227,7 +227,7 @@ export const communityService = {
 
   async getCommunity(titleOrId: string, useId: boolean = false): Promise<Community | void> {
     try {
-      return await db.query.communities.findFirst({
+      return db.query.communities.findFirst({
         where: (community, { eq, and }) =>
           and(
             eq(useId ? community.id : community.url_title, titleOrId),
@@ -243,7 +243,7 @@ export const communityService = {
 
   async getCommunityWithMembers(titleOrId: string, useId: boolean = false) {
     try {
-      return await db.query.communities.findFirst({
+      return db.query.communities.findFirst({
         where: (community, { eq, and }) =>
           and(
             eq(useId ? community.id : community.url_title, titleOrId),
@@ -376,7 +376,7 @@ export const communityService = {
   ): Promise<CommunityListData[]> {
     try {
       const cm = alias(communityMembers, "cm")
-      return await db
+      return db
         .select({
           community: communities,
           members: sql<number>`count(${cm.id})`,
@@ -466,7 +466,7 @@ export const communityService = {
 
   async getJoinRequests(communityId: string): Promise<CommunityJoinRequestData[] | void> {
     try {
-      return await db.query.communityJoinRequests
+      return db.query.communityJoinRequests
         .findMany({
           where: (joinReq, { and, eq }) =>
             and(eq(joinReq.communityId, communityId), isNull(joinReq.response)),
@@ -552,7 +552,7 @@ export const communityService = {
     | void
   > {
     try {
-      return await db.query.communityMembers.findFirst({
+      return db.query.communityMembers.findFirst({
         where: (member, { and, eq }) =>
           and(eq(member.communityId, communityId), eq(member.userId, userId)),
         with: {
@@ -595,7 +595,7 @@ export const communityService = {
     userId: string
   ): Promise<CommunityNsfwAgreement | void> {
     try {
-      return await db.query.communityNsfwAgreements.findFirst({
+      return db.query.communityNsfwAgreements.findFirst({
         where: (agreement, { and, eq }) =>
           and(eq(agreement.communityId, communityId), eq(agreement.userId, userId)),
       })
@@ -610,7 +610,7 @@ export const communityService = {
     userId: string
   ): Promise<CommunityMemberData | void> {
     try {
-      return await db.query.communityMembers.findFirst({
+      return db.query.communityMembers.findFirst({
         where: (member, { and, eq }) =>
           and(
             eq(member.communityId, communityId),
@@ -637,7 +637,7 @@ export const communityService = {
   async getPage(page = 0): Promise<CommunityListData[] | void> {
     const _page = page < 0 ? 0 : page
     try {
-      return await db
+      return db
         .select({
           members: sql<number>`count(${communityMembers.id})`,
           community: communities,
